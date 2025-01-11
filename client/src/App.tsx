@@ -160,6 +160,12 @@ function App({ sdk }: { sdk: SDK<SchemaType> }) {
             <div className="max-w-7xl mx-auto">
                 <WalletAccount />
 
+                <div>
+                    <button className="bg-white text-black px-3 py-1" onClick={async () => await client.actions.upgradeSpeed(account!)}>
+                        Upgrade Speed
+                    </button>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                     <div className="bg-gray-700 p-4 rounded-lg shadow-inner">
                         <div className="grid grid-cols-3 gap-2 w-full h-48">

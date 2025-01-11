@@ -1,143 +1,143 @@
-use dojo_starter::models::{Direction, Position, Stats};
+use dojo_starter::models::{PlayerStats, DojoMon};
 
-// define the interface
+// Define the interface
 #[starknet::interface]
 trait IActions<T> {
-    fn spawn(ref self: T);
-    fn move(ref self: T, direction: Direction);
-    fn upgradeSpeed(ref self: T);
+    fn spawnPlayer(ref self: T);
+    fn createDojomon(ref self: T, dojomonId:u32, name: felt252, health: u32, attack: u32, defense: u32, speed: u32);
+    fn catchDojomon(ref self: T, dojomonId: u32);
 }
 
-// dojo decorator
+// Dojo contract
 #[dojo::contract]
-pub mod actions { 
-    use super::{IActions, Direction, Position, Stats, next_position};
+pub mod actions {
+    use super::{IActions, PlayerStats, DojoMon};
     use starknet::{ContractAddress, get_caller_address};
-    use dojo_starter::models::{Vec2, Moves, DirectionsAvailable};
-
     use dojo::model::{ModelStorage, ModelValueStorage};
     use dojo::event::EventStorage;
 
-    #[derive(Copy, Drop, Serde)]
+    #[derive(Drop, Serde, Debug)]
     #[dojo::event]
-    pub struct Moved {
+    pub struct PlayerSpawned {
         #[key]
         pub player: ContractAddress,
-        pub direction: Direction,
+        pub stats: PlayerStats,
     }
+
+    #[derive(Copy, Drop, Serde, Debug)]
+    #[dojo::event]
+    pub struct DojoMonCreated {
+        #[key]
+        pub dojomonId: u32,
+        pub player: ContractAddress,
+    }
+
+    #[derive(Copy, Drop, Serde)]
+    #[dojo::event]
+    pub struct DojoMonCaptured {
+        #[key]
+        pub dojomonId: u32,
+        pub player: ContractAddress,
+    }
+
 
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
-        fn spawn(ref self: ContractState) {
-            // Get the default world.
+        /// Spawns a new player if they do not already exist.
+        fn spawnPlayer(ref self: ContractState) {
             let mut world = self.world_default();
-
-            // Get the address of the current caller, possibly the player's address.
             let player = get_caller_address();
-            // Retrieve the player's current position from the world.
-            let position: Position = world.read_model(player);
 
-            //let stats: Stats = world.read_model(player);
+            // Check if the player already exists
+            // if let Option::Some(_) = PlayerStats::get(player) {
+            //     panic!("Player already exists!");
+            // }
 
-            let start_stats = Stats {
-                player, health: 100, attack: 10, defense: 10, speed: 1
+            // Create new player stats
+            let start_stats = PlayerStats {
+                player,
+                gold: 100,
+                level: 1,
+                exp: 0,
+                food: 100,
+                dojomonIds: ArrayTrait::<u32>::new(),
             };
 
             world.write_model(@start_stats);
 
-            // Update the world state with the new data.
-
-            // 1. Move the player's position 10 units in both the x and y direction.
-            let new_position = Position {
-                player, vec: Vec2 { x: position.vec.x + 10, y: position.vec.y + 10 }
-            };
-
-            // Write the new position to the world.
-            world.write_model(@new_position);
-
-            // 2. Set the player's remaining moves to 100.
-            let moves = Moves {
-                player, remaining: 100, last_direction: Option::None, can_move: true
-            };
-
-            // Write the new moves to the world.
-            world.write_model(@moves);
+            // Emit event for player creation
+            world.emit_event(@PlayerSpawned {player,stats: start_stats});
         }
 
-        fn upgradeSpeed(ref self: ContractState) {
-            // Get the default world.
+        /// Creates a new DojoMon for the calling player.
+        fn createDojomon(
+            ref self: ContractState,
+            dojomonId: u32,
+            name: felt252,
+            health: u32,
+            attack: u32,
+            defense: u32,
+            speed: u32,
+        ) {
             let mut world = self.world_default();
-
-            // Get the address of the current caller, possibly the player's address.
             let player = get_caller_address();
 
-            let stats: Stats = world.read_model(player);
-
-            let newStats = Stats {
-                player, speed: stats.speed + 1, ..stats
+            // Create new DojoMon
+            let dojomon = DojoMon {
+                dojomonId,
+                player,
+                name,
+                health,
+                attack,
+                defense,
+                speed,
+                level: 1, // New DojoMons start at level 1
+                exp: 0,   // Initial experience
             };
 
-            // Write the new moves to the world.
-            world.write_model(@newStats);
+            world.write_model(@dojomon);
+
+            // // Emit event for DojoMon creation
+            world.emit_event(@DojoMonCreated { dojomonId, player });
         }
 
-        // Implementation of the move function for the ContractState struct.
-        fn move(ref self: ContractState, direction: Direction) {
-            // Get the address of the current caller, possibly the player's address.
-
+        /// Captures an unowned DojoMon and assigns it to the calling player.
+        fn catchDojomon(ref self: ContractState, dojomonId: u32) {
             let mut world = self.world_default();
-
             let player = get_caller_address();
 
-            // Retrieve the player's current position and moves data from the world.
-            let position: Position = world.read_model(player);
-            let mut moves: Moves = world.read_model(player);
-            // if player hasn't spawn, read returns model default values. This leads to sub overflow afterwards.
-            // Plus it's generally considered as a good pratice to fast-return on matching conditions.
-            if !moves.can_move {
-                return;
-            }
+            // Check if the DojoMon exists
+            //let mut dojomon = DojoMon::get(dojomonId).expect("DojoMon does not exist!");
 
-            // Deduct one from the player's remaining moves.
-            moves.remaining -= 1;
+            let mut dojomon: DojoMon = world.read_model(dojomonId);
 
-            // Update the last direction the player moved in.
-            moves.last_direction = Option::Some(direction);
+            // Ensure the DojoMon is unowned
+            // if dojomon.player != ContractAddress::default() {
+            //     panic!("DojoMon is already owned!");
+            // }
 
-            // Calculate the player's next position based on the provided direction.
-            let next = next_position(position, moves.last_direction);
+            // Assign the DojoMon to the player
+            dojomon.player = player;
+            world.write_model(@dojomon);
 
-            // Write the new position to the world.
-            world.write_model(@next);
+            // Add the DojoMon to the player's list
+            let mut player_stats: PlayerStats = world.read_model(player);
+            player_stats.dojomonIds.append(dojomonId);
+            world.write_model(@player_stats);
 
-            // Write the new moves to the world.
-            world.write_model(@moves);
-
-            // Emit an event to the world to notify about the player's move.
-            world.emit_event(@Moved { player, direction });
+            // Emit event for DojoMon capture
+            world.emit_event(@DojoMonCaptured{ dojomonId, player });
         }
     }
 
+    /// Internal trait implementation for helper functions
     #[generate_trait]
     impl InternalImpl of InternalTrait {
-        /// Use the default namespace "dojo_starter". This function is handy since the ByteArray
-        /// can't be const.
+        /// Returns the default world storage for the contract.
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
             self.world(@"dojo_starter")
         }
-    }
-}
 
-// Define function like this:
-fn next_position(mut position: Position, direction: Option<Direction>) -> Position {
-    match direction {
-        Option::None => { return position; },
-        Option::Some(d) => match d {
-            Direction::Left => { position.vec.x -= 1; },
-            Direction::Right => { position.vec.x += 1; },
-            Direction::Up => { position.vec.y -= 1; },
-            Direction::Down => { position.vec.y += 1; },
-        }
-    };
-    position
+        
+    }
 }
