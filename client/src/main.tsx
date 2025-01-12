@@ -20,43 +20,36 @@ import GameCanvas from "./GameCanvas.tsx";
  * @throws {Error} If initialization fails
  */
 async function main() {
+  const sdk = await init<SchemaType>(
+    {
+      client: {
+        rpcUrl: dojoConfig.rpcUrl,
+        toriiUrl: dojoConfig.toriiUrl,
+        relayUrl: dojoConfig.relayUrl,
+        worldAddress: dojoConfig.manifest.world.address,
+      },
+      domain: {
+        name: "WORLD_NAME",
+        version: "1.0",
+        chainId: "KATANA",
+        revision: "1",
+      },
+    },
+    schema
+  );
 
-    
-    const sdk = await init<SchemaType>(
-        {
-            client: {
-                rpcUrl: dojoConfig.rpcUrl,
-                toriiUrl: dojoConfig.toriiUrl,
-                relayUrl: dojoConfig.relayUrl,
-                worldAddress: dojoConfig.manifest.world.address,
-            },
-            domain: {
-                name: "WORLD_NAME",
-                version: "1.0",
-                chainId: "KATANA",
-                revision: "1",
-            },
-        },
-        schema
-    );
-
-    createRoot(document.getElementById("root")!).render(
-        <StrictMode>
-            <DojoContextProvider
-                burnerManager={await setupBurnerManager(dojoConfig)}
-            >
-                <StarknetProvider>
-                    {/* <App sdk={sdk} /> */}
-                    <GameCanvas 
-                    
-                    
-                    />
-                </StarknetProvider>
-            </DojoContextProvider>
-        </StrictMode>
-    );
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <DojoContextProvider burnerManager={await setupBurnerManager(dojoConfig)}>
+        <StarknetProvider>
+          {/* <App sdk={sdk} /> */}
+          <GameCanvas pokeballPosition={{ x: 0, y: 0 }} />
+        </StarknetProvider>
+      </DojoContextProvider>
+    </StrictMode>
+  );
 }
 
 main().catch((error) => {
-    console.error("Failed to initialize the application:", error);
+  console.error("Failed to initialize the application:", error);
 });

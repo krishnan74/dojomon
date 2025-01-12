@@ -1,7 +1,7 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { Position } from "./interfaces";
 
-const GameCanvas = () => {
+const GameCanvas = ({ pokeballPosition }: { pokeballPosition: Position }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const keys = { w: false, a: false, s: false, d: false }; // External keys object
   const backgroundPosition = { x: -430, y: -480 }; // External position object
@@ -24,6 +24,9 @@ const GameCanvas = () => {
 
     const playerImage = new Image();
     playerImage.src = "../assets/playerSprites/playerDown.png";
+
+    const pokeballImage = new Image();
+    pokeballImage.src = "../assets/pokeball.png";
 
     // Handle player movement
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -68,6 +71,22 @@ const GameCanvas = () => {
         playerImage.width / 4,
         playerImage.height
       );
+
+      // Draw pokeball
+      const pokeballScreenX = pokeballPosition.x + backgroundPosition.x;
+      const pokeballScreenY = pokeballPosition.y + backgroundPosition.y;
+
+      ctx.drawImage(
+        pokeballImage,
+        0,
+        0,
+        pokeballImage.width,
+        pokeballImage.height,
+        pokeballScreenX,
+        pokeballScreenY,
+        pokeballImage.width / 18,
+        pokeballImage.height / 18
+      );
     };
 
     const gameLoop = () => {
@@ -86,7 +105,7 @@ const GameCanvas = () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
+  }, [pokeballPosition]);
 
   return <canvas ref={canvasRef} />;
 };
