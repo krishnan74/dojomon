@@ -10,6 +10,8 @@ import { dojoConfig } from "../dojoConfig.ts";
 import { DojoContextProvider } from "./DojoContext.tsx";
 import { setupBurnerManager } from "@dojoengine/create-burner";
 import StarknetProvider from "./starknet-provider.tsx";
+import Demo from "./GameCanvas.tsx";
+import GameCanvas from "./GameCanvas.tsx";
 
 /**
  * Initializes and bootstraps the Dojo application.
@@ -18,6 +20,8 @@ import StarknetProvider from "./starknet-provider.tsx";
  * @throws {Error} If initialization fails
  */
 async function main() {
+
+    
     const sdk = await init<SchemaType>(
         {
             client: {
@@ -42,7 +46,11 @@ async function main() {
                 burnerManager={await setupBurnerManager(dojoConfig)}
             >
                 <StarknetProvider>
-                    <App sdk={sdk} />
+                    {/* <App sdk={sdk} /> */}
+                    <GameCanvas 
+                    
+                    
+                    />
                 </StarknetProvider>
             </DojoContextProvider>
         </StrictMode>

@@ -1,12 +1,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-.map-container {
-  position: relative;
-  width: 5000px; /* Example size */
-  height: 5000px; /* Example size */
-  background-image: url('path-to-map-image.jpg');
-  background-size: cover;
-  overflow: hidden;
-}
