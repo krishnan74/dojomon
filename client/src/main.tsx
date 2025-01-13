@@ -42,8 +42,8 @@ async function main() {
     <StrictMode>
       <DojoContextProvider burnerManager={await setupBurnerManager(dojoConfig)}>
         <StarknetProvider>
-          {/* <App sdk={sdk} /> */}
-          <GameCanvas pokeballPosition={{ x: 0, y: 0 }} />
+          <App sdk={sdk} />
+          {/* <GameCanvas pokeballPosition={{ x: 0, y: 0 }} /> */}
         </StarknetProvider>
       </DojoContextProvider>
     </StrictMode>
