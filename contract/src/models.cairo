@@ -48,12 +48,10 @@ struct Counter {
     dojomon_count: u32,
 }
 
-#[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug,)]
-pub enum DojoBallType{
-    Dojoball,
-    Greatball,
-    Ultraball,
-    Masterball,
+#[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
+pub struct Position{
+    pub x: u32,
+    pub y: u32,
 }
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
@@ -63,9 +61,14 @@ pub enum DojomonType{
     Grass,
 }
 
-#[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
-pub struct Position{
-    pub x: u32,
-    pub y: u32,
+#[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug,)]
+pub enum DojoBallType{
+    Dojoball,
+    Greatball,
+    Ultraball,
+    Masterball,
 }
+
+
+
 

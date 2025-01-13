@@ -4,158 +4,149 @@ import { CairoOption, CairoOptionVariant, BigNumberish } from "starknet";
 
 type WithFieldOrder<T> = T & { fieldOrder: string[] };
 
-// Type definition for `dojo_starter::models::DirectionsAvailable` struct
-export interface DirectionsAvailable {
-    player: string;
-    directions: Array<Direction>;
+// Type definition for `dojo_starter::models::PlayerStats` struct
+export interface PlayerStats {
+  player: string;
+  gold: BigNumberish;
+  level: BigNumberish;
+  exp: BigNumberish;
+  food: BigNumberish;
 }
 
-// Type definition for `dojo_starter::models::DirectionsAvailableValue` struct
-export interface DirectionsAvailableValue {
-    directions: Array<Direction>;
+// Type definition for `dojo_starter::models::DojoMon` struct
+export interface DojoMon {
+  dojomon_id: string;
+  player: string;
+  name: string;
+  health: BigNumberish;
+  attack: BigNumberish;
+  defense: BigNumberish;
+  speed: BigNumberish;
+  level: BigNumberish;
+  exp: BigNumberish;
+  dojomon_type: CairoOption<DojomonType>;
+  position: Position;
 }
 
-// Type definition for `dojo_starter::models::Moves` struct
-export interface Moves {
-    player: string;
-    remaining: BigNumberish;
-    last_direction: CairoOption<Direction>;
-    can_move: boolean;
+// Type definition for `dojo_starter::models::DojoBall` struct
+export interface DojoBall {
+  player: string;
+  dojomon_id: string;
+  position: Position;
+  dojoball_type: CairoOption<DojoBallType>;
 }
 
-// Type definition for `dojo_starter::models::MovesValue` struct
-export interface MovesValue {
-    remaining: BigNumberish;
-    last_direction: CairoOption<Direction>;
-    can_move: boolean;
+// Type definition for `dojo_starter::models::Counter` struct
+export interface Counter {
+  counter: BigNumberish;
+  player_count: BigNumberish;
+  dojoball_count: BigNumberish;
+  dojomon_count: BigNumberish;
 }
 
 // Type definition for `dojo_starter::models::Position` struct
 export interface Position {
-    player: string;
-    vec: Vec2;
+  x: BigNumberish;
+  y: BigNumberish;
 }
 
-export interface Stats {
-    player: string;
-    health: BigNumberish;
-    attack: BigNumberish;
-    defense: BigNumberish;
-    speed: BigNumberish;
+// Type definition for `dojo_starter::models::DojomonType` enum
+export enum DojomonType {
+  Fire,
+  Water,
+  Grass,
 }
 
-// Type definition for `dojo_starter::models::PositionValue` struct
-export interface PositionValue {
-    vec: Vec2;
-}
-
-// Type definition for `dojo_starter::models::Vec2` struct
-export interface Vec2 {
-    x: BigNumberish;
-    y: BigNumberish;
-}
-
-// Type definition for `dojo_starter::systems::actions::actions::Moved` struct
-export interface Moved {
-    player: string;
-    direction: Direction;
-}
-
-// Type definition for `dojo_starter::systems::actions::actions::MovedValue` struct
-export interface MovedValue {
-    direction: Direction;
-}
-
-// Type definition for `dojo_starter::models::Direction` enum
-export enum Direction {
-    Left,
-    Right,
-    Up,
-    Down,
+// Type definition for `dojo_starter::models::DojoBallType` enum
+export enum DojoBallType {
+  Dojoball,
+  Greatball,
+  Ultraball,
+  Masterball,
 }
 
 export interface SchemaType extends ISchemaType {
-    dojo_starter: {
-        DirectionsAvailable: WithFieldOrder<DirectionsAvailable>;
-        DirectionsAvailableValue: WithFieldOrder<DirectionsAvailableValue>;
-        Moves: WithFieldOrder<Moves>;
-        MovesValue: WithFieldOrder<MovesValue>;
-        Position: WithFieldOrder<Position>;
-        Stats: WithFieldOrder<Stats>;
-        PositionValue: WithFieldOrder<PositionValue>;
-        Vec2: WithFieldOrder<Vec2>;
-        Moved: WithFieldOrder<Moved>;
-        MovedValue: WithFieldOrder<MovedValue>;
-    };
+  dojo_starter: {
+    PlayerStats: WithFieldOrder<PlayerStats>;
+    DojoMon: WithFieldOrder<DojoMon>;
+    DojoBall: WithFieldOrder<DojoBall>;
+    Counter: WithFieldOrder<Counter>;
+    Position: WithFieldOrder<Position>;
+  };
 }
-export const schema: SchemaType = {
-    dojo_starter: {
-        DirectionsAvailable: {
-            fieldOrder: ["player", "directions"],
-            player: "",
-            directions: [Direction.Left],
-        },
-        DirectionsAvailableValue: {
-            fieldOrder: ["directions"],
-            directions: [Direction.Left],
-        },
-        Moves: {
-            fieldOrder: ["player", "remaining", "last_direction", "can_move"],
-            player: "",
-            remaining: 0,
-            last_direction: new CairoOption(CairoOptionVariant.None),
-            can_move: false,
-        },
-        MovesValue: {
-            fieldOrder: ["remaining", "last_direction", "can_move"],
-            remaining: 0,
-            last_direction: new CairoOption(CairoOptionVariant.None),
-            can_move: false,
-        },
-        Position: {
-            fieldOrder: ["player", "vec"],
-            player: "",
-            vec: { x: 0, y: 0 },
-        },
 
-        Stats: {
-            fieldOrder: ["player", "health", "attack", "defense", "speed"],
-            player: "",
-            health: 0,
-            attack: 0,
-            defense: 0,
-            speed: 0,
-        },
-        PositionValue: {
-            fieldOrder: ["vec"],
-            vec: { x: 0, y: 0 },
-        },
-        Vec2: {
-            fieldOrder: ["x", "y"],
-            x: 0,
-            y: 0,
-        },
-        Moved: {
-            fieldOrder: ["player", "direction"],
-            player: "",
-            direction: Direction.Left,
-        },
-        MovedValue: {
-            fieldOrder: ["direction"],
-            direction: Direction.Left,
-        },
+export const schema: SchemaType = {
+  dojo_starter: {
+    PlayerStats: {
+      fieldOrder: ["player", "gold", "level", "exp", "food"],
+      player: "",
+      gold: 0,
+      level: 0,
+      exp: 0,
+      food: 0,
     },
+
+    DojoMon: {
+      fieldOrder: [
+        "dojomon_id",
+        "player",
+        "name",
+        "health",
+        "attack",
+        "defense",
+        "speed",
+        "level",
+        "exp",
+        "dojomon_type",
+        "position",
+      ],
+      dojomon_id: "",
+      player: "",
+      name: "",
+      health: 0,
+      attack: 0,
+      defense: 0,
+      speed: 0,
+      level: 0,
+      exp: 0,
+      dojomon_type: new CairoOption<DojomonType>(CairoOptionVariant.None),
+      position: { x: 0, y: 0 },
+    },
+
+    DojoBall: {
+      fieldOrder: ["player", "dojomon_id", "position", "dojoball_type"],
+      player: "",
+      dojomon_id: "",
+      position: { x: 0, y: 0 },
+      dojoball_type: new CairoOption<DojoBallType>(CairoOptionVariant.None),
+    },
+
+    Counter: {
+      fieldOrder: [
+        "counter",
+        "player_count",
+        "dojoball_count",
+        "dojomon_count",
+      ],
+      counter: 0,
+      player_count: 0,
+      dojoball_count: 0,
+      dojomon_count: 0,
+    },
+
+    Position: {
+      fieldOrder: ["x", "y"],
+      x: 0,
+      y: 0,
+    },
+  },
 };
 export enum ModelsMapping {
-    Direction = "dojo_starter-Direction",
-    DirectionsAvailable = "dojo_starter-DirectionsAvailable",
-    DirectionsAvailableValue = "dojo_starter-DirectionsAvailableValue",
-    Moves = "dojo_starter-Moves",
-    MovesValue = "dojo_starter-MovesValue",
-    Position = "dojo_starter-Position",
-    Stats = "dojo_starter-Stats",
-    PositionValue = "dojo_starter-PositionValue",
-    Vec2 = "dojo_starter-Vec2",
-    Moved = "dojo_starter-Moved",
-    MovedValue = "dojo_starter-MovedValue",
+  PlayerStats = "dojo_starter-PlayerStats",
+  DojoMon = "dojo_starter-DojoMon",
+  DojoBall = "dojo_starter-DojoBall",
+  Counter = "dojo_starter-Counter",
+  Position = "dojo_starter-Position",
+  DojomonType = "dojo_starter-DojomonType",
+  DojoBallType = "dojo_starter-DojoBallType",
 }
