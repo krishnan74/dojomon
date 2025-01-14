@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ParsedEntity,
   QueryBuilder,
@@ -122,6 +122,8 @@ function App({ sdk }: { sdk: SDK<SchemaType> }) {
 
   console.log(playerStats);
 
+  const [enterLobbyCode, setEnterLobbyCode] = useState("");
+
   return (
     <div className="bg-black min-h-screen w-full p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
@@ -136,6 +138,35 @@ function App({ sdk }: { sdk: SDK<SchemaType> }) {
           >
             Spawn Player
           </button>
+        </div>
+
+        <div>
+          <button
+            className="bg-white text-black px-3 py-1"
+            onClick={async () => {
+              const lobbyCode = await client.actions.createLobby(account!);
+              console.log(lobbyCode); // This will log the returned string (lobby ID)
+            }}
+          >
+            Create Lobby
+          </button>
+        </div>
+
+        <div className="p-5 border-white ">
+          <button
+            className="bg-white text-black px-3 py-1"
+            onClick={async () => {
+              await client.actions.joinLobby(account!, enterLobbyCode);
+            }}
+          >
+            Join Lobby
+          </button>
+
+          <input
+            type="text"
+            value={enterLobbyCode}
+            onChange={(e) => setEnterLobbyCode(e.target.value)}
+          />
         </div>
 
         <div className="mt-8 overflow-x-auto">

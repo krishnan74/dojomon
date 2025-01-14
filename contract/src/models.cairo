@@ -9,8 +9,8 @@ pub struct PlayerStats{
     pub level: u32,
     pub exp: u32,
     pub food: u32,
-    pub league: League,
     pub trophies: u32,
+    pub league: League,
     pub host_lobby_code: felt252,
 }
 

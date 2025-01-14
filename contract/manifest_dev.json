@@ -1252,8 +1252,8 @@
   },
   "contracts": [
     {
-      "address": "0x297eb25efee955b827d111bb14cd5affe57742ee9e36578454c4a3f25938c77",
-      "class_hash": "0x367deaeaaf10c6f6d4fc012c30a2fcf602c3cbf43bdfeeff35a3ff90f028f2",
+      "address": "0x707b4fd776ece1dc72ca718163331b91a23da47f0cfb25725beba073f458cfa",
+      "class_hash": "0x6bcdbdbc50c73b2db21f585f89b11b0b9b41bfe3f2039d3ac0eab3efef6e2ad",
       "abi": [
         {
           "type": "impl",
@@ -1329,6 +1329,28 @@
           ]
         },
         {
+          "type": "enum",
+          "name": "dojo_starter::models::DojoBallType",
+          "variants": [
+            {
+              "name": "Dojoball",
+              "type": "()"
+            },
+            {
+              "name": "Greatball",
+              "type": "()"
+            },
+            {
+              "name": "Ultraball",
+              "type": "()"
+            },
+            {
+              "name": "Masterball",
+              "type": "()"
+            }
+          ]
+        },
+        {
           "type": "struct",
           "name": "dojo_starter::models::Position",
           "members": [
@@ -1353,6 +1375,38 @@
                 {
                   "name": "starting_dojo_mon",
                   "type": "dojo_starter::models::DojomonType"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "buyDojoBall",
+              "inputs": [
+                {
+                  "name": "dojoball_type",
+                  "type": "dojo_starter::models::DojoBallType"
+                },
+                {
+                  "name": "quantitiy",
+                  "type": "core::integer::u32"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "feedDojoMon",
+              "inputs": [
+                {
+                  "name": "dojomon_id",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "quantitiy",
+                  "type": "core::integer::u32"
                 }
               ],
               "outputs": [],
@@ -1404,6 +1458,29 @@
               "inputs": [
                 {
                   "name": "dojomon_id",
+                  "type": "core::felt252"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "createLobby",
+              "inputs": [],
+              "outputs": [
+                {
+                  "type": "core::felt252"
+                }
+              ],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "joinLobby",
+              "inputs": [
+                {
+                  "name": "lobby_code",
                   "type": "core::felt252"
                 }
               ],
@@ -1532,8 +1609,12 @@
       "selector": "0x7a1c71029f2d0b38e3ac89b09931d08b6e48417e079c289ff19a8698d0cba33",
       "systems": [
         "spawnPlayer",
+        "buyDojoBall",
+        "feedDojoMon",
         "createDojomon",
         "catchDojomon",
+        "createLobby",
+        "joinLobby",
         "upgrade"
       ]
     }
@@ -1547,7 +1628,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x1792b50dfea078cc88a8b7dbcf638bdd86404101cd9c3508e333a2aaf747b7a",
+      "class_hash": "0x153dfe4c087dc91735994d2c7e9d84443cdc621f83d58deb7ccf21ab05fb606",
       "tag": "dojo_starter-DojoBall",
       "selector": "0x7aa4925b4d8b944863ed8903b51e2c883bd73082b4e76450de4190dba0cf03a"
     },
@@ -1559,7 +1640,13 @@
     },
     {
       "members": [],
-      "class_hash": "0x37e705071ded0f066e1c29a72c53d7e45d683eea0772e1a877cf19800ce7e36",
+      "class_hash": "0x2661b1b804ac3233222d64026b53e255da25c68e164bf4a72d952cd40202dcb",
+      "tag": "dojo_starter-Lobby",
+      "selector": "0x77b8878f1bbeb2df9d44c6244903a428bedecbc127186068a78067e64dcac1"
+    },
+    {
+      "members": [],
+      "class_hash": "0x46f51d37207a6506aa6134800957d34cbbf6587221c8dcf832a5f72a8b7828c",
       "tag": "dojo_starter-PlayerStats",
       "selector": "0x3fa16f4e136c20faceb4888812ba685c403d1ad1816a15b67dc6ccd9b0eb13c"
     }
@@ -1579,7 +1666,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x968e16a3df0292160c3fdc4b3eafc503f608b84ed5c97e37e522d1d6d79433",
+      "class_hash": "0x683aa63e7c76f3d779e7cf70b23be21a3deca3561b9934f3ac120c65414c2fe",
       "tag": "dojo_starter-PlayerSpawned",
       "selector": "0x5ae774f30c57741d65d258b45cd664de99fec5e031870df61757751a1cece4f"
     }

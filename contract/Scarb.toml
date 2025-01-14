@@ -9,8 +9,8 @@ sierra-replace-ids = true
 [scripts]
 migrate = "sozo build && sozo migrate"                      # scarb run migrate
 spawnPlayer = "sozo execute dojo_starter-actions spawnPlayer -c str:'Fire' --wait"    # scarb run spawn
-createDojo = "sozo execute dojo_starter-actions createDojomon -c str:'Balbasaur' 60 20 20 1 str:'Grass' {0,0} --wait"
-catchDojo = "sozo execute dojo_starter-actions catchDojomon -c 1 --wait"
+createDojomon = "sozo execute dojo_starter-actions createDojomon -c str:'Balbasaur' 60 20 20 1 str:'Grass' {0,0} --wait"
+catchDojomon = "sozo execute dojo_starter-actions catchDojomon -c 1 --wait"
 
 
 

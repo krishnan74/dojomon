@@ -40,6 +40,51 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
+  const build_actions_createLobby_calldata = () => {
+    return {
+      contractName: "actions",
+      entrypoint: "createLobby",
+      calldata: [],
+    };
+  };
+
+  const actions_createLobby = async (snAccount: Account | AccountInterface) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        build_actions_createLobby_calldata(),
+        "dojo_starter"
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const build_actions_joinLobby_calldata = (lobby_code: string) => {
+    return {
+      contractName: "actions",
+      entrypoint: "joinLobby",
+      calldata: [lobby_code],
+    };
+  };
+
+  const actions_joinLobby = async (
+    snAccount: Account | AccountInterface,
+    lobby_code: string
+  ) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        build_actions_joinLobby_calldata(lobby_code),
+        "dojo_starter"
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
   const build_actions_createDojomon_calldata = (
     name: string,
     health: BigNumberish,
@@ -106,6 +151,10 @@ export function setupWorld(provider: DojoProvider) {
       buildSpawnCalldata: build_actions_spawn_calldata,
       createDojomon: actions_createDojomon,
       buildCreateDojomonCalldata: build_actions_createDojomon_calldata,
+      createLobby: actions_createLobby,
+      buildCreateLobbyCalldata: build_actions_createLobby_calldata,
+      joinLobby: actions_joinLobby,
+      buildJoinLobbyCalldata: build_actions_joinLobby_calldata,
     },
   };
 }

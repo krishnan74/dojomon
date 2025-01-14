@@ -11,6 +11,20 @@ export interface PlayerStats {
   level: BigNumberish;
   exp: BigNumberish;
   food: BigNumberish;
+  trophies: BigNumberish;
+  league: CairoOption<League>;
+  host_lobby_code: string;
+}
+
+export interface Lobby {
+  lobby_code: string;
+  host_player: string;
+  guest_player: string;
+  host_ready: boolean;
+  guest_ready: boolean;
+  host_dojomon_id: string;
+  guest_dojomon_id: string;
+  can_join: boolean;
 }
 
 // Type definition for `dojo_starter::models::DojoMon` struct
@@ -65,9 +79,21 @@ export enum DojoBallType {
   Masterball,
 }
 
+// Type definition for `dojo_starter::models::League` enum
+export enum League {
+  Bronze,
+  Silver,
+  Gold,
+  Platinum,
+  Diamond,
+  Master,
+  Grandmaster,
+}
+
 export interface SchemaType extends ISchemaType {
   dojo_starter: {
     PlayerStats: WithFieldOrder<PlayerStats>;
+    Lobby: WithFieldOrder<Lobby>;
     DojoMon: WithFieldOrder<DojoMon>;
     DojoBall: WithFieldOrder<DojoBall>;
     Counter: WithFieldOrder<Counter>;
@@ -78,12 +104,45 @@ export interface SchemaType extends ISchemaType {
 export const schema: SchemaType = {
   dojo_starter: {
     PlayerStats: {
-      fieldOrder: ["player", "gold", "level", "exp", "food"],
+      fieldOrder: [
+        "player",
+        "gold",
+        "level",
+        "exp",
+        "food",
+        "trophies",
+        "league",
+        "host_lobby_code",
+      ],
       player: "",
       gold: 0,
       level: 0,
       exp: 0,
       food: 0,
+      trophies: 0,
+      league: new CairoOption<League>(CairoOptionVariant.None),
+      host_lobby_code: "",
+    },
+
+    Lobby: {
+      fieldOrder: [
+        "lobby_code",
+        "host_player",
+        "guest_player",
+        "host_ready",
+        "guest_ready",
+        "host_dojomon_id",
+        "guest_dojomon_id",
+        "can_join",
+      ],
+      lobby_code: "",
+      host_player: "",
+      guest_player: "",
+      host_ready: false,
+      guest_ready: false,
+      host_dojomon_id: "",
+      guest_dojomon_id: "",
+      can_join: false,
     },
 
     DojoMon: {
@@ -143,10 +202,12 @@ export const schema: SchemaType = {
 };
 export enum ModelsMapping {
   PlayerStats = "dojo_starter-PlayerStats",
+  Lobby = "dojo_starter-Lobby",
   DojoMon = "dojo_starter-DojoMon",
   DojoBall = "dojo_starter-DojoBall",
   Counter = "dojo_starter-Counter",
   Position = "dojo_starter-Position",
   DojomonType = "dojo_starter-DojomonType",
   DojoBallType = "dojo_starter-DojoBallType",
+  League = "dojo_starter-League",
 }
