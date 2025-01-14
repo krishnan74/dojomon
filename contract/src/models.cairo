@@ -1,6 +1,6 @@
 use starknet::{ContractAddress};
 
-#[derive(Drop, Serde, Debug)]
+#[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
 pub struct PlayerStats{
     #[key]
@@ -9,7 +9,25 @@ pub struct PlayerStats{
     pub level: u32,
     pub exp: u32,
     pub food: u32,
+    pub league: League,
+    pub trophies: u32,
+    pub host_lobby_code: felt252,
 }
+
+#[derive(Copy, Drop, Serde, Debug)]
+#[dojo::model]
+pub struct Lobby{
+    #[key]
+    pub lobby_code: felt252,
+    pub host_player: ContractAddress,
+    pub guest_player: ContractAddress,
+    pub host_ready: bool,
+    pub guest_ready: bool,
+    pub host_dojomon_id: felt252,
+    pub guest_dojomon_id: felt252,
+    pub can_join: bool,
+}
+
 
 #[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
@@ -36,6 +54,7 @@ pub struct DojoBall{
     pub dojomon_id: felt252,
     pub position: Position,
     pub dojoball_type: DojoBallType,
+    pub has_dojomon: bool,
 }
 
 #[derive(Copy, Drop, Serde)]
@@ -59,6 +78,17 @@ pub enum DojomonType{
     Fire,
     Water,
     Grass,
+}
+
+#[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
+pub enum League{
+    Bronze,
+    Silver,
+    Gold,
+    Platinum,
+    Diamond,
+    Master,
+    GrandMaster,
 }
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug,)]
