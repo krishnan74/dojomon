@@ -40,6 +40,55 @@ export function setupWorld(provider: DojoProvider) {
     }
   };
 
+  const build_actions_buyDojoBall_calldata = (
+    dojoball_type: models.DojoBallType,
+    quantity: BigNumberish,
+    dojomon_id: string,
+    has_dojomon: boolean
+  ) => {
+    const dojoballTypeToString = {
+      0: "Dojoball",
+      1: "Greatball",
+      2: "Ultraball",
+      3: "Masterball",
+    };
+
+    return {
+      contractName: "actions",
+      entrypoint: "buyDojoBall",
+      calldata: [
+        new CairoCustomEnum({ [dojoballTypeToString[dojoball_type]]: "()" }),
+        quantity,
+        dojomon_id,
+        has_dojomon,
+      ],
+    };
+  };
+
+  const actions_buyDojoBall = async (
+    snAccount: Account | AccountInterface,
+    dojoball_type: models.DojoBallType,
+    quantity: BigNumberish,
+    dojomon_id: string,
+    has_dojomon: boolean
+  ) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        build_actions_buyDojoBall_calldata(
+          dojoball_type,
+          quantity,
+          dojomon_id,
+          has_dojomon
+        ),
+        "dojo_starter"
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
   const build_actions_createLobby_calldata = () => {
     return {
       contractName: "actions",
@@ -77,6 +126,54 @@ export function setupWorld(provider: DojoProvider) {
       return await provider.execute(
         snAccount,
         build_actions_joinLobby_calldata(lobby_code),
+        "dojo_starter"
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const build_actions_acceptFriendRequest_calldata = (sender: string) => {
+    return {
+      contractName: "actions",
+      entrypoint: "acceptFriendRequest",
+      calldata: [sender],
+    };
+  };
+
+  const actions_acceptFriendRequest = async (
+    snAccount: Account | AccountInterface,
+    sender: string
+  ) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        build_actions_acceptFriendRequest_calldata(sender),
+        "dojo_starter"
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const build_actions_sendFriendRequest_calldata = (receiver: string) => {
+    return {
+      contractName: "actions",
+      entrypoint: "sendFriendRequest",
+      calldata: [receiver],
+    };
+  };
+
+  const actions_sendFriendRequest = async (
+    snAccount: Account | AccountInterface,
+    receiver: string
+  ) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        build_actions_sendFriendRequest_calldata(receiver),
         "dojo_starter"
       );
     } catch (error) {
@@ -148,13 +245,12 @@ export function setupWorld(provider: DojoProvider) {
   return {
     actions: {
       spawnPlayer: actions_spawn,
-      buildSpawnCalldata: build_actions_spawn_calldata,
+      buyDojoBall: actions_buyDojoBall,
       createDojomon: actions_createDojomon,
-      buildCreateDojomonCalldata: build_actions_createDojomon_calldata,
       createLobby: actions_createLobby,
-      buildCreateLobbyCalldata: build_actions_createLobby_calldata,
       joinLobby: actions_joinLobby,
-      buildJoinLobbyCalldata: build_actions_joinLobby_calldata,
+      sendFriendRequest: actions_sendFriendRequest,
+      acceptFriendRequest: actions_acceptFriendRequest,
     },
   };
 }

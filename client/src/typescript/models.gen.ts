@@ -27,6 +27,18 @@ export interface Lobby {
   can_join: boolean;
 }
 
+export interface Friend {
+  player: string;
+  friend: string;
+}
+
+export interface ReceiverFriendRequest {
+  sender: string;
+  receiver: string;
+  active: boolean;
+  accepted: boolean;
+}
+
 // Type definition for `dojo_starter::models::DojoMon` struct
 export interface DojoMon {
   dojomon_id: string;
@@ -44,10 +56,12 @@ export interface DojoMon {
 
 // Type definition for `dojo_starter::models::DojoBall` struct
 export interface DojoBall {
+  dojoball_id: string;
   player: string;
   dojomon_id: string;
   position: Position;
   dojoball_type: CairoOption<DojoBallType>;
+  has_dojomon: boolean;
 }
 
 // Type definition for `dojo_starter::models::Counter` struct
@@ -94,6 +108,8 @@ export interface SchemaType extends ISchemaType {
   dojo_starter: {
     PlayerStats: WithFieldOrder<PlayerStats>;
     Lobby: WithFieldOrder<Lobby>;
+    Friend: WithFieldOrder<Friend>;
+    ReceiverFriendRequest: WithFieldOrder<ReceiverFriendRequest>;
     DojoMon: WithFieldOrder<DojoMon>;
     DojoBall: WithFieldOrder<DojoBall>;
     Counter: WithFieldOrder<Counter>;
@@ -145,6 +161,20 @@ export const schema: SchemaType = {
       can_join: false,
     },
 
+    Friend: {
+      fieldOrder: ["player", "friend"],
+      player: "",
+      friend: "",
+    },
+
+    ReceiverFriendRequest: {
+      fieldOrder: ["sender", "receiver", "active", "accepted"],
+      sender: "",
+      receiver: "",
+      active: false,
+      accepted: false,
+    },
+
     DojoMon: {
       fieldOrder: [
         "dojomon_id",
@@ -173,11 +203,20 @@ export const schema: SchemaType = {
     },
 
     DojoBall: {
-      fieldOrder: ["player", "dojomon_id", "position", "dojoball_type"],
+      fieldOrder: [
+        "dojoball_id",
+        "player",
+        "dojomon_id",
+        "position",
+        "dojoball_type",
+        "has_dojomon",
+      ],
+      dojoball_id: "",
       player: "",
       dojomon_id: "",
       position: { x: 0, y: 0 },
       dojoball_type: new CairoOption<DojoBallType>(CairoOptionVariant.None),
+      has_dojomon: false,
     },
 
     Counter: {
@@ -203,6 +242,9 @@ export const schema: SchemaType = {
 export enum ModelsMapping {
   PlayerStats = "dojo_starter-PlayerStats",
   Lobby = "dojo_starter-Lobby",
+  Friend = "dojo_starter-Friend",
+  SenderFriendRequest = "dojo_starter-SenderFriendRequest",
+  ReceiverFriendRequest = "dojo_starter-ReceiverFriendRequest",
   DojoMon = "dojo_starter-DojoMon",
   DojoBall = "dojo_starter-DojoBall",
   Counter = "dojo_starter-Counter",
