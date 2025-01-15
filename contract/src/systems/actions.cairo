@@ -1,24 +1,28 @@
-use dojo_starter::models::{PlayerStats, Counter, DojoMon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby};
+use dojo_starter::models::{PlayerStats, Counter, DojoMon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby, ReceiverFriendRequest, Friend};
+use starknet::{ContractAddress, get_caller_address, contract_address_const};
 
 // Define the interface
 #[starknet::interface]
 trait IActions<T> {
     fn spawnPlayer(ref self: T, starting_dojo_mon: DojomonType);
-    fn buyDojoBall( ref self: T, dojoball_type: DojoBallType, quantitiy: u32);
-    fn feedDojoMon(ref self: T, dojomon_id: felt252, quantitiy: u32);
+    fn buyDojoBall( ref self: T, dojoball_type: DojoBallType, quantity: u32, dojomon_id: felt252, has_dojomon: bool);
+    fn feedDojoMon(ref self: T, dojomon_id: felt252, quantity: u32);
     fn createDojomon(ref self: T, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, dojomon_type: DojomonType, position: Position) -> felt252;
     fn catchDojomon(ref self: T, dojomon_id: felt252);
     fn createLobby(ref self: T) -> felt252;
     fn joinLobby(ref self: T, lobby_code: felt252);
+    fn sendFriendRequest(ref self: T, receiver_felt252: felt252);
+    fn acceptFriendRequest(ref self: T, sender_felt252: felt252);
 }
 
 // Dojo contract
 #[dojo::contract]
 pub mod actions {
-    use super::{IActions, PlayerStats, Counter, DojoMon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby};
+    use super::{IActions, PlayerStats, Counter, DojoMon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby, ReceiverFriendRequest, Friend};
     use starknet::{ContractAddress, get_caller_address, contract_address_const};
     use dojo::model::{ModelStorage, ModelValueStorage};
     use dojo::event::EventStorage;
+    use core::starknet::contract_address::contract_address_to_felt252;
     use dojo::world::WorldStorage;
     use dojo::world::IWorldDispatcherTrait;
     use core::poseidon::poseidon_hash_span;
@@ -46,7 +50,6 @@ pub mod actions {
         pub dojomon_id: felt252,
         pub player: ContractAddress,
     }
-
 
     const COUNTER_ID: u32 = 999;
     const DOJOMON : felt252 = 'DOJOMON';
@@ -148,20 +151,6 @@ pub mod actions {
                 }
                 
             };
-
-
-            //creating starting dojoball
-            let starting_dojo_ball = DojoBall {
-                player,
-                dojomon_id: created_dojomon_id,
-                position: Position { x: 0, y: 0 },
-                dojoball_type: DojoBallType::Dojoball,
-                has_dojomon: true,
-            };
-
-            world.write_model(@starting_dojo_ball);
-
-
             
             let start_stats = PlayerStats {
                 player,
@@ -177,18 +166,31 @@ pub mod actions {
             //writing the player stats
             world.write_model(@start_stats);
 
+            self.buyDojoBall(
+                DojoBallType::Dojoball,
+                1,
+                created_dojomon_id,
+                true
+            );
+
             // Emit event for player creation
             world.emit_event(@PlayerSpawned {player,stats: start_stats});
         }
 
-        fn buyDojoBall( ref self: ContractState,  dojoball_type: DojoBallType, quantitiy: u32){ 
+        fn buyDojoBall( ref self: ContractState,  dojoball_type: DojoBallType, quantity: u32, dojomon_id: felt252, has_dojomon: bool) { 
             let mut world = self.world_default();
             let player = get_caller_address();
+
+            let player_felt252 = contract_address_to_felt252(player);
             let mut counter : Counter = world.read_model(COUNTER_ID);
+            
+            let mut dojoball_count = counter.dojoball_count;
 
             //incrementing the counter
-            counter.dojoball_count += quantitiy;
+            counter.dojoball_count += quantity;
             world.write_model(@counter);
+
+            
 
             //mapping dojoball type to gold expense
             let gold_expense = match dojoball_type {
@@ -200,18 +202,26 @@ pub mod actions {
 
             // Deduct gold from player
             let mut player_stats: PlayerStats = world.read_model(player);
-            player_stats.gold -= gold_expense * quantitiy;
+            player_stats.gold -= gold_expense * quantity;
             world.write_model(@player_stats);
 
 
             //creating new dojo_balls
-            for _ in 0..quantitiy{
+            for _ in 0..quantity{
+
+                dojoball_count+=1;
+
+                let dojoball_count_felt: felt252 = dojoball_count.into();
+
+                let dojoball_id = poseidon_hash_span([dojoball_count_felt, player_felt252].span());
+
                 let dojoball = DojoBall {
+                    dojoball_id,
                     player,
-                    dojomon_id: 0,
+                    dojomon_id,
                     position: Position { x: 0, y: 0 },
                     dojoball_type,
-                    has_dojomon: false,
+                    has_dojomon,
                 };
 
                 world.write_model(@dojoball);
@@ -219,7 +229,7 @@ pub mod actions {
 
         }
         
-        fn feedDojoMon(ref self: ContractState, dojomon_id: felt252, quantitiy: u32) {
+        fn feedDojoMon(ref self: ContractState, dojomon_id: felt252, quantity: u32) {
             let mut world = self.world_default();
             let player = get_caller_address();
 
@@ -233,7 +243,7 @@ pub mod actions {
             }
 
             // Increase the DojoMon's health
-            dojomon.health += INCREASE_HEALTH_PER_FOOD * quantitiy;
+            dojomon.health += INCREASE_HEALTH_PER_FOOD * quantity;
 
             world.write_model(@dojomon);
         }
@@ -252,7 +262,10 @@ pub mod actions {
         ) -> felt252 {
             let mut world = self.world_default();
             let player = get_caller_address();
+            let player_felt252 = contract_address_to_felt252(player);
+            
             let mut counter : Counter = world.read_model(COUNTER_ID);
+
 
             let dojomon_count = counter.dojomon_count;
 
@@ -263,7 +276,7 @@ pub mod actions {
 
             let dojomon_count_felt: felt252 = dojomon_count.into();
 
-            let dojomon_id = poseidon_hash_span([dojomon_count_felt, DOJOMON].span());
+            let dojomon_id = poseidon_hash_span([dojomon_count_felt, player_felt252].span());
 
 
             // Create new DojoMon
@@ -366,6 +379,52 @@ pub mod actions {
             world.write_model(@lobby);
         }
 
+        fn sendFriendRequest(
+            ref self: ContractState,
+            receiver_felt252: felt252,
+        ) {
+            let mut world = self.world_default();
+            let sender = get_caller_address();
+            let receiver: ContractAddress = receiver_felt252.try_into().unwrap();
+
+            
+            // Create a new receiver friend request
+            let receiver_friend_request = ReceiverFriendRequest {
+                receiver,
+                sender,
+                accepted: false,
+                active: true,
+            };
+
+            world.write_model(@receiver_friend_request);
+        }
+
+        fn acceptFriendRequest(
+            ref self: ContractState,
+            sender_felt252: felt252,
+        ) {
+            let mut world = self.world_default();
+            let player = get_caller_address();
+            let sender: ContractAddress = sender_felt252.try_into().unwrap();
+
+            let mut sender_friend_request: ReceiverFriendRequest = world.read_model(sender);
+
+            sender_friend_request.accepted = true;
+            sender_friend_request.active = false;
+
+            world.write_model(@sender_friend_request);
+
+            // Create a new friend
+            let friend = Friend {
+                friend: sender,
+
+                player,
+            };
+
+            world.write_model(@friend);
+        }
+        
+        
     }
 
     /// Internal trait implementation for helper functions

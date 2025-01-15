@@ -1252,8 +1252,8 @@
   },
   "contracts": [
     {
-      "address": "0x707b4fd776ece1dc72ca718163331b91a23da47f0cfb25725beba073f458cfa",
-      "class_hash": "0x6bcdbdbc50c73b2db21f585f89b11b0b9b41bfe3f2039d3ac0eab3efef6e2ad",
+      "address": "0x25a9ebac22279f0bb4d420993c01f53549b0968ded2d712eba371536955fed0",
+      "class_hash": "0x1c73ef3f231d6f801726a277bd2374d9c403f6f775e0252a41f6d693be9bc6a",
       "abi": [
         {
           "type": "impl",
@@ -1351,6 +1351,20 @@
           ]
         },
         {
+          "type": "enum",
+          "name": "core::bool",
+          "variants": [
+            {
+              "name": "False",
+              "type": "()"
+            },
+            {
+              "name": "True",
+              "type": "()"
+            }
+          ]
+        },
+        {
           "type": "struct",
           "name": "dojo_starter::models::Position",
           "members": [
@@ -1389,8 +1403,16 @@
                   "type": "dojo_starter::models::DojoBallType"
                 },
                 {
-                  "name": "quantitiy",
+                  "name": "quantity",
                   "type": "core::integer::u32"
+                },
+                {
+                  "name": "dojomon_id",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "has_dojomon",
+                  "type": "core::bool"
                 }
               ],
               "outputs": [],
@@ -1405,7 +1427,7 @@
                   "type": "core::felt252"
                 },
                 {
-                  "name": "quantitiy",
+                  "name": "quantity",
                   "type": "core::integer::u32"
                 }
               ],
@@ -1481,6 +1503,30 @@
               "inputs": [
                 {
                   "name": "lobby_code",
+                  "type": "core::felt252"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "sendFriendRequest",
+              "inputs": [
+                {
+                  "name": "receiver_felt252",
+                  "type": "core::felt252"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "acceptFriendRequest",
+              "inputs": [
+                {
+                  "name": "sender_felt252",
                   "type": "core::felt252"
                 }
               ],
@@ -1615,6 +1661,8 @@
         "catchDojomon",
         "createLobby",
         "joinLobby",
+        "sendFriendRequest",
+        "acceptFriendRequest",
         "upgrade"
       ]
     }
@@ -1628,7 +1676,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x153dfe4c087dc91735994d2c7e9d84443cdc621f83d58deb7ccf21ab05fb606",
+      "class_hash": "0x48e5395d8fe869f5bc41b58e5a5e6dcf98af5abe2960c326e4641efdb8a6d4",
       "tag": "dojo_starter-DojoBall",
       "selector": "0x7aa4925b4d8b944863ed8903b51e2c883bd73082b4e76450de4190dba0cf03a"
     },
@@ -1637,6 +1685,12 @@
       "class_hash": "0x585b188324b74536be5f5df924ad6d332b697722d38823036dbabde00977850",
       "tag": "dojo_starter-DojoMon",
       "selector": "0x3da773191607043d7ef58d4515122d5fc94f692a09ba825f5add8f85b14cefa"
+    },
+    {
+      "members": [],
+      "class_hash": "0x5be965e46a113d52d5784953c6c066e01710ad51e733254ce41dbf53b65dc4b",
+      "tag": "dojo_starter-Friend",
+      "selector": "0x102a9096cde6527baf7c61bceec73acbd3124eabcdc224533d774881e1df88a"
     },
     {
       "members": [],
@@ -1649,6 +1703,12 @@
       "class_hash": "0x46f51d37207a6506aa6134800957d34cbbf6587221c8dcf832a5f72a8b7828c",
       "tag": "dojo_starter-PlayerStats",
       "selector": "0x3fa16f4e136c20faceb4888812ba685c403d1ad1816a15b67dc6ccd9b0eb13c"
+    },
+    {
+      "members": [],
+      "class_hash": "0x5b4e790c656f0fdc6c1093923ec5efc20782ed2efaf9f88a38cae9634a4c27f",
+      "tag": "dojo_starter-ReceiverFriendRequest",
+      "selector": "0x46985051d5b2d9dd85f939cbfe0db7bbc24f71d5dccf330fcee5d6e2aebdc1d"
     }
   ],
   "events": [

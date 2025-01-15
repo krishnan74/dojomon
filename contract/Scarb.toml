@@ -1,7 +1,7 @@
 [package]
 cairo-version = "=2.8.4"
 name = "dojo_starter"
-version = "1.0.10"
+version = "1.0.11"
 
 [cairo]
 sierra-replace-ids = true
@@ -15,10 +15,10 @@ catchDojomon = "sozo execute dojo_starter-actions catchDojomon -c 1 --wait"
 
 
 [dependencies]
-dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.10" }
+dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.11" }
 
 [[target.starknet-contract]]
 build-external-contracts = ["dojo::world::world_contract::world"]
 
 [dev-dependencies]
-dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.10" }
+dojo_cairo_test = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.11" }

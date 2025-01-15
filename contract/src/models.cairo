@@ -28,6 +28,23 @@ pub struct Lobby{
     pub can_join: bool,
 }
 
+#[derive(Copy, Drop, Serde, Debug)]
+#[dojo::model]
+pub struct ReceiverFriendRequest{
+    #[key]
+    pub receiver: ContractAddress,
+    pub sender: ContractAddress,
+    pub active: bool,
+    pub accepted: bool,
+}
+
+#[derive (Copy, Drop, Serde, Debug)]
+#[dojo::model]
+pub struct Friend{
+    #[key]
+    pub friend: ContractAddress,
+    pub player: ContractAddress,
+}
 
 #[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
@@ -50,6 +67,7 @@ pub struct DojoMon{
 #[dojo::model]
 pub struct DojoBall{
     #[key]
+    pub dojoball_id: felt252,
     pub player: ContractAddress,
     pub dojomon_id: felt252,
     pub position: Position,
