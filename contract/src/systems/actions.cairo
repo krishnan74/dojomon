@@ -81,10 +81,6 @@ pub mod actions {
 
             world.write_model(@counter);
 
-
-
-            
-
             //let dojomon =  
             //creating starting dojomon based on the input
             let created_dojomon_id = match starting_dojo_mon {
@@ -166,12 +162,25 @@ pub mod actions {
             //writing the player stats
             world.write_model(@start_stats);
 
-            self.buyDojoBall(
-                DojoBallType::Dojoball,
-                1,
-                created_dojomon_id,
-                true
-            );
+            let mut counter : Counter = world.read_model(COUNTER_ID);
+            
+            let mut dojoball_count = counter.dojoball_count;
+
+            let dojoball_count_felt: felt252 = dojoball_count.into();
+            let player_felt252 = contract_address_to_felt252(player);
+
+            let dojoball_id = poseidon_hash_span([dojoball_count_felt, player_felt252].span());
+
+            let dojoball = DojoBall {
+                dojoball_id,
+                player,
+                dojomon_id: created_dojomon_id,
+                position: Position { x: 0, y: 0 },
+                dojoball_type: DojoBallType::Dojoball,
+                has_dojomon: true,
+            };
+
+            world.write_model(@dojoball);
 
             // Emit event for player creation
             world.emit_event(@PlayerSpawned {player,stats: start_stats});
