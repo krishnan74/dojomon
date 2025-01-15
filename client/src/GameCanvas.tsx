@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect } from "react";
 import { Position } from "./interfaces";
 
 const GameCanvas = ({ pokeballPosition }: { pokeballPosition: Position }) => {

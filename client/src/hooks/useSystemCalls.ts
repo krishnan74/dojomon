@@ -1,4 +1,3 @@
-import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useDojoStore } from "../App";
 import { DojoContext } from "../dojo-sdk-provider";
 import { v4 as uuidv4 } from "uuid";
@@ -6,7 +5,6 @@ import { useAccount } from "@starknet-react/core";
 import { DojomonType, League } from "../typescript/models.gen";
 import {
   CairoOption,
-  CairoCustomEnum,
   CairoOptionVariant,
   BigNumberish,
 } from "starknet";

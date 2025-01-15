@@ -8,7 +8,7 @@ import {
   SelectContent,
 } from "./ui/select";
 import { useAccount } from "@starknet-react/core";
-import { copyToClipboard, shortenAddress } from "../utils";
+import { copyToClipboard, shortenAddress } from "../lib/utils";
 import { MetaMaskAvatar } from "react-metamask-avatar";
 
 const Navbar = () => {

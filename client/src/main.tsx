@@ -10,8 +10,7 @@ import { dojoConfig } from "../dojoConfig.ts";
 import { DojoSdkProvider } from "./dojo-sdk-provider.tsx";
 import { setupBurnerManager } from "@dojoengine/create-burner";
 import StarknetProvider from "./starknet-provider.tsx";
-import Demo from "./GameCanvas.tsx";
-import GameCanvas from "./GameCanvas.tsx";
+import Navbar from "./components/Navbar.tsx";
 
 /**
  * Initializes and bootstraps the Dojo application.
@@ -45,6 +44,7 @@ async function main() {
         burnerManager={await setupBurnerManager(dojoConfig)}
       >
         <StarknetProvider>
+          <Navbar />
           <App />
           {/* <GameCanvas pokeballPosition={{ x: 0, y: 0 }} /> */}
         </StarknetProvider>

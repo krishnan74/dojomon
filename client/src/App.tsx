@@ -1,26 +1,21 @@
-import { useContext, useEffect, useMemo, useState } from "react";
-import {
-  ParsedEntity,
-  QueryBuilder,
-  SDK,
-  createDojoStore,
-} from "@dojoengine/sdk";
-import { getEntityIdFromKeys } from "@dojoengine/utils";
-import { AccountInterface, addAddressPadding } from "starknet";
+import { useContext, useState } from "react";
+import { createDojoStore } from "@dojoengine/sdk";
 
 import {
   DojomonType,
   DojoBallType,
-  ModelsMapping,
+  //ModelsMapping,
   SchemaType,
 } from "./typescript/models.gen.ts";
-import useModel from "./hooks/useModel.tsx";
-import { useSystemCalls } from "./hooks/useSystemCalls.ts";
+
 import { useAccount } from "@starknet-react/core";
 import { WalletAccount } from "./wallet-account.tsx";
-import { HistoricalEvents } from "./historical-events.tsx";
-import { usePlayerActions } from "./hooks/usePlayerActions.tsx";
 import { DojoContext } from "./dojo-sdk-provider.tsx";
+
+// import useModel from "./hooks/useModel.tsx";
+// import { useSystemCalls } from "./hooks/useSystemCalls.ts";
+// import { HistoricalEvents } from "./historical-events.tsx";
+// import { usePlayerActions } from "./hooks/usePlayerActions.tsx";
 
 /**
  * Global store for managing Dojo game state.
@@ -34,16 +29,15 @@ export const useDojoStore = createDojoStore<SchemaType>();
  * @param props.sdk - The Dojo SDK instance configured with the game schema
  */
 function App() {
-  const { address, account } = useAccount();
-  const state = useDojoStore((state) => state);
+  const { account } = useAccount();
   const entities = useDojoStore((state) => state.entities);
-  const entityId = usePlayerActions(address);
+  //const entityId = usePlayerActions(address);
 
   const { client } = useContext(DojoContext);
 
-  const { spawn: spawnCallback } = useSystemCalls(entityId);
+  //const { spawn: spawnCallback } = useSystemCalls(entityId);
 
-  const playerStats = useModel(entityId as string, ModelsMapping.PlayerStats);
+  //const playerStats = useModel(entityId as string, ModelsMapping.PlayerStats);
 
   const [enterLobbyCode, setEnterLobbyCode] = useState("");
   const [friendAddress, setfriendAddress] = useState("");
