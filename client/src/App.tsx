@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   ParsedEntity,
   QueryBuilder,
@@ -14,12 +14,13 @@ import {
   ModelsMapping,
   SchemaType,
 } from "./typescript/models.gen.ts";
-import { useDojo } from "./useDojo.tsx";
-import useModel from "./useModel.tsx";
-import { useSystemCalls } from "./useSystemCalls.ts";
+import useModel from "./hooks/useModel.tsx";
+import { useSystemCalls } from "./hooks/useSystemCalls.ts";
 import { useAccount } from "@starknet-react/core";
 import { WalletAccount } from "./wallet-account.tsx";
 import { HistoricalEvents } from "./historical-events.tsx";
+import { usePlayerActions } from "./hooks/usePlayerActions.tsx";
+import { DojoContext } from "./dojo-sdk-provider.tsx";
 
 /**
  * Global store for managing Dojo game state.
@@ -32,109 +33,32 @@ export const useDojoStore = createDojoStore<SchemaType>();
  *
  * @param props.sdk - The Dojo SDK instance configured with the game schema
  */
-function App({ sdk }: { sdk: SDK<SchemaType> }) {
-  const {
-    setup: { client },
-  } = useDojo();
-  const { account } = useAccount();
+function App() {
+  const { address, account } = useAccount();
   const state = useDojoStore((state) => state);
   const entities = useDojoStore((state) => state.entities);
+  const entityId = usePlayerActions(address);
 
-  const { spawn } = useSystemCalls();
+  const { client } = useContext(DojoContext);
 
-  const entityId = useMemo(() => {
-    if (account) {
-      return getEntityIdFromKeys([BigInt(account.address)]);
-    }
-    return BigInt(0);
-  }, [account]);
-
-  useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-
-    const subscribe = async (account: AccountInterface) => {
-      const subscription = await sdk.subscribeEntityQuery({
-        query: new QueryBuilder<SchemaType>()
-          .namespace("dojo_starter", (n) =>
-            n.entity("PlayerStats", (e) =>
-              e.is("player", addAddressPadding(account.address))
-            )
-          )
-          .build(),
-        callback: ({ error, data }) => {
-          if (error) {
-            console.error("Error setting up entity sync:", error);
-          } else if (
-            data &&
-            (data[0] as ParsedEntity<SchemaType>).entityId !== "0x0"
-          ) {
-            state.updateEntity(data[0] as ParsedEntity<SchemaType>);
-          }
-        },
-      });
-
-      unsubscribe = () => subscription.cancel();
-    };
-
-    if (account) {
-      subscribe(account);
-    }
-
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, [sdk, account]);
-
-  useEffect(() => {
-    const fetchEntities = async (account: AccountInterface) => {
-      try {
-        await sdk.getEntities({
-          query: new QueryBuilder<SchemaType>()
-            .namespace("dojo_starter", (n) =>
-              n.entity("PlayerStats", (e) =>
-                e.is("player", addAddressPadding(account.address))
-              )
-            )
-            .build(),
-          callback: (resp) => {
-            if (resp.error) {
-              console.error("resp.error.message:", resp.error.message);
-              return;
-            }
-            if (resp.data) {
-              state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
-            }
-          },
-        });
-      } catch (error) {
-        console.error("Error querying entities:", error);
-      }
-    };
-
-    if (account) {
-      fetchEntities(account);
-    }
-  }, [sdk, account]);
+  const { spawn: spawnCallback } = useSystemCalls(entityId);
 
   const playerStats = useModel(entityId as string, ModelsMapping.PlayerStats);
 
-  console.log(playerStats);
-
   const [enterLobbyCode, setEnterLobbyCode] = useState("");
+  const [friendAddress, setfriendAddress] = useState("");
 
   return (
-    <div className="bg-black min-h-screen w-full p-4 sm:p-8">
+    <div className=" min-h-screen w-full p-4 sm:p-8">
       <div className="max-w-7xl mx-auto">
         <WalletAccount />
 
         <div>
           <button
-            className="bg-white text-black px-3 py-1"
-            onClick={async () =>
-              await client.actions.spawnPlayer(account!, DojomonType.Fire)
-            }
+            className="border-black border text-black px-3 py-1"
+            onClick={async () => {
+              await client.actions.spawnPlayer(account!, DojomonType.Fire);
+            }}
           >
             Spawn Player
           </button>
@@ -142,7 +66,7 @@ function App({ sdk }: { sdk: SDK<SchemaType> }) {
 
         <div>
           <button
-            className="bg-white text-black px-3 py-1"
+            className="border-black border text-black px-3 py-1"
             onClick={async () => {
               const lobbyCode = await client.actions.createLobby(account!);
               console.log(lobbyCode); // This will log the returned string (lobby ID)
@@ -152,9 +76,9 @@ function App({ sdk }: { sdk: SDK<SchemaType> }) {
           </button>
         </div>
 
-        <div className="p-5 border-white ">
+        <div className="p-5 border-black border ">
           <button
-            className="bg-white text-black px-3 py-1"
+            className="border-black border text-black px-3 py-1"
             onClick={async () => {
               await client.actions.joinLobby(account!, enterLobbyCode);
             }}
@@ -168,6 +92,39 @@ function App({ sdk }: { sdk: SDK<SchemaType> }) {
             onChange={(e) => setEnterLobbyCode(e.target.value)}
           />
         </div>
+
+        <div className="p-5 border-black border ">
+          <button
+            className="border-black border text-black px-3 py-1"
+            onClick={async () => {
+              await client.actions.sendFriendRequest(account!, friendAddress);
+            }}
+          >
+            Send Friend Req
+          </button>
+
+          <input
+            type="text"
+            value={friendAddress}
+            className="border-black border text-black px-3 py-1"
+            onChange={(e) => setfriendAddress(e.target.value)}
+          />
+        </div>
+
+        <button
+          className="border-black border text-black px-3 py-1"
+          onClick={async () => {
+            await client.actions.buyDojoBall(
+              account!,
+              DojoBallType.Dojoball,
+              1,
+              "0",
+              false
+            );
+          }}
+        >
+          Buy DojoBall
+        </button>
 
         <div className="mt-8 overflow-x-auto">
           <table className="w-full border-collapse border border-gray-700">
@@ -213,9 +170,6 @@ function App({ sdk }: { sdk: SDK<SchemaType> }) {
             </tbody>
           </table>
         </div>
-
-        {/* // Here sdk is passed as props but this can be done via contexts */}
-        <HistoricalEvents sdk={sdk} />
       </div>
     </div>
   );

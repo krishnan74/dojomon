@@ -1,7 +1,17 @@
+import { sepolia, mainnet } from "@starknet-react/chains";
+
+import ControllerConnector from "@cartridge/connector/controller";
+import { SessionPolicies } from "@cartridge/controller";
+
 import type { PropsWithChildren } from "react";
-import { mainnet } from "@starknet-react/chains";
-import { jsonRpcProvider, StarknetConfig, voyager } from "@starknet-react/core";
+import {
+  jsonRpcProvider,
+  StarknetConfig,
+  voyager,
+  starkscan,
+} from "@starknet-react/core";
 import { dojoConfig } from "../dojoConfig";
+
 import {
   predeployedAccounts,
   PredeployedAccountsConnector,

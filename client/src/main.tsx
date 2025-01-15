@@ -7,7 +7,7 @@ import "./index.css";
 import { init } from "@dojoengine/sdk";
 import { SchemaType, schema } from "./typescript/models.gen.ts";
 import { dojoConfig } from "../dojoConfig.ts";
-import { DojoContextProvider } from "./DojoContext.tsx";
+import { DojoSdkProvider } from "./dojo-sdk-provider.tsx";
 import { setupBurnerManager } from "@dojoengine/create-burner";
 import StarknetProvider from "./starknet-provider.tsx";
 import Demo from "./GameCanvas.tsx";
@@ -40,12 +40,15 @@ async function main() {
 
   createRoot(document.getElementById("root")!).render(
     <StrictMode>
-      <DojoContextProvider burnerManager={await setupBurnerManager(dojoConfig)}>
+      <DojoSdkProvider
+        sdk={sdk}
+        burnerManager={await setupBurnerManager(dojoConfig)}
+      >
         <StarknetProvider>
-          <App sdk={sdk} />
+          <App />
           {/* <GameCanvas pokeballPosition={{ x: 0, y: 0 }} /> */}
         </StarknetProvider>
-      </DojoContextProvider>
+      </DojoSdkProvider>
     </StrictMode>
   );
 }
