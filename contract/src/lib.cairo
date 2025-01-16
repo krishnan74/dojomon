@@ -1,5 +1,7 @@
 mod systems {
     mod actions;
+    mod friendSystem;
+    mod battle;
 }
 
 mod models;

@@ -4,9 +4,12 @@ mod tests {
 use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
     use dojo::world::WorldStorageTrait;
     use dojo_cairo_test::{spawn_test_world, NamespaceDef, TestResource, ContractDefTrait, ContractDef};
+    use core::starknet::contract_address::contract_address_to_felt252;
+
 
     use dojo_starter::systems::actions::{actions, IActionsDispatcher, IActionsDispatcherTrait};
-    
+    use dojo_starter::systems::friendSystem::{friendSystem, IFriendSystemDispatcher, IFriendSystemDispatcherTrait};
+    use dojo_starter::systems::battle::{battle, IBattleDispatcher, IBattleDispatcherTrait};
     use dojo_starter::models::{PlayerStats, m_PlayerStats, Position, Counter, m_Counter, DojoMon, m_DojoMon, DojoBallType , DojomonType , DojoBall, m_DojoBall, League, Lobby, m_Lobby, ReceiverFriendRequest, m_ReceiverFriendRequest, Friend, m_Friend, Move, m_Move, MoveEffect};
 
 
@@ -35,7 +38,9 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
                 TestResource::Model(m_ReceiverFriendRequest::TEST_CLASS_HASH),
                 TestResource::Model(m_Friend::TEST_CLASS_HASH),
                 TestResource::Model(m_Move::TEST_CLASS_HASH),
-                TestResource::Contract(actions::TEST_CLASS_HASH)
+                TestResource::Contract(actions::TEST_CLASS_HASH),
+                TestResource::Contract(friendSystem::TEST_CLASS_HASH),
+                TestResource::Contract(battle::TEST_CLASS_HASH),
             ].span()
         };
 
@@ -44,8 +49,10 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
 
     fn contract_defs() -> Span<ContractDef> {
         [
-            ContractDefTrait::new(@"dojo_starter", @"actions")
-                .with_writer_of([dojo::utils::bytearray_hash(@"dojo_starter")].span())
+            ContractDefTrait::new(@"dojo_starter", @"actions").with_writer_of([dojo::utils::bytearray_hash(@"dojo_starter")].span()), 
+            ContractDefTrait::new(@"dojo_starter", @"battle").with_writer_of([dojo::utils::bytearray_hash(@"dojo_starter")].span()),
+            ContractDefTrait::new(@"dojo_starter", @"friendSystem").with_writer_of([dojo::utils::bytearray_hash(@"dojo_starter")].span())
+
         ].span()
     }
 
@@ -138,11 +145,11 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
         let attacker_dojomon: DojoMon = world.read_model(attacker_dojomon_id);
 
 
-        println!("Attacker Dojomon spawned");
+        //println!("Attacker Dojomon spawned");
         //print_dojomon_stats(attacker_dojomon);
 
-        println!("Defender Dojomon spawned");
-        //print_dojomon_stats(defender_dojomon);
+        //println!("Defender Dojomon spawned");
+       // print_dojomon_stats(defender_dojomon);
 
         let move_id : u32 = 4;
         let move_name : felt252 = 'Ember';
@@ -160,28 +167,72 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
 
         world.write_model(@move);
 
-        let move1: Move = world.read_model(move_id);
-        print_move_stats(move1);
+        println!("Attacker Dojomon id from test {}", attacker_dojomon_id);
 
-        actions_system.attack(attacker_dojomon_id, defender_dojomon_id, move_id);
+        test_attack(attacker_dojomon_id, defender_dojomon_id, move_id);
 
-        let after_attack_defender_dojomon: DojoMon = world.read_model(defender_dojomon_id);
+    }
 
-        println!("Attacker Dojomon Stats after attack");
-        print_dojomon_stats(attacker_dojomon);
+    #[test]
+    fn test_friend_system (){
 
-        println!("Defender Dojomon Stats after attack");
-        print_dojomon_stats(after_attack_defender_dojomon);
+        //let caller = starknet::contract_address_const::<0x0>();
 
-        test_attack(attacker_dojomon_id, defender_dojomon_id);
+        let ndef = namespace_def();
+        let mut world = spawn_test_world([ndef].span());
+        world.sync_perms_and_inits(contract_defs());
+
+        let (contract_address, _) = world.dns(@"friendSystem").unwrap();
+        let friends_system = IFriendSystemDispatcher { contract_address };
+
+        let receiver_felt252 = contract_address_to_felt252 (starknet::contract_address_const::<0x1>());
+
+        friends_system.sendFriendRequest(
+            receiver_felt252
+        );
+
+        // friends_system.acceptFriendRequest(
+        //     receiver_felt252
+        // );
+
+        let friend_request: ReceiverFriendRequest = world.read_model(starknet::contract_address_const::<0x1>());
+
+        assert(
+            friend_request.receiver == starknet::contract_address_const::<0x1>() &&
+            friend_request.sender == starknet::contract_address_const::<0x0>() &&
+            friend_request.accepted == false &&
+            friend_request.active == true,
+            'wrong friend request'
+        );
 
     }
 
     fn test_attack(
         attacker_dojomon_id: felt252,
         defender_dojomon_id: felt252,
+        move_id: u32,
     ) {
-        println!("Dojomon ID: {}", attacker_dojomon_id);
+
+        let ndef = namespace_def();
+        let mut world = spawn_test_world([ndef].span());
+        world.sync_perms_and_inits(contract_defs());
+
+        let (contract_address, _) = world.dns(@"battle").unwrap();
+        let battle_system = IBattleDispatcher { contract_address };
+
+        let after_attack_attacker_dojomon: DojoMon = world.read_model(attacker_dojomon_id);
+
+        println!("Attacker Dojomon Stats after attack");
+        print_dojomon_stats(after_attack_attacker_dojomon);
+
+        battle_system.attack(attacker_dojomon_id, defender_dojomon_id, move_id);
+
+        let after_attack_defender_dojomon: DojoMon = world.read_model(defender_dojomon_id);
+
+        
+
+        println!("Defender Dojomon Stats after attack");
+        print_dojomon_stats(after_attack_defender_dojomon);
 
     
 

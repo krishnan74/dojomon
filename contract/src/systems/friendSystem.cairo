@@ -13,7 +13,7 @@ trait IFriendSystem<T> {
 
 // Dojo contract
 #[dojo::contract]
-pub mod friendsSystem {
+pub mod friendSystem {
     
     use super::{
             IFriendSystem, PlayerStats, ReceiverFriendRequest, Friend
@@ -30,7 +30,9 @@ pub mod friendsSystem {
             ref self: ContractState,
             receiver_felt252: felt252,
         ) {
+            
             let mut world = self.world_default();
+
             let sender = get_caller_address();
             let receiver: ContractAddress = receiver_felt252.try_into().unwrap();
 
