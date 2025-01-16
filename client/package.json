@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": " vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
     "@cartridge/connector": "^0.5.5",
     "@cartridge/controller": "^0.5.5",
+    "@chakra-ui/react": "^2.8.1",
     "@dojoengine/core": "1.0.8",
     "@dojoengine/create-burner": "1.0.8",
     "@dojoengine/predeployed-connector": "1.0.8",
@@ -26,6 +27,7 @@
     "@types/uuid": "^10.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "i": "^0.3.7",
     "immer": "^10.1.1",
     "lucide-react": "^0.471.1",
     "react": "^18.3.1",
@@ -35,6 +37,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^10.0.0",
+    "vite-plugin-mkcert": "^1.17.6",
     "vite-plugin-top-level-await": "^1.4.4",
     "vite-plugin-wasm": "^3.3.0",
     "zustand": "^4.5.5"

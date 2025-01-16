@@ -10,6 +10,7 @@ import {
 import { useAccount } from "@starknet-react/core";
 import { copyToClipboard, shortenAddress } from "../lib/utils";
 import { MetaMaskAvatar } from "react-metamask-avatar";
+import { ConnectButton } from "./wallet/ConnectButton";
 
 const Navbar = () => {
   const { address } = useAccount();
@@ -83,12 +84,7 @@ const Navbar = () => {
               )}
             </div>
           ) : (
-            <Button
-              onClick={() => {}}
-              className="px-6 py-2 bg-[#845DCC] text-white rounded-lg hover:bg-[#6344A6] transition-colors"
-            >
-              Connect Wallet
-            </Button>
+            <ConnectButton />
           )}
         </div>
       </div>

@@ -3,11 +3,7 @@ import { DojoContext } from "../dojo-sdk-provider";
 import { v4 as uuidv4 } from "uuid";
 import { useAccount } from "@starknet-react/core";
 import { DojomonType, League } from "../typescript/models.gen";
-import {
-  CairoOption,
-  CairoOptionVariant,
-  BigNumberish,
-} from "starknet";
+import { CairoOption, CairoOptionVariant, BigNumberish } from "starknet";
 import { useCallback, useContext } from "react";
 
 /**
@@ -90,25 +86,21 @@ export const useSystemCalls = (entityId: BigNumberish) => {
         await client.actions.spawnPlayer(account!, dojomon_type);
 
         // Wait for the entity to be updated with the new state
-        await state.waitForEntityChange(
-          entityId.toString(),
-          (entity) => {
-            const result =
-              entity?.models?.dojo_starter?.PlayerStats?.gold === goldCount &&
-              entity?.models?.dojo_starter?.PlayerStats?.level === levelCount &&
-              entity?.models?.dojo_starter?.PlayerStats?.exp === expCount &&
-              entity?.models?.dojo_starter?.PlayerStats?.food === foodCount &&
+        await state.waitForEntityChange(entityId.toString(), (entity) => {
+          const result =
+            entity?.models?.dojo_starter?.PlayerStats?.gold === goldCount &&
+            entity?.models?.dojo_starter?.PlayerStats?.level === levelCount &&
+            entity?.models?.dojo_starter?.PlayerStats?.exp === expCount &&
+            entity?.models?.dojo_starter?.PlayerStats?.food === foodCount &&
+            // @ts-expect-error inner enum is not hydrated there
+            entity?.models?.dojo_starter?.PlayerStats?.league?.Some ===  league.activeVariant() &&
+            entity?.models?.dojo_starter?.PlayerStats?.trophies ===
+              trophyCount &&
+            entity?.models?.dojo_starter?.PlayerStats?.host_lobby_code ===
+              host_lobby_code;
 
-              // @ts-expect-error inner enum is not hydrated there
-              entity?.models?.dojo_starter?.PlayerStats?.league?.Some === league.activeVariant() &&
-              entity?.models?.dojo_starter?.PlayerStats?.trophies ===
-                trophyCount &&
-              entity?.models?.dojo_starter?.PlayerStats?.host_lobby_code ===
-                host_lobby_code;
-
-            return !!result;
-          }
-        );
+          return !!result;
+        });
       } catch (error) {
         // Revert the optimistic update if an error occurs
         state.revertOptimisticUpdate(transactionId);
@@ -122,7 +114,6 @@ export const useSystemCalls = (entityId: BigNumberish) => {
     },
     [state, account, client]
   );
-
 
   return {
     spawn,
