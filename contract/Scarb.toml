@@ -15,6 +15,7 @@ catchDojomon = "sozo execute dojo_starter-actions catchDojomon -c 1 --wait"
 
 
 [dependencies]
+starknet = "2.8.4"
 dojo = { git = "https://github.com/dojoengine/dojo", tag = "v1.0.11" }
 
 [[target.starknet-contract]]
