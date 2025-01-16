@@ -1,4 +1,4 @@
-use dojo_starter::models::{PlayerStats, Counter, DojoMon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby, ReceiverFriendRequest, Friend};
+use dojo_starter::models::{PlayerStats, Counter, DojoMon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby, ReceiverFriendRequest, Friend, MoveEffect, Move};
 use starknet::{ContractAddress, get_caller_address, contract_address_const};
 
 // Define the interface
@@ -11,14 +11,20 @@ trait IActions<T> {
     fn catchDojomon(ref self: T, dojomon_id: felt252);
     fn createLobby(ref self: T) -> felt252;
     fn joinLobby(ref self: T, lobby_code: felt252);
-    fn sendFriendRequest(ref self: T, receiver_felt252: felt252);
-    fn acceptFriendRequest(ref self: T, sender_felt252: felt252);
+    fn attack(
+        ref self: T,
+        attacker_dojomon_id: felt252,
+        defender_dojomon_id: felt252,
+        move_id: u32,
+    );
+    
+    
 }
 
 // Dojo contract
 #[dojo::contract]
 pub mod actions {
-    use super::{IActions, PlayerStats, Counter, DojoMon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby, ReceiverFriendRequest, Friend};
+    use super::{IActions, PlayerStats, Counter, DojoMon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby, ReceiverFriendRequest, Friend, MoveEffect, Move};
     use starknet::{ContractAddress, get_caller_address, contract_address_const};
     use dojo::model::{ModelStorage, ModelValueStorage};
     use dojo::event::EventStorage;
@@ -59,10 +65,8 @@ pub mod actions {
     const GREATBALL_PRICE : u32 = 100;
     const ULTRABALL_PRICE : u32 = 200;
     const MASTERBALL_PRICE : u32 = 300;
+    const RANDOM_NUMBER: u32 = 3;
     
-
-
-
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
         fn spawnPlayer(ref self: ContractState, starting_dojo_mon: DojomonType) {
@@ -86,65 +90,23 @@ pub mod actions {
             let created_dojomon_id = match starting_dojo_mon {
                 DojomonType::Fire => {
                     self.createDojomon( 'Charmander', 30, 50, 20, 2, DojomonType::Fire, Position { x: 0, y: 0 })
-                    // dojomon = DojoMon{
-                    //     dojomon_id, 
-                    //     player,
-                    //     name: 'Charmander',
-                    //     health: 30,
-                    //     attack: 50,
-                    //     defense: 20,
-                    //     speed: 2,
-                    //     level: 1,
-                    //     exp: 0,
-                    //     dojomon_type: DojomonType::Fire,
-                    //     position: Position { x: 0, y: 0 }
-                    // };
-
-                    // world.write_model(@dojomon);
+                    
 
                 },
                 
                 DojomonType::Grass =>{
                     self.createDojomon( 'Bulbasaur', 60, 20, 20, 1, DojomonType::Grass, Position { x: 0, y: 0 })
-                    // let dojomon = DojoMon{
-                    //     dojomon_id, 
-                    //     player,
-                    //     name: 'Bulbasaur',
-                    //     health: 60,
-                    //     attack: 20,
-                    //     defense: 20,
-                    //     speed: 1,
-                    //     level: 1,
-                    //     exp: 0,
-                    //     dojomon_type: DojomonType::Grass,
-                    //     position: Position { x: 0, y: 0 }
-                    // };
-
-                    // world.write_model(@dojomon);
+                    
 
                 
                 },  
 
                 DojomonType::Water =>{
                     self.createDojomon( 'Squirtle', 30, 30, 40, 3, DojomonType::Water, Position { x: 0, y: 0 })
-                    // let dojomon = DojoMon{
-                    //     dojomon_id, 
-                    //     player,
-                    //     name: 'Squirtle',
-                    //     health: 30,
-                    //     attack: 30,
-                    //     defense: 40,
-                    //     speed: 3,
-                    //     level: 1,
-                    //     exp: 0,
-                    //     dojomon_type: DojomonType::Water,
-                    //     position: Position { x: 0, y: 0 }
-                    // };
-
-                    // world.write_model(@dojomon);
-
                 
-                }
+                },
+                
+                _ => 0,
                 
             };
             
@@ -183,7 +145,7 @@ pub mod actions {
             world.write_model(@dojoball);
 
             // Emit event for player creation
-            world.emit_event(@PlayerSpawned {player,stats: start_stats});
+            //world.emit_event(@PlayerSpawned {player,stats: start_stats});
         }
 
         fn buyDojoBall( ref self: ContractState,  dojoball_type: DojoBallType, quantity: u32, dojomon_id: felt252, has_dojomon: bool) { 
@@ -306,7 +268,7 @@ pub mod actions {
             world.write_model(@dojomon);
 
             // // Emit event for DojoMon creation
-            world.emit_event(@DojoMonCreated { dojomon_id, player });
+            //world.emit_event(@DojoMonCreated { dojomon_id, player });
 
             dojomon_id
         }
@@ -335,7 +297,7 @@ pub mod actions {
             world.write_model(@player_stats);
 
             // Emit event for DojoMon capture
-            world.emit_event(@DojoMonCaptured{ dojomon_id, player });
+            //world.emit_event(@DojoMonCaptured{ dojomon_id, player });
         }
 
         fn createLobby(ref self: ContractState) -> felt252 {
@@ -387,73 +349,204 @@ pub mod actions {
             lobby.can_join = false;
             world.write_model(@lobby);
         }
-
-        fn sendFriendRequest(
+        
+        fn attack(
             ref self: ContractState,
-            receiver_felt252: felt252,
+            attacker_dojomon_id: felt252,
+            defender_dojomon_id: felt252,
+            move_id: u32,
         ) {
             let mut world = self.world_default();
-            let sender = get_caller_address();
-            let receiver: ContractAddress = receiver_felt252.try_into().unwrap();
+            //let attacker = get_caller_address();
 
-            
-            // Create a new receiver friend request
-            let receiver_friend_request = ReceiverFriendRequest {
-                receiver,
-                sender,
-                accepted: false,
-                active: true,
+            let mut attacker_dojomon: DojoMon = world.read_model(attacker_dojomon_id);
+            let mut defender_dojomon: DojoMon = world.read_model(defender_dojomon_id);
+
+            let selected_move: Move = world.read_model(move_id);
+
+            // Base damage calculation
+            let base_damage = selected_move.power * attacker_dojomon.attack / 50;
+
+            println!("Base damage: {}", base_damage);
+
+
+            // Apply type effectiveness
+            let type_effectiveness = self.calculate_type_effectiveness(selected_move.move_type, defender_dojomon.dojomon_type);
+            let adjusted_damage = base_damage * type_effectiveness;
+
+            println!("Adjusted damage: {}", adjusted_damage);
+
+            // Apply random damage variability
+            let random_damage_factor: u32 = (10 % 400) / 1000 + 8; // Replace RNG logic
+            let damage_variation = adjusted_damage * random_damage_factor / 10;
+
+            println!("Base damage variation: {}", damage_variation);
+
+            // Final damage after considering defense
+            let damage_dealt = if damage_variation > defender_dojomon.defense / 2 {
+                damage_variation - defender_dojomon.defense / 2
+            } else {
+                0
             };
 
-            world.write_model(@receiver_friend_request);
+            println!("Damage dealt: {}", damage_dealt);
+
+            // Update defender's health
+            if defender_dojomon.health <= damage_dealt {
+                defender_dojomon.health = 0;
+            } else {
+                defender_dojomon.health -= damage_dealt;
+            }
+
+            println!("Defender health: {}", defender_dojomon.health);
+
+            // // Handle move effects
+            // if let Some(effect) = selected_move.effect {
+            //     match effect {
+            //         "burn" => {
+            //             defender_dojomon.health -= 10; // Burn deals 10 damage per turn
+            //             defender_dojomon.attack /= 2; // Burn reduces attack by half
+            //         },
+            //         "paralyze" => {
+            //             defender_dojomon.speed /= 2; // Paralysis halves speed
+            //             // Add logic for a chance to skip a turn due to paralysis
+            //         },
+            //         "freeze" => {
+            //             defender_dojomon.speed = 0; // Frozen Pokémon can't move
+            //             // Add logic to handle thawing out after a few turns
+            //         },
+            //         "confuse" => {
+            //             // Add logic to track confusion status and calculate chances of hitting self
+            //         },
+            //         "flinch" => {
+            //             // Add logic to skip the next turn if the Pokémon flinches
+            //         },
+            //         "lower_special_defense" => {
+            //             //
+            //         },
+            //         _ => {
+            //             // No effect for unrecognized effect strings
+            //         }
+            //     }
+            // }
+
+            // Update models in the world
+            world.write_model(@attacker_dojomon);
+            world.write_model(@defender_dojomon);
         }
-
-        fn acceptFriendRequest(
-            ref self: ContractState,
-            sender_felt252: felt252,
-        ) {
-            let mut world = self.world_default();
-            let player = get_caller_address();
-            let sender: ContractAddress = sender_felt252.try_into().unwrap();
-
-            let mut sender_friend_request: ReceiverFriendRequest = world.read_model(sender);
-
-            sender_friend_request.accepted = true;
-            sender_friend_request.active = false;
-
-            world.write_model(@sender_friend_request);
-
-            // Create a new friend
-            let friend = Friend {
-                friend: sender,
-
-                player,
-            };
-
-            world.write_model(@friend);
-        }
-        
-        
     }
 
     /// Internal trait implementation for helper functions
     #[generate_trait]
     impl InternalImpl of InternalTrait {
+
+        
         /// Returns the default world storage for the contract.
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
             self.world(@"dojo_starter")
         }
-    }
 
+        fn calculate_type_effectiveness(ref self: ContractState, move_type: DojomonType, target_type: DojomonType) -> u32 {
+            match (move_type, target_type) {
+                (DojomonType::Fire, DojomonType::Grass) => 2_u32,
+                (DojomonType::Fire, DojomonType::Water) => 1_u32,
+                (DojomonType::Fire, DojomonType::Ice) => 2_u32,
+
+                (DojomonType::Water, DojomonType::Fire) => 2_u32,
+                (DojomonType::Water, DojomonType::Electric) => 1_u32,
+                (DojomonType::Water, DojomonType::Grass) => 1_u32,
+
+                (DojomonType::Electric, DojomonType::Water) => 2_u32,
+                (DojomonType::Electric, DojomonType::Grass) => 1_u32,
+                (DojomonType::Electric, DojomonType::Electric) => 1_u32,
+
+                (DojomonType::Grass, DojomonType::Water) => 2_u32,
+                (DojomonType::Grass, DojomonType::Fire) => 1_u32,
+                (DojomonType::Grass, DojomonType::Grass) => 1_u32,
+
+                (DojomonType::Ice, DojomonType::Grass) => 2_u32,
+                (DojomonType::Ice, DojomonType::Fire) => 1_u32,
+                (DojomonType::Ice, DojomonType::Water) => 1_u32,
+
+                (DojomonType::Psychic, DojomonType::Poison) => 2_u32,
+                (DojomonType::Psychic, DojomonType::Psychic) => 1_u32,
+
+                (DojomonType::Normal, DojomonType::Ghost) => 0_u32,
+
+                (DojomonType::Ghost, DojomonType::Normal) => 0_u32,
+                
+                _ => 1_u32,
+            }
+        }
+
+        fn apply_move_effect(ref self: ContractState, effect: MoveEffect, ref defender: DojoMon) {
+            match effect {
+                MoveEffect::Burn => {
+                    defender.health -= 10; // Burn deals 10 damage per turn
+                    defender.attack /= 2; // Burn reduces attack by half
+                },
+                MoveEffect::Paralyze => {
+                    defender.speed /= 2; // Paralysis halves speed
+                    // Add logic for a chance to skip a turn due to paralysis
+                },
+                MoveEffect::Freeze => {
+                    defender.speed = 0; // Frozen Pokémon can't move
+                    // Add logic to handle thawing out after a few turns
+                },
+                MoveEffect::Confuse => {
+                    // Add logic to track confusion status and calculate chances of hitting self
+                },
+                MoveEffect::Flinch => {
+                    // Add logic to skip the next turn if the Pokémon flinches
+                },
+                MoveEffect::LowerSpecialDefense => {
+                    if defender.defense > 5 {
+                        defender.defense -= 5; // Lower special defense by a fixed amount
+                    }
+                },
+                _ => {
+                    // No effect for unrecognized effect strings
+                }
+            }
+        }
+        
+
+    }
     
-    impl DojoBallTypeIntoFelt252 of Into<DojoBallType, felt252> {
-    fn into(self: DojoBallType) -> felt252 {
-        match self {
-            DojoBallType::Dojoball => 'Dojoball',
-            DojoBallType::Greatball => 'Greatball',
-            DojoBallType::Ultraball => 'Ultraball',
-            DojoBallType::Masterball => 'Masterball',
+    // impl DojoBallTypeIntoFelt252 of Into<DojoBallType, felt252> {
+    // fn into(self: DojoBallType) -> felt252 {
+    //     match self {
+    //         DojoBallType::Dojoball => 'Dojoball',
+    //         DojoBallType::Greatball => 'Greatball',
+    //         DojoBallType::Ultraball => 'Ultraball',
+    //         DojoBallType::Masterball => 'Masterball',
+    //     }
+    // }
+    // }
+
+    impl DojomonTypeIntoFelt252 of Into<DojomonType, felt252> {
+        fn into(self: DojomonType) -> felt252 {
+            match self {
+                DojomonType::Fire => 'Fire',
+                DojomonType::Grass => 'Grass',
+                DojomonType::Water => 'Water',
+                DojomonType::Electric => 'Electric',
+                DojomonType::Ice => 'Ice',
+                DojomonType::Psychic => 'Psychic',
+                DojomonType::Normal => 'Normal',
+                DojomonType::Ghost => 'Ghost',
+                DojomonType::Flying => 'Flying',
+                DojomonType::Rock => 'Rock',
+                DojomonType::Ground => 'Ground',
+                DojomonType::Bug => 'Bug',
+                DojomonType::Dark => 'Dark',
+                DojomonType::Steel => 'Steel',
+                DojomonType::Dragon => 'Dragon',
+                DojomonType::Fairy => 'Fairy',
+                DojomonType::Poison => 'Poison',
+                DojomonType::Fighting => 'Fighting',
+
+            }
         }
     }
-}
 }

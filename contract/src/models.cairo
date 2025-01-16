@@ -85,6 +85,19 @@ struct Counter {
     dojomon_count: u32,
 }
 
+#[derive( Drop, Serde, Debug)]
+#[dojo::model]
+struct Move {
+    #[key]
+    id: u32,
+    name: felt252,
+    description: ByteArray,
+    power: u32,
+    accuracy: u32,
+    move_type: DojomonType, 
+    effect: MoveEffect,
+}
+
 #[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
 pub struct Position{
     pub x: u32,
@@ -92,11 +105,37 @@ pub struct Position{
 }
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
-pub enum DojomonType{
+pub enum MoveEffect{
+    Burn,
+    Paralyze,
+    Confuse,
+    LowerSpecialDefense,
+    Flinch,
+    Freeze
+}
+
+#[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
+pub enum DojomonType {
     Fire,
     Water,
     Grass,
+    Electric,
+    Normal,
+    Flying,
+    Rock,
+    Ground,
+    Ice,
+    Bug,
+    Psychic,
+    Dark,
+    Steel,
+    Dragon,
+    Fairy,
+    Ghost,
+    Poison,
+    Fighting,
 }
+
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
 pub enum League{
