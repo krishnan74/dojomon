@@ -24,18 +24,44 @@ predeployedAccounts({
   name: "Katana",
 }).then((p) => (pa = p));
 
-const ETH_TOKEN_ADDRESS =
-  "0x7a1c71029f2d0b38e3ac89b09931d08b6e48417e079c289ff19a8698d0cba33";
+const ACTIONS_ADDRESS =
+  "0x34f280e64e9e2d1ad0910429e658611acfd9a7804ee931c0f57cb11abb46049";
+
+const BATTLE_ADDRESS =
+  "0x73c76d1c5f35f6f410b33697486054516d7a841ca89506bf17dd867bacb3546";
+
+const FRIEND_ADDRESS =
+  "0x04ac0ef61f7f06f302ba43a472bf4c92aeb9413c19620d57d15758182f949c73";
 
 const policies: SessionPolicies = {
   contracts: {
-    [ETH_TOKEN_ADDRESS]: {
+    [ACTIONS_ADDRESS]: {
       methods: [
         {
           name: "actions",
           entrypoint: "spawnPlayer",
         },
         { name: "actions", entrypoint: "createLobby" },
+      ],
+    },
+    [BATTLE_ADDRESS]: {
+      methods: [
+        {
+          name: "battle",
+          entrypoint: "attack",
+        },
+      ],
+    },
+    [FRIEND_ADDRESS]: {
+      methods: [
+        {
+          name: "friendSystem",
+          entrypoint: "sendFriendRequest",
+        },
+        {
+          name: "friendSystem",
+          entrypoint: "acceptFriendRequest",
+        },
       ],
     },
   },

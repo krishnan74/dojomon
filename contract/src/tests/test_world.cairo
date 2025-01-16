@@ -93,6 +93,9 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
         let (contract_address, _) = world.dns(@"actions").unwrap();
         let actions_system = IActionsDispatcher { contract_address };
 
+        let (contract_address, _) = world.dns(@"battle").unwrap();
+        let battle_system = IBattleDispatcher { contract_address };
+
 
         // actions_system.spawnPlayer(
         //     DojomonType::Fire(())
@@ -144,12 +147,11 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
         let defender_dojomon: DojoMon = world.read_model(defender_dojomon_id);
         let attacker_dojomon: DojoMon = world.read_model(attacker_dojomon_id);
 
+        println!("Attacker Dojomon spawned");
+        print_dojomon_stats(attacker_dojomon);
 
-        //println!("Attacker Dojomon spawned");
-        //print_dojomon_stats(attacker_dojomon);
-
-        //println!("Defender Dojomon spawned");
-       // print_dojomon_stats(defender_dojomon);
+        println!("Defender Dojomon spawned");
+       print_dojomon_stats(defender_dojomon);
 
         let move_id : u32 = 4;
         let move_name : felt252 = 'Ember';
@@ -167,9 +169,17 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
 
         world.write_model(@move);
 
-        println!("Attacker Dojomon id from test {}", attacker_dojomon_id);
+        battle_system.attack(attacker_dojomon_id, defender_dojomon_id, move_id);
 
-        test_attack(attacker_dojomon_id, defender_dojomon_id, move_id);
+        let after_attack_defender_dojomon: DojoMon = world.read_model(defender_dojomon_id);
+
+        println!("Defender Dojomon Stats after attack");
+        print_dojomon_stats(after_attack_defender_dojomon);
+
+        let after_attack_attacker_dojomon: DojoMon = world.read_model(attacker_dojomon_id);
+
+        println!("Attacker Dojomon Stats after attack");
+        print_dojomon_stats(after_attack_attacker_dojomon);
 
     }
 
@@ -204,38 +214,6 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
             friend_request.active == true,
             'wrong friend request'
         );
-
-    }
-
-    fn test_attack(
-        attacker_dojomon_id: felt252,
-        defender_dojomon_id: felt252,
-        move_id: u32,
-    ) {
-
-        let ndef = namespace_def();
-        let mut world = spawn_test_world([ndef].span());
-        world.sync_perms_and_inits(contract_defs());
-
-        let (contract_address, _) = world.dns(@"battle").unwrap();
-        let battle_system = IBattleDispatcher { contract_address };
-
-        let after_attack_attacker_dojomon: DojoMon = world.read_model(attacker_dojomon_id);
-
-        println!("Attacker Dojomon Stats after attack");
-        print_dojomon_stats(after_attack_attacker_dojomon);
-
-        battle_system.attack(attacker_dojomon_id, defender_dojomon_id, move_id);
-
-        let after_attack_defender_dojomon: DojoMon = world.read_model(defender_dojomon_id);
-
-        
-
-        println!("Defender Dojomon Stats after attack");
-        print_dojomon_stats(after_attack_defender_dojomon);
-
-    
-
 
     }
 
