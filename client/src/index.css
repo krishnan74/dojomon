@@ -6,3 +6,17 @@
     --radius: 0.5rem
   }
 }
+.flash-box {
+  background-color: #00000000;
+  animation: flash 0.4s ;
+}
+
+@keyframes flash {
+  0%, 100% {
+    opacity: 1;
+    background-color: black;
+  }
+  50% {
+    opacity: 0;
+  }
+}
