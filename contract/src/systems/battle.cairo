@@ -1,6 +1,6 @@
 use dojomon::models::{
     PlayerStats,
-    ReceiverFriendRequest, DojoMon, DojomonType, MoveEffect, Move
+    ReceiverFriendRequest, DojoMon, DojomonType, MoveEffect, Move, Lobby
 };
 use starknet::{ContractAddress, get_caller_address};
 
@@ -9,9 +9,14 @@ use starknet::{ContractAddress, get_caller_address};
 trait IBattle<T> {
     fn attack(
         ref self: T,
-        attacker_dojomon_id: felt252,
-        defender_dojomon_id: felt252,
+        lobby_code: u32,
+        attacker_dojomon_id: u32,
+        defender_dojomon_id: u32,
         move_id: u32,
+    );
+    fn changeTurn(
+        ref self: T,
+        lobby_code: u32
     );
 }
 
@@ -20,19 +25,30 @@ trait IBattle<T> {
 pub mod battle {
     
     use super::{
-            IBattle, PlayerStats, ReceiverFriendRequest, DojoMon, DojomonType, MoveEffect, Move
+            IBattle, PlayerStats, ReceiverFriendRequest, DojoMon, DojomonType, MoveEffect, Move, Lobby
         };
         use starknet::{ContractAddress, get_caller_address};
         use dojo::model::{ModelStorage, ModelValueStorage};
         use dojo::event::EventStorage;
+
+    #[derive(Drop, Serde, Debug)]
+    #[dojo::event]
+    pub struct PlayerAttacked {
+        #[key]
+        pub attacker_dojomon: DojoMon,
+        pub defender_dojomon: DojoMon,
+        pub move: Move,
+        pub lobby: Lobby,
+    }
 
     #[abi(embed_v0)]
     impl BattleImpl of IBattle<ContractState> {
         
         fn attack(
             ref self: ContractState,
-            attacker_dojomon_id: felt252,
-            defender_dojomon_id: felt252,
+            lobby_code: u32,
+            attacker_dojomon_id: u32,
+            defender_dojomon_id: u32,
             move_id: u32,
         ) {
             let mut world = self.world_default();
@@ -90,8 +106,37 @@ pub mod battle {
             // Update models in the world
             world.write_model(@attacker_dojomon);
             world.write_model(@defender_dojomon);
+
+            let attacker_dojomon_after_attack: DojoMon = world.read_model(attacker_dojomon_id);
+            let defender_dojomon_after_attack: DojoMon = world.read_model(defender_dojomon_id);
+
+            world.emit_event(@PlayerAttacked {
+                attacker_dojomon: attacker_dojomon_after_attack,
+                defender_dojomon: defender_dojomon_after_attack,
+                move: selected_move,
+                lobby: world.read_model(lobby_code),
+
+            });
+
+            self.changeTurn(lobby_code);
         }
-        
+
+        fn changeTurn(
+            ref self: ContractState,
+            lobby_code: u32
+        ){
+            let mut world = self.world_default();
+            let player = get_caller_address();
+            let mut lobby: Lobby = world.read_model(lobby_code);
+
+            if lobby.host_player == player {
+                lobby.turn = lobby.guest_player;
+            } else {
+                lobby.turn = lobby.host_player;
+            }
+
+            world.write_model(@lobby);
+        }
     }
 
     /// Internal trait implementation for helper functions
