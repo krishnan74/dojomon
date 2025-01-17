@@ -1,4 +1,4 @@
-use dojo_starter::models::{
+use dojomon::models::{
     PlayerStats,
     ReceiverFriendRequest, DojoMon, DojomonType, MoveEffect, Move
 };
@@ -99,7 +99,7 @@ pub mod battle {
     impl InternalImpl of InternalTrait {
         /// Returns the default world storage for the contract.
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
-            self.world(@"dojo_starter")
+            self.world(@"dojomon")
         }
 
         fn calculate_type_effectiveness(ref self: ContractState, move_type: DojomonType, target_type: DojomonType) -> u32 {

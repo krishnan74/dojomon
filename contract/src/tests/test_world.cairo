@@ -7,10 +7,10 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
     use core::starknet::contract_address::contract_address_to_felt252;
 
 
-    use dojo_starter::systems::actions::{actions, IActionsDispatcher, IActionsDispatcherTrait};
-    use dojo_starter::systems::friendSystem::{friendSystem, IFriendSystemDispatcher, IFriendSystemDispatcherTrait};
-    use dojo_starter::systems::battle::{battle, IBattleDispatcher, IBattleDispatcherTrait};
-    use dojo_starter::models::{PlayerStats, m_PlayerStats, Position, Counter, m_Counter, DojoMon, m_DojoMon, DojoBallType , DojomonType , DojoBall, m_DojoBall, League, Lobby, m_Lobby, ReceiverFriendRequest, m_ReceiverFriendRequest, Friend, m_Friend, Move, m_Move, MoveEffect};
+    use dojomon::systems::actions::{actions, IActionsDispatcher, IActionsDispatcherTrait};
+    use dojomon::systems::friendSystem::{friendSystem, IFriendSystemDispatcher, IFriendSystemDispatcherTrait};
+    use dojomon::systems::battle::{battle, IBattleDispatcher, IBattleDispatcherTrait};
+    use dojomon::models::{PlayerStats, m_PlayerStats, Position, Counter, m_Counter, DojoMon, m_DojoMon, DojoBallType , DojomonType , DojoBall, m_DojoBall, League, Lobby, m_Lobby, ReceiverFriendRequest, m_ReceiverFriendRequest, Friend, m_Friend, Move, m_Move, MoveEffect};
 
 
     impl LeagueIntoFelt252 of Into<League, felt252> {
@@ -29,7 +29,7 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
 
     fn namespace_def() -> NamespaceDef {
         let ndef = NamespaceDef {
-            namespace: "dojo_starter", resources: [
+            namespace: "dojomon", resources: [
                 TestResource::Model(m_PlayerStats::TEST_CLASS_HASH),
                 TestResource::Model(m_DojoMon::TEST_CLASS_HASH),
                 TestResource::Model(m_DojoBall::TEST_CLASS_HASH),
@@ -49,9 +49,9 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
 
     fn contract_defs() -> Span<ContractDef> {
         [
-            ContractDefTrait::new(@"dojo_starter", @"actions").with_writer_of([dojo::utils::bytearray_hash(@"dojo_starter")].span()), 
-            ContractDefTrait::new(@"dojo_starter", @"battle").with_writer_of([dojo::utils::bytearray_hash(@"dojo_starter")].span()),
-            ContractDefTrait::new(@"dojo_starter", @"friendSystem").with_writer_of([dojo::utils::bytearray_hash(@"dojo_starter")].span())
+            ContractDefTrait::new(@"dojomon", @"actions").with_writer_of([dojo::utils::bytearray_hash(@"dojomon")].span()), 
+            ContractDefTrait::new(@"dojomon", @"battle").with_writer_of([dojo::utils::bytearray_hash(@"dojomon")].span()),
+            ContractDefTrait::new(@"dojomon", @"friendSystem").with_writer_of([dojo::utils::bytearray_hash(@"dojomon")].span())
 
         ].span()
     }

@@ -88,8 +88,8 @@ export function HistoricalEvents({ sdk }: { sdk: SDK<SchemaType> }) {
 }
 function Event({ event }: { event: ParsedEntity<SchemaType> }) {
   if (!event) return null;
-  const player = event.models?.dojo_starter?.PlayerStats?.player;
-  const gold = event.models?.dojo_starter?.PlayerStats?.gold;
+  const player = event.models?.dojomon?.PlayerStats?.player;
+  const gold = event.models?.dojomon?.PlayerStats?.gold;
 
   return (
     <div className="text-white flex gap-3">

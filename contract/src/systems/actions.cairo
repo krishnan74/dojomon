@@ -1,4 +1,4 @@
-use dojo_starter::models::{PlayerStats, Counter, DojoMon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby,};
+use dojomon::models::{PlayerStats, Counter, DojoMon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby,};
 use starknet::{ContractAddress, get_caller_address, contract_address_const};
 
 // Define the interface
@@ -349,7 +349,7 @@ pub mod actions {
     impl InternalImpl of InternalTrait {
         /// Returns the default world storage for the contract.
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
-            self.world(@"dojo_starter")
+            self.world(@"dojomon")
         }
 
     }
