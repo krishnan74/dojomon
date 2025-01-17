@@ -1,4 +1,4 @@
-# 🚀 About Dojomon
+# Dojomon
 
 **Dojomon** is an engaging and decentralized 2D top-down pixel multiplayer game inspired by the **Pokemon anime series**, built using the **Dojo Game Engine** on StarkNet. The game merges classic Pokemon-style gameplay with modern blockchain technology to deliver a nostalgic yet innovative experience. Players can explore a dynamic world, catch and train DojoMons, compete in online battles, and maintain farms for resources, all while earning on-chain rewards and climbing competitive leaderboards.
 
