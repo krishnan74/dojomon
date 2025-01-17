@@ -55,7 +55,7 @@ pub struct Friend{
 
 #[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
-pub struct DojoMon{
+pub struct Dojomon{
     #[key]
     pub dojomon_id: u32,
     pub player: ContractAddress,
