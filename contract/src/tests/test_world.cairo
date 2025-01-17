@@ -100,6 +100,18 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
         println!("Dojomon Position: ({}, {})", dojomon.position.x, dojomon.position.y);
     }
 
+    fn print_player_stats( 
+        player: PlayerStats,
+    ) {
+        println!("Player Name: {}", player.name);
+        println!("Player Gold: {}", player.gold);
+        println!("Player Level: {}", player.level);
+        println!("Player Exp: {}", player.exp);
+        println!("Player Food: {}", player.food);
+        println!("Player Trophies: {}", player.trophies);
+        println!("Player League: {:?}", player.league);
+    }
+
     fn print_move_stats(
         move: Move,
     ) {
@@ -115,7 +127,7 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
 
     #[test]    
     fn test_spawn() {
-        let caller = starknet::contract_address_const::<0x0>();
+        
 
         let ndef = namespace_def();
         let mut world = spawn_test_world([ndef].span());
@@ -130,18 +142,41 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
         let (contract_address, _) = world.dns(@"lobby").unwrap();
         let lobby_system = ILobbyDispatcher { contract_address };
 
-
         println!("world created");
-        // actions_system.spawnPlayer(
-        //     DojomonType::Fire(())
-        // );
 
-        // let initial_player: PlayerStats = world.read_model(caller);
+        let player1_address = starknet::contract_address_const::<0x0>();
+        let player2_address = starknet::contract_address_const::<0x1>();
 
-        // let player_league: felt252 = League::Bronze.into();
+        let player1_name: felt252 = 'Player1';
+        let player2_name: felt252 = 'Player2';
+
+        actions_system.spawnPlayer(
+            player1_address, player1_name,
+            DojomonType::Fire(())
+        );
+
+        println!("player1 spawned");
+
+        print_player_stats(world.read_model(player1_address));
+
+        println!("");
+
+        actions_system.spawnPlayer(
+            player2_address, player2_name,
+            DojomonType::Fire(())
+        );
+
+        println!("player2 spawned");
+
+        print_player_stats(world.read_model(player2_address));
+
+        println!("");
+
+        //let initial_player: PlayerStats = world.read_model(caller);
+
+        //let player_league: felt252 = League::Bronze.into();
 
 
-        // println!("player spawned");
 
         // assert(
         //     initial_player.gold == 100 && 
@@ -153,41 +188,52 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
         //     'wrong initial stats'
         // );
 
-
-        let defender_dojomon_id : u32 = actions_system.createDojomon(
-            'Squirtle',
-            110,
-            30,
-            35,
-            35,
-            DojomonType::Water(()),
-            Position{
-                x: 0,
-                y: 0,
-            },
-        );
-
         let attacker_dojomon_id : u32 = actions_system.createDojomon(
+            player1_address,
             'Charmander',
             100,
             40,
             30,
             40,
+            0,
             DojomonType::Fire(()),
             Position{
                 x: 0,
                 y: 0,
             },
+            false,
+            false,
         );
 
-        let defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
-        let attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
+        let defender_dojomon_id : u32 = actions_system.createDojomon(
+            player2_address,
+            'Squirtle',
+            110,
+            30,
+            35,
+            35,
+            0,
+            DojomonType::Water(()),
+            Position{
+                x: 0,
+                y: 0,
+            },
+            false,
+            false
+        );
+
+        //let attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
+        //let defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
 
         println!("Attacker Dojomon spawned");
-        print_dojomon_stats(attacker_dojomon);
+        //print_dojomon_stats(attacker_dojomon);
+
+        println!("");
 
         println!("Defender Dojomon spawned");
-        print_dojomon_stats(defender_dojomon);
+        //print_dojomon_stats(defender_dojomon);
+
+        println!("");
 
         let move_id : u32 = 4;
         let move_name : felt252 = 'Ember';
@@ -209,17 +255,51 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
             LobbyType::Public(()),
         );
 
-        battle_system.attack(lobby_code, attacker_dojomon_id, defender_dojomon_id, move_id);
 
-        let after_attack_defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
+        loop {
 
-        println!("Defender Dojomon Stats after attack");
-        print_dojomon_stats(after_attack_defender_dojomon);
+            let attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
+            let defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
 
-        let after_attack_attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
+            if( 
+                attacker_dojomon.health == 0 || 
+                defender_dojomon.health == 0
+            ) {
+                break;
+            }
+        
+            battle_system.attack(lobby_code, attacker_dojomon_id, defender_dojomon_id, move_id);
 
-        println!("Attacker Dojomon Stats after attack");
-        print_dojomon_stats(after_attack_attacker_dojomon);
+            let after_attack_attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
+
+            let after_attack_defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
+
+            println!("
+                Charmander attacked Squirtle with Ember
+            ");
+
+            println!("Attacker Dojomon Stats after attack");
+            print_dojomon_stats(after_attack_attacker_dojomon);
+
+            println!("");
+
+            println!("Defender Dojomon Stats after attack");
+            print_dojomon_stats(after_attack_defender_dojomon);
+
+        };
+
+
+        println!(" --- Battle Ended --- ");
+
+        println!(" Player 1 Stats ");
+        print_player_stats(world.read_model(player1_address));
+
+        println!("");
+
+        println!(" Player 2 Stats ");
+
+        print_player_stats(world.read_model(player2_address));
+        
 
     }
 

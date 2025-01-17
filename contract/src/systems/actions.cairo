@@ -1,23 +1,23 @@
 use dojomon::models::{PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby};
 use dojomon::events::{PlayerSpawned, DojomonCreated, DojomonCaptured};
+use starknet::{ContractAddress, get_caller_address, contract_address_const};
 
 // Define the interface
 #[starknet::interface]
 trait IActions<T> {
-    fn spawnPlayer(ref self: T, starting_dojo_mon: DojomonType);
+    fn spawnPlayer(ref self: T, player_address: ContractAddress, name: felt252, starting_dojo_mon: DojomonType);
     fn buyDojoBall( ref self: T, dojoball_type: DojoBallType, quantity: u32, dojomon_id: u32, has_dojomon: bool);
     fn feedDojomon(ref self: T, dojomon_id: u32, quantity: u32);
-    fn createDojomon(ref self: T, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, dojomon_type: DojomonType, position: Position) -> u32;
+    fn createDojomon(ref self: T, player_address: ContractAddress, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, evolution: u32, dojomon_type: DojomonType, position: Position, is_free: bool, is_being_caught: bool) -> u32;
     fn catchDojomon(ref self: T, dojomon_id: u32);
-    
 }
 
 // Dojo contract
 #[dojo::contract]
 pub mod actions {
-    use super::{IActions, PlayerStats, Counter, Dojomon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby, PlayerSpawned, DojomonCreated, DojomonCaptured};
+    use super::{IActions, PlayerStats, Counter, Dojomon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby, PlayerSpawned, DojomonCreated, DojomonCaptured,ContractAddress, get_caller_address, contract_address_const};
     use dojo::model::{ModelStorage, ModelValueStorage};
-    use starknet::{ContractAddress, get_caller_address, contract_address_const};
+    
 
     use dojo::event::EventStorage;
     use core::starknet::contract_address::contract_address_to_felt252;
@@ -25,22 +25,19 @@ pub mod actions {
     use dojo::world::IWorldDispatcherTrait;
 
     const COUNTER_ID: u32 = 999;
-    const DOJOMON : felt252 = 'DOJOMON';
-    const LOBBY: felt252 = 'LOBBY';
     const INCREASE_HEALTH_PER_FOOD: u32 = 10;
     const DOJOBALL_PRICE : u32 = 50;
     const GREATBALL_PRICE : u32 = 100;
     const ULTRABALL_PRICE : u32 = 200;
     const MASTERBALL_PRICE : u32 = 300;
-    const RANDOM_NUMBER: u32 = 3;
     
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
-        fn spawnPlayer(ref self: ContractState, starting_dojo_mon: DojomonType) {
+        fn spawnPlayer(ref self: ContractState, player_address: ContractAddress, name: felt252, starting_dojo_mon: DojomonType) {
 
             
             let mut world = self.world_default();
-            let player = get_caller_address();
+            //let player = get_caller_address();
             
             //reading counter model
             let mut counter : Counter = world.read_model(COUNTER_ID);
@@ -58,20 +55,20 @@ pub mod actions {
             //creating starting dojomon based on the input
             let created_dojomon_id = match starting_dojo_mon {
                 DojomonType::Fire => {
-                    self.createDojomon( 'Charmander', 30, 50, 20, 2, DojomonType::Fire, Position { x: 0, y: 0 })
+                    self.createDojomon( player_address, 'Charmander', 30, 50, 20, 2, 0, DojomonType::Fire, Position { x: 0, y: 0 }, false, false)
                     
 
                 },
                 
                 DojomonType::Grass =>{
-                    self.createDojomon( 'Bulbasaur', 60, 20, 20, 1, DojomonType::Grass, Position { x: 0, y: 0 })
+                    self.createDojomon( player_address, 'Bulbasaur', 60, 20, 20, 1, 0, DojomonType::Grass, Position { x: 0, y: 0 }, false, false)
                     
 
                 
                 },  
 
                 DojomonType::Water =>{
-                    self.createDojomon( 'Squirtle', 30, 30, 40, 3, DojomonType::Water, Position { x: 0, y: 0 })
+                    self.createDojomon( player_address, 'Squirtle', 30, 30, 40, 3, 0, DojomonType::Water, Position { x: 0, y: 0 }, false, false)
                 
                 },
                 
@@ -80,14 +77,14 @@ pub mod actions {
             };
             
             let start_stats = PlayerStats {
-                player,
+                name,
+                player: player_address,
                 gold: 100,
                 level: 1,
                 exp: 0,
                 food: 100,
                 league: League::Bronze,
-                trophies: 0,
-
+                trophies: 100,
             };
 
             //writing the player stats
@@ -98,7 +95,7 @@ pub mod actions {
 
             let dojoball = DojoBall {
                 dojoball_id,
-                player,
+                player: player_address,
                 dojomon_id: created_dojomon_id,
                 position: Position { x: 0, y: 0 },
                 dojoball_type: DojoBallType::Dojoball,
@@ -108,7 +105,7 @@ pub mod actions {
             world.write_model(@dojoball);
 
             // Emit event for player creation
-            world.emit_event(@PlayerSpawned {player,stats: start_stats});
+            world.emit_event(@PlayerSpawned {player: player_address,stats: start_stats});
         }
 
         fn buyDojoBall( ref self: ContractState,  dojoball_type: DojoBallType, quantity: u32, dojomon_id: u32, has_dojomon: bool) { 
@@ -183,21 +180,21 @@ pub mod actions {
         /// Creates a new Dojomon for the calling player.
         fn createDojomon(
             ref self: ContractState,
+            player_address: ContractAddress,
             name: felt252,
             health: u32,
             attack: u32,
             defense: u32,
             speed: u32,
+            evolution: u32,
             dojomon_type: DojomonType,
             position: Position,
-
+            is_free: bool,
+            is_being_caught: bool
         ) -> u32 {
             let mut world = self.world_default();
-            let player = get_caller_address();
             
             let mut counter : Counter = world.read_model(COUNTER_ID);
-
-
 
             //incrementing the counter
             counter.dojomon_count += 1;
@@ -212,7 +209,7 @@ pub mod actions {
             // Create new Dojomon
             let dojomon = Dojomon {
                 dojomon_id,
-                player,
+                player: player_address,
                 name,
                 health,
                 attack,
@@ -220,14 +217,17 @@ pub mod actions {
                 speed,
                 level: 1, // New Dojomons start at level 1
                 exp: 0,   // Initial experience
+                evolution,
                 dojomon_type,
-                position
+                position,
+                is_free,
+                is_being_caught
             };
 
             world.write_model(@dojomon);
 
             // // Emit event for Dojomon creation
-            world.emit_event(@DojomonCreated { dojomon_id, player });
+            world.emit_event(@DojomonCreated { dojomon_id, player: player_address });
 
             dojomon_id
         }

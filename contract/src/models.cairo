@@ -5,6 +5,7 @@ use starknet::{ContractAddress};
 pub struct PlayerStats{
     #[key]
     pub player: ContractAddress,
+    pub name: felt252,
     pub gold: u32,
     pub level: u32,
     pub exp: u32,
@@ -66,8 +67,11 @@ pub struct Dojomon{
     pub speed: u32,
     pub level: u32,
     pub exp: u32,
+    pub evolution: u32,
     pub dojomon_type: DojomonType,
     pub position: Position,
+    pub is_free: bool,
+    pub is_being_caught: bool,
 }
 
 #[derive(Copy, Drop, Serde, Debug)]

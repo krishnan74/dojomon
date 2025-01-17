@@ -1,29 +1,28 @@
 use dojomon::models::{
     PlayerStats,
-    Lobby, LobbyType,
+    Dojomon, DojomonType,
 };
 use dojomon::events::{
-    PlayerSelectedDojomon,
-    PlayerReady,
-    PlayerJoined,
+    
 };
 use starknet::{ContractAddress, get_caller_address};
 
 // Define the interface
 #[starknet::interface]
-trait ILobby<T> {
+trait IDojomon<T> {
     fn createLobby(ref self: T, lobby_type: LobbyType) -> u32;
     fn joinLobby(ref self: T, lobby_code: u32);
     fn selectDojomon(ref self: T, lobby_code: u32, dojomon_id: u32);
     fn readyForBattle(ref self: T, lobby_code: u32);
+    fn endBattle( ref self: T, lobby_code: u32);
 }
 
 // Dojo contract
 #[dojo::contract]
-pub mod lobby {
+pub mod dojomon {
     
     use super::{
-            ILobby, PlayerStats, Lobby, LobbyType, PlayerSelectedDojomon, PlayerReady, PlayerJoined
+            ILobby, PlayerStats, Lobby, LobbyType, PlayerSelectedDojomon, PlayerReady, PlayerJoined, BattleEnded
         };
     use starknet::{ContractAddress, get_caller_address};
     use dojo::model::{ModelStorage, ModelValueStorage};
@@ -126,7 +125,21 @@ pub mod lobby {
             });
         }
 
-        
+        fn endBattle(
+            ref self: ContractState,
+            lobby_code: u32
+        ){
+            let mut world = self.world_default();
+            let mut lobby: Lobby = world.read_model(lobby_code);
+
+            world.emit_event(@BattleEnded{
+                lobby_code,
+                host_player: lobby.host_player,
+                guest_player: lobby.guest_player,
+            });
+            
+            world.erase_model(@lobby);
+        }
 
         
     }
