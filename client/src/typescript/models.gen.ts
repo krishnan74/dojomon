@@ -4,7 +4,7 @@ import { CairoOption, CairoOptionVariant, BigNumberish } from "starknet";
 
 type WithFieldOrder<T> = T & { fieldOrder: string[] };
 
-// Type definition for `dojo_starter::models::PlayerStats` struct
+// Type definition for `dojomon::models::PlayerStats` struct
 export interface PlayerStats {
   player: string;
   gold: BigNumberish;
@@ -39,7 +39,7 @@ export interface ReceiverFriendRequest {
   accepted: boolean;
 }
 
-// Type definition for `dojo_starter::models::DojoMon` struct
+// Type definition for `dojomon::models::DojoMon` struct
 export interface DojoMon {
   dojomon_id: string;
   player: string;
@@ -54,7 +54,7 @@ export interface DojoMon {
   position: Position;
 }
 
-// Type definition for `dojo_starter::models::DojoBall` struct
+// Type definition for `dojomon::models::DojoBall` struct
 export interface DojoBall {
   dojoball_id: string;
   player: string;
@@ -64,7 +64,7 @@ export interface DojoBall {
   has_dojomon: boolean;
 }
 
-// Type definition for `dojo_starter::models::Counter` struct
+// Type definition for `dojomon::models::Counter` struct
 export interface Counter {
   counter: BigNumberish;
   player_count: BigNumberish;
@@ -72,20 +72,20 @@ export interface Counter {
   dojomon_count: BigNumberish;
 }
 
-// Type definition for `dojo_starter::models::Position` struct
+// Type definition for `dojomon::models::Position` struct
 export interface Position {
   x: BigNumberish;
   y: BigNumberish;
 }
 
-// Type definition for `dojo_starter::models::DojomonType` enum
+// Type definition for `dojomon::models::DojomonType` enum
 export enum DojomonType {
   Fire,
   Water,
   Grass,
 }
 
-// Type definition for `dojo_starter::models::DojoBallType` enum
+// Type definition for `dojomon::models::DojoBallType` enum
 export enum DojoBallType {
   Dojoball,
   Greatball,
@@ -93,7 +93,7 @@ export enum DojoBallType {
   Masterball,
 }
 
-// Type definition for `dojo_starter::models::League` enum
+// Type definition for `dojomon::models::League` enum
 export enum League {
   Bronze,
   Silver,
@@ -105,7 +105,7 @@ export enum League {
 }
 
 export interface SchemaType extends ISchemaType {
-  dojo_starter: {
+  dojomon: {
     PlayerStats: WithFieldOrder<PlayerStats>;
     Lobby: WithFieldOrder<Lobby>;
     Friend: WithFieldOrder<Friend>;
@@ -118,7 +118,7 @@ export interface SchemaType extends ISchemaType {
 }
 
 export const schema: SchemaType = {
-  dojo_starter: {
+  dojomon: {
     PlayerStats: {
       fieldOrder: [
         "player",
@@ -240,16 +240,16 @@ export const schema: SchemaType = {
   },
 };
 export enum ModelsMapping {
-  PlayerStats = "dojo_starter-PlayerStats",
-  Lobby = "dojo_starter-Lobby",
-  Friend = "dojo_starter-Friend",
-  SenderFriendRequest = "dojo_starter-SenderFriendRequest",
-  ReceiverFriendRequest = "dojo_starter-ReceiverFriendRequest",
-  DojoMon = "dojo_starter-DojoMon",
-  DojoBall = "dojo_starter-DojoBall",
-  Counter = "dojo_starter-Counter",
-  Position = "dojo_starter-Position",
-  DojomonType = "dojo_starter-DojomonType",
-  DojoBallType = "dojo_starter-DojoBallType",
-  League = "dojo_starter-League",
+  PlayerStats = "dojomon-PlayerStats",
+  Lobby = "dojomon-Lobby",
+  Friend = "dojomon-Friend",
+  SenderFriendRequest = "dojomon-SenderFriendRequest",
+  ReceiverFriendRequest = "dojomon-ReceiverFriendRequest",
+  DojoMon = "dojomon-DojoMon",
+  DojoBall = "dojomon-DojoBall",
+  Counter = "dojomon-Counter",
+  Position = "dojomon-Position",
+  DojomonType = "dojomon-DojomonType",
+  DojoBallType = "dojomon-DojoBallType",
+  League = "dojomon-League",
 }

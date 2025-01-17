@@ -32,7 +32,7 @@ export function setupWorld(provider: DojoProvider) {
       return await provider.execute(
         snAccount,
         build_actions_spawn_calldata(dojoball_type),
-        "dojo_starter"
+        "dojomon"
       );
     } catch (error) {
       console.error(error);
@@ -81,7 +81,7 @@ export function setupWorld(provider: DojoProvider) {
           dojomon_id,
           has_dojomon
         ),
-        "dojo_starter"
+        "dojomon"
       );
     } catch (error) {
       console.error(error);
@@ -102,7 +102,7 @@ export function setupWorld(provider: DojoProvider) {
       return await provider.execute(
         snAccount,
         build_actions_createLobby_calldata(),
-        "dojo_starter"
+        "dojomon"
       );
     } catch (error) {
       console.error(error);
@@ -126,7 +126,7 @@ export function setupWorld(provider: DojoProvider) {
       return await provider.execute(
         snAccount,
         build_actions_joinLobby_calldata(lobby_code),
-        "dojo_starter"
+        "dojomon"
       );
     } catch (error) {
       console.error(error);
@@ -150,7 +150,7 @@ export function setupWorld(provider: DojoProvider) {
       return await provider.execute(
         snAccount,
         build_actions_acceptFriendRequest_calldata(sender),
-        "dojo_starter"
+        "dojomon"
       );
     } catch (error) {
       console.error(error);
@@ -174,7 +174,7 @@ export function setupWorld(provider: DojoProvider) {
       return await provider.execute(
         snAccount,
         build_actions_sendFriendRequest_calldata(receiver),
-        "dojo_starter"
+        "dojomon"
       );
     } catch (error) {
       console.error(error);
@@ -234,7 +234,7 @@ export function setupWorld(provider: DojoProvider) {
           dojomon_type,
           position
         ),
-        "dojo_starter"
+        "dojomon"
       );
     } catch (error) {
       console.error(error);

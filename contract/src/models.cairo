@@ -5,27 +5,35 @@ use starknet::{ContractAddress};
 pub struct PlayerStats{
     #[key]
     pub player: ContractAddress,
+    pub name: felt252,
     pub gold: u32,
     pub level: u32,
     pub exp: u32,
     pub food: u32,
     pub trophies: u32,
     pub league: League,
-    pub host_lobby_code: felt252,
 }
 
 #[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
 pub struct Lobby{
     #[key]
-    pub lobby_code: felt252,
+    pub lobby_code: u32,
     pub host_player: ContractAddress,
     pub guest_player: ContractAddress,
     pub host_ready: bool,
     pub guest_ready: bool,
-    pub host_dojomon_id: felt252,
-    pub guest_dojomon_id: felt252,
-    pub can_join: bool,
+    pub host_dojomon_id: u32,
+    pub guest_dojomon_id: u32,
+    pub is_vacant: bool,
+    pub lobby_type: LobbyType,
+    pub turn: ContractAddress,
+
+    //for matchmaking purposes
+    pub lobby_league: League,
+    pub lobby_exp: u32,
+    pub lobby_level: u32,
+
 }
 
 #[derive(Copy, Drop, Serde, Debug)]
@@ -48,9 +56,9 @@ pub struct Friend{
 
 #[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
-pub struct DojoMon{
+pub struct Dojomon{
     #[key]
-    pub dojomon_id: felt252,
+    pub dojomon_id: u32,
     pub player: ContractAddress,
     pub name: felt252,
     pub health: u32,
@@ -59,17 +67,20 @@ pub struct DojoMon{
     pub speed: u32,
     pub level: u32,
     pub exp: u32,
+    pub evolution: u32,
     pub dojomon_type: DojomonType,
     pub position: Position,
+    pub is_free: bool,
+    pub is_being_caught: bool,
 }
 
 #[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
 pub struct DojoBall{
     #[key]
-    pub dojoball_id: felt252,
+    pub dojoball_id: u32,
     pub player: ContractAddress,
-    pub dojomon_id: felt252,
+    pub dojomon_id: u32,
     pub position: Position,
     pub dojoball_type: DojoBallType,
     pub has_dojomon: bool,
@@ -112,6 +123,12 @@ pub enum MoveEffect{
     LowerSpecialDefense,
     Flinch,
     Freeze
+}
+
+#[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
+pub enum LobbyType{
+    Public, 
+    Private,
 }
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]

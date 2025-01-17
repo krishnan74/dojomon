@@ -1,71 +1,43 @@
-use dojo_starter::models::{PlayerStats, Counter, DojoMon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby,};
+use dojomon::models::{PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby};
+use dojomon::events::{PlayerSpawned, DojomonCreated, DojomonCaptured};
 use starknet::{ContractAddress, get_caller_address, contract_address_const};
 
 // Define the interface
 #[starknet::interface]
 trait IActions<T> {
-    fn spawnPlayer(ref self: T, starting_dojo_mon: DojomonType);
-    fn buyDojoBall( ref self: T, dojoball_type: DojoBallType, quantity: u32, dojomon_id: felt252, has_dojomon: bool);
-    fn feedDojoMon(ref self: T, dojomon_id: felt252, quantity: u32);
-    fn createDojomon(ref self: T, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, dojomon_type: DojomonType, position: Position) -> felt252;
-    fn catchDojomon(ref self: T, dojomon_id: felt252);
-    fn createLobby(ref self: T) -> felt252;
-    fn joinLobby(ref self: T, lobby_code: felt252);
+    fn spawnPlayer(ref self: T, player_address: ContractAddress, name: felt252, starting_dojo_mon: DojomonType);
+    fn buyDojoBall( ref self: T, dojoball_type: DojoBallType, quantity: u32, dojomon_id: u32, has_dojomon: bool);
+    fn feedDojomon(ref self: T, dojomon_id: u32, quantity: u32);
+    fn createDojomon(ref self: T, player_address: ContractAddress, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, evolution: u32, dojomon_type: DojomonType, position: Position, is_free: bool, is_being_caught: bool) -> u32;
+    fn catchDojomon(ref self: T, dojomon_id: u32);
 }
 
 // Dojo contract
 #[dojo::contract]
 pub mod actions {
-    use super::{IActions, PlayerStats, Counter, DojoMon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby};
-    use starknet::{ContractAddress, get_caller_address, contract_address_const};
+    use super::{IActions, PlayerStats, Counter, Dojomon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby, PlayerSpawned, DojomonCreated, DojomonCaptured,ContractAddress, get_caller_address, contract_address_const};
     use dojo::model::{ModelStorage, ModelValueStorage};
+    
+
     use dojo::event::EventStorage;
     use core::starknet::contract_address::contract_address_to_felt252;
     use dojo::world::WorldStorage;
     use dojo::world::IWorldDispatcherTrait;
-    use core::poseidon::poseidon_hash_span;
-
-    #[derive(Drop, Serde, Debug)]
-    #[dojo::event]
-    pub struct PlayerSpawned {
-        #[key]
-        pub player: ContractAddress,
-        pub stats: PlayerStats,
-    }
-
-    #[derive(Copy, Drop, Serde, Debug)]
-    #[dojo::event]
-    pub struct DojoMonCreated {
-        #[key]
-        pub dojomon_id: felt252,
-        pub player: ContractAddress,
-    }
-
-    #[derive(Copy, Drop, Serde)]
-    #[dojo::event]
-    pub struct DojoMonCaptured {
-        #[key]
-        pub dojomon_id: felt252,
-        pub player: ContractAddress,
-    }
 
     const COUNTER_ID: u32 = 999;
-    const DOJOMON : felt252 = 'DOJOMON';
-    const LOBBY: felt252 = 'LOBBY';
     const INCREASE_HEALTH_PER_FOOD: u32 = 10;
     const DOJOBALL_PRICE : u32 = 50;
     const GREATBALL_PRICE : u32 = 100;
     const ULTRABALL_PRICE : u32 = 200;
     const MASTERBALL_PRICE : u32 = 300;
-    const RANDOM_NUMBER: u32 = 3;
     
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
-        fn spawnPlayer(ref self: ContractState, starting_dojo_mon: DojomonType) {
+        fn spawnPlayer(ref self: ContractState, player_address: ContractAddress, name: felt252, starting_dojo_mon: DojomonType) {
 
             
             let mut world = self.world_default();
-            let player = get_caller_address();
+            //let player = get_caller_address();
             
             //reading counter model
             let mut counter : Counter = world.read_model(COUNTER_ID);
@@ -75,26 +47,28 @@ pub mod actions {
             
             counter.dojoball_count += 1;
 
+            counter.dojomon_count += 1;
+
             world.write_model(@counter);
 
-            //let dojomon =  
+            
             //creating starting dojomon based on the input
             let created_dojomon_id = match starting_dojo_mon {
                 DojomonType::Fire => {
-                    self.createDojomon( 'Charmander', 30, 50, 20, 2, DojomonType::Fire, Position { x: 0, y: 0 })
+                    self.createDojomon( player_address, 'Charmander', 30, 50, 20, 2, 0, DojomonType::Fire, Position { x: 0, y: 0 }, false, false)
                     
 
                 },
                 
                 DojomonType::Grass =>{
-                    self.createDojomon( 'Bulbasaur', 60, 20, 20, 1, DojomonType::Grass, Position { x: 0, y: 0 })
+                    self.createDojomon( player_address, 'Bulbasaur', 60, 20, 20, 1, 0, DojomonType::Grass, Position { x: 0, y: 0 }, false, false)
                     
 
                 
                 },  
 
                 DojomonType::Water =>{
-                    self.createDojomon( 'Squirtle', 30, 30, 40, 3, DojomonType::Water, Position { x: 0, y: 0 })
+                    self.createDojomon( player_address, 'Squirtle', 30, 30, 40, 3, 0, DojomonType::Water, Position { x: 0, y: 0 }, false, false)
                 
                 },
                 
@@ -103,31 +77,25 @@ pub mod actions {
             };
             
             let start_stats = PlayerStats {
-                player,
+                name,
+                player: player_address,
                 gold: 100,
                 level: 1,
                 exp: 0,
                 food: 100,
                 league: League::Bronze,
-                trophies: 0,
-                host_lobby_code: 0,
+                trophies: 100,
             };
 
             //writing the player stats
             world.write_model(@start_stats);
 
-            let mut counter : Counter = world.read_model(COUNTER_ID);
             
-            let mut dojoball_count = counter.dojoball_count;
-
-            let dojoball_count_felt: felt252 = dojoball_count.into();
-            let player_felt252 = contract_address_to_felt252(player);
-
-            let dojoball_id = poseidon_hash_span([dojoball_count_felt, player_felt252].span());
+            let dojoball_id = world.dispatcher.uuid();
 
             let dojoball = DojoBall {
                 dojoball_id,
-                player,
+                player: player_address,
                 dojomon_id: created_dojomon_id,
                 position: Position { x: 0, y: 0 },
                 dojoball_type: DojoBallType::Dojoball,
@@ -137,14 +105,13 @@ pub mod actions {
             world.write_model(@dojoball);
 
             // Emit event for player creation
-            //world.emit_event(@PlayerSpawned {player,stats: start_stats});
+            world.emit_event(@PlayerSpawned {player: player_address,stats: start_stats});
         }
 
-        fn buyDojoBall( ref self: ContractState,  dojoball_type: DojoBallType, quantity: u32, dojomon_id: felt252, has_dojomon: bool) { 
+        fn buyDojoBall( ref self: ContractState,  dojoball_type: DojoBallType, quantity: u32, dojomon_id: u32, has_dojomon: bool) { 
             let mut world = self.world_default();
             let player = get_caller_address();
 
-            let player_felt252 = contract_address_to_felt252(player);
             let mut counter : Counter = world.read_model(COUNTER_ID);
             
             let mut dojoball_count = counter.dojoball_count;
@@ -174,9 +141,8 @@ pub mod actions {
 
                 dojoball_count+=1;
 
-                let dojoball_count_felt: felt252 = dojoball_count.into();
 
-                let dojoball_id = poseidon_hash_span([dojoball_count_felt, player_felt252].span());
+                let dojoball_id = world.dispatcher.uuid();
 
                 let dojoball = DojoBall {
                     dojoball_id,
@@ -192,155 +158,108 @@ pub mod actions {
 
         }
         
-        fn feedDojoMon(ref self: ContractState, dojomon_id: felt252, quantity: u32) {
+        fn feedDojomon(ref self: ContractState, dojomon_id: u32, quantity: u32) {
             let mut world = self.world_default();
             let player = get_caller_address();
 
-            // Check if the DojoMon exists
+            // Check if the Dojomon exists
 
-            let mut dojomon: DojoMon = world.read_model(dojomon_id);
+            let mut dojomon: Dojomon = world.read_model(dojomon_id);
 
-            // Ensure the DojoMon is owned by the player
+            // Ensure the Dojomon is owned by the player
             if dojomon.player != player {
-                panic!("DojoMon is not owned by the player!");
+                panic!("Dojomon is not owned by the player!");
             }
 
-            // Increase the DojoMon's health
+            // Increase the Dojomon's health
             dojomon.health += INCREASE_HEALTH_PER_FOOD * quantity;
 
             world.write_model(@dojomon);
         }
 
-        /// Creates a new DojoMon for the calling player.
+        /// Creates a new Dojomon for the calling player.
         fn createDojomon(
             ref self: ContractState,
+            player_address: ContractAddress,
             name: felt252,
             health: u32,
             attack: u32,
             defense: u32,
             speed: u32,
+            evolution: u32,
             dojomon_type: DojomonType,
             position: Position,
-
-        ) -> felt252 {
+            is_free: bool,
+            is_being_caught: bool
+        ) -> u32 {
             let mut world = self.world_default();
-            let player = get_caller_address();
-            let player_felt252 = contract_address_to_felt252(player);
             
             let mut counter : Counter = world.read_model(COUNTER_ID);
-
-
-            let dojomon_count = counter.dojomon_count;
 
             //incrementing the counter
             counter.dojomon_count += 1;
 
             world.write_model(@counter);
 
-            let dojomon_count_felt: felt252 = dojomon_count.into();
 
-            let dojomon_id = poseidon_hash_span([dojomon_count_felt, player_felt252].span());
+            let dojomon_id = world.dispatcher.uuid();
 
 
-            // Create new DojoMon
-            let dojomon = DojoMon {
+
+            // Create new Dojomon
+            let dojomon = Dojomon {
                 dojomon_id,
-                player,
+                player: player_address,
                 name,
                 health,
                 attack,
                 defense,
                 speed,
-                level: 1, // New DojoMons start at level 1
+                level: 1, // New Dojomons start at level 1
                 exp: 0,   // Initial experience
+                evolution,
                 dojomon_type,
-                position
+                position,
+                is_free,
+                is_being_caught
             };
 
             world.write_model(@dojomon);
 
-            // // Emit event for DojoMon creation
-            //world.emit_event(@DojoMonCreated { dojomon_id, player });
+            // // Emit event for Dojomon creation
+            world.emit_event(@DojomonCreated { dojomon_id, player: player_address });
 
             dojomon_id
         }
 
-        /// Captures an unowned DojoMon and assigns it to the calling player.
-        fn catchDojomon(ref self: ContractState, dojomon_id: felt252) {
+        /// Captures an unowned Dojomon and assigns it to the calling player.
+        fn catchDojomon(ref self: ContractState, dojomon_id: u32) {
             let mut world = self.world_default();
             let player = get_caller_address();
 
-            // Check if the DojoMon exists
-            //let mut dojomon = DojoMon::get(dojomon_id).expect("DojoMon does not exist!");
+            // Check if the Dojomon exists
+            //let mut dojomon = Dojomon::get(dojomon_id).expect("Dojomon does not exist!");
 
-            let mut dojomon: DojoMon = world.read_model(dojomon_id);
+            let mut dojomon: Dojomon = world.read_model(dojomon_id);
 
-            // Ensure the DojoMon is unowned
+            // Ensure the Dojomon is unowned
             // if dojomon.player != ContractAddress::default() {
-            //     panic!("DojoMon is already owned!");
+            //     panic!("Dojomon is already owned!");
             // }
 
-            // Assign the DojoMon to the player
+            // Assign the Dojomon to the player
             dojomon.player = player;
             world.write_model(@dojomon);
 
-            // Add the DojoMon to the player's list
+            // Add the Dojomon to the player's list
             let mut player_stats: PlayerStats = world.read_model(player);
             world.write_model(@player_stats);
 
-            // Emit event for DojoMon capture
-            //world.emit_event(@DojoMonCaptured{ dojomon_id, player });
+            // Emit event for Dojomon capture
+            world.emit_event(@DojomonCaptured{ dojomon_id, player });
         }
 
-        fn createLobby(ref self: ContractState) -> felt252 {
-            let mut world = self.world_default();
-            let host_player = get_caller_address();
-
-            let host_player_felt252: felt252 = host_player.into();
-
-            let lobby_code = poseidon_hash_span([host_player_felt252, LOBBY].span());
-
-            let player_stats: PlayerStats = world.read_model(host_player);
-
-            if( player_stats.host_lobby_code == lobby_code ){
-                lobby_code
-            }
-
-            else{
-                // Creating new lobby
-                let lobby = Lobby {
-                    lobby_code,
-                    host_player,
-                    guest_player: Zeroable::zero(),
-                    host_ready: false,
-                    guest_ready: false,
-                    host_dojomon_id: 0,
-                    guest_dojomon_id: 0,
-                    can_join: true,
-                };
-
-                world.write_model(@lobby);
-                lobby_code
-            }
-            
-        }
-
-        fn joinLobby(ref self: ContractState, lobby_code: felt252) {
-            let mut world = self.world_default();
-            let guest_player = get_caller_address();
-
-            let mut lobby: Lobby = world.read_model(lobby_code);
-
-            // Ensure the lobby is not full
-            if lobby.can_join == false {
-                panic!("Lobby is full!");
-            }
-
-            // Assign the guest player to the lobby
-            lobby.guest_player = guest_player;
-            lobby.can_join = false;
-            world.write_model(@lobby);
-        }
+        
         
     }
 
@@ -349,7 +268,7 @@ pub mod actions {
     impl InternalImpl of InternalTrait {
         /// Returns the default world storage for the contract.
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
-            self.world(@"dojo_starter")
+            self.world(@"dojomon")
         }
 
     }

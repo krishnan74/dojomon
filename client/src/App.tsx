@@ -137,7 +137,7 @@ function App() {
             </thead>
             <tbody>
               {Object.entries(entities).map(([entityId, entity]) => {
-                const player_stats = entity.models.dojo_starter.PlayerStats;
+                const player_stats = entity.models.dojomon.PlayerStats;
 
                 return (
                   <tr key={entityId} className="text-gray-300">
