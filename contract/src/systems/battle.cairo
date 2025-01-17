@@ -1,7 +1,9 @@
 use dojomon::models::{
     PlayerStats,
-    ReceiverFriendRequest, DojoMon, DojomonType, MoveEffect, Move, Lobby
+    ReceiverFriendRequest, Dojomon, DojomonType, MoveEffect, Move, Lobby
 };
+use dojomon::events::{PlayerAttacked};
+use dojomon::utils::random::{Random, RandomImpl, RandomTrait};
 use starknet::{ContractAddress, get_caller_address};
 
 // Define the interface
@@ -25,21 +27,11 @@ trait IBattle<T> {
 pub mod battle {
     
     use super::{
-            IBattle, PlayerStats, ReceiverFriendRequest, DojoMon, DojomonType, MoveEffect, Move, Lobby
+            IBattle, PlayerStats, ReceiverFriendRequest, Dojomon, DojomonType, MoveEffect, Move, Lobby , Random, RandomImpl, RandomTrait, PlayerAttacked
         };
         use starknet::{ContractAddress, get_caller_address};
         use dojo::model::{ModelStorage, ModelValueStorage};
         use dojo::event::EventStorage;
-
-    #[derive(Drop, Serde, Debug)]
-    #[dojo::event]
-    pub struct PlayerAttacked {
-        #[key]
-        pub attacker_dojomon: DojoMon,
-        pub defender_dojomon: DojoMon,
-        pub move: Move,
-        pub lobby: Lobby,
-    }
 
     #[abi(embed_v0)]
     impl BattleImpl of IBattle<ContractState> {
@@ -52,72 +44,62 @@ pub mod battle {
             move_id: u32,
         ) {
             let mut world = self.world_default();
-            //let attacker = get_caller_address();
 
-            println!("Attacker Dojomon id from battle: {:?}  ", attacker_dojomon_id);
+            // Retrieve attacker and defender Dojomons
+            let mut attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
+            let mut defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
 
-            let mut attacker_dojomon: DojoMon = world.read_model(attacker_dojomon_id);
-            let mut defender_dojomon: DojoMon = world.read_model(defender_dojomon_id);
-
-            println!("Attacker: {:?}", attacker_dojomon);
-
+            // Retrieve the selected move
             let selected_move: Move = world.read_model(move_id);
 
-            // Base damage calculation
-            let base_damage = selected_move.power * attacker_dojomon.attack / 50;
+            // Critical hit chance (10%)
+            let mut randomizer = RandomImpl::new('world');
+            let is_critical = randomizer.between::<u32>(1, 100) <= 10; // Generates 1 if critical hit
+            let critical_multiplier = if is_critical { 150 } else { 100 }; // 150% for critical, scaled by 100
+
+            // Base damage calculation (scaled by 100 for precision)
+            let base_damage = selected_move.power * attacker_dojomon.attack * critical_multiplier / (defender_dojomon.defense * 100);
 
             println!("Base damage: {}", base_damage);
 
-
-            // Apply type effectiveness
+            // Apply type effectiveness (scaled by 100 for precision)
             let type_effectiveness = self.calculate_type_effectiveness(selected_move.move_type, defender_dojomon.dojomon_type);
-            let adjusted_damage = base_damage * type_effectiveness;
 
-            println!("Adjusted damage: {}", adjusted_damage);
-
-            // Apply random damage variability
-            let random_damage_factor: u32 = (10 % 400) / 1000 + 8; // Replace RNG logic
-            let damage_variation = adjusted_damage * random_damage_factor / 10;
-
-            println!("Base damage variation: {}", damage_variation);
-
-            // Final damage after considering defense
-            let damage_dealt = if damage_variation > defender_dojomon.defense / 2 {
-                damage_variation - defender_dojomon.defense / 2
-            } else {
-                0
-            };
-
-            println!("Damage dealt: {}", damage_dealt);
+            let rand_variation = randomizer.between::<u32>(attacker_dojomon.level,attacker_dojomon.level+10);
+            let adding_damage_percent = 10 * type_effectiveness + rand_variation;
+            
+            
+            let final_damage = base_damage + ( base_damage * adding_damage_percent / 100 );
 
             // Update defender's health
-            if defender_dojomon.health <= damage_dealt {
+            if defender_dojomon.health <= final_damage {
                 defender_dojomon.health = 0;
             } else {
-                defender_dojomon.health -= damage_dealt;
+                defender_dojomon.health -= final_damage;
             }
 
-            println!("Defender health: {}", defender_dojomon.health);
+            println!("Final damage dealt: {}", final_damage);
+
+            if is_critical {
+                println!("It was a critical hit!");
+            }
 
             // Apply move effects
-
             self.apply_move_effect(selected_move.effect, ref defender_dojomon);
 
             // Update models in the world
             world.write_model(@attacker_dojomon);
             world.write_model(@defender_dojomon);
 
-            let attacker_dojomon_after_attack: DojoMon = world.read_model(attacker_dojomon_id);
-            let defender_dojomon_after_attack: DojoMon = world.read_model(defender_dojomon_id);
-
+            // Emit an event for the attack
             world.emit_event(@PlayerAttacked {
-                attacker_dojomon: attacker_dojomon_after_attack,
-                defender_dojomon: defender_dojomon_after_attack,
+                attacker_dojomon: world.read_model(attacker_dojomon_id),
+                defender_dojomon: world.read_model(defender_dojomon_id),
                 move: selected_move,
                 lobby: world.read_model(lobby_code),
-
             });
 
+            // Switch the turn
             self.changeTurn(lobby_code);
         }
 
@@ -180,11 +162,11 @@ pub mod battle {
             }
         }
 
-        fn apply_move_effect(ref self: ContractState, effect: MoveEffect, ref defender: DojoMon) {
+        fn apply_move_effect(ref self: ContractState, effect: MoveEffect, ref defender: Dojomon) {
             match effect {
                 MoveEffect::Burn => {
-                    defender.health -= 10; // Burn deals 10 damage per turn
-                    defender.attack /= 2; // Burn reduces attack by half
+                    defender.health -= 5; // Burn deals 5 damage per turn
+                    defender.attack -= 5; // Burn reduces attack by half
                 },
                 MoveEffect::Paralyze => {
                     defender.speed /= 2; // Paralysis halves speed

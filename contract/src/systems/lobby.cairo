@@ -2,6 +2,12 @@ use dojomon::models::{
     PlayerStats,
     Lobby, LobbyType,
 };
+use dojomon::events::{
+    PlayerSelectedDojomon,
+    PlayerReady,
+    PlayerJoined,
+    BattleEnded,
+};
 use starknet::{ContractAddress, get_caller_address};
 
 // Define the interface
@@ -19,7 +25,7 @@ trait ILobby<T> {
 pub mod lobby {
     
     use super::{
-            ILobby, PlayerStats, Lobby, LobbyType
+            ILobby, PlayerStats, Lobby, LobbyType, PlayerSelectedDojomon, PlayerReady, PlayerJoined, BattleEnded
         };
     use starknet::{ContractAddress, get_caller_address};
     use dojo::model::{ModelStorage, ModelValueStorage};
@@ -27,39 +33,7 @@ pub mod lobby {
     use dojo::world::WorldStorage;
     use dojo::world::IWorldDispatcherTrait;
 
-    #[derive(Drop, Serde, Debug)]
-    #[dojo::event]
-    pub struct PlayerSelectedDojomon {
-        #[key]
-        lobby_code: u32,
-        player: ContractAddress,
-        dojomon_id: u32,
-    }
-
-    #[derive(Drop, Serde, Debug)]
-    #[dojo::event]
-    pub struct PlayerReady {
-        #[key]
-        lobby_code: u32,
-        player: ContractAddress,
-    }
-
-    #[derive(Drop, Serde, Debug)]
-    #[dojo::event]
-    pub struct PlayerJoined {
-        #[key]
-        lobby_code: u32,
-        player: ContractAddress,
-    }
-
-    #[derive(Drop, Serde, Debug)]
-    #[dojo::event]
-    pub struct BattleEnded {
-        #[key]
-        lobby_code: u32,
-        host_player: ContractAddress,
-        guest_player: ContractAddress,
-    }
+    
 
     #[abi(embed_v0)]
     impl LobbyImpl of ILobby<ContractState> {

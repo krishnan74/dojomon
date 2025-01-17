@@ -1,12 +1,12 @@
-use dojomon::models::{PlayerStats, Counter, DojoMon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby,};
-use starknet::{ContractAddress, get_caller_address, contract_address_const};
+use dojomon::models::{PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby};
+use dojomon::events::{PlayerSpawned, DojomonCreated, DojomonCaptured};
 
 // Define the interface
 #[starknet::interface]
 trait IActions<T> {
     fn spawnPlayer(ref self: T, starting_dojo_mon: DojomonType);
     fn buyDojoBall( ref self: T, dojoball_type: DojoBallType, quantity: u32, dojomon_id: u32, has_dojomon: bool);
-    fn feedDojoMon(ref self: T, dojomon_id: u32, quantity: u32);
+    fn feedDojomon(ref self: T, dojomon_id: u32, quantity: u32);
     fn createDojomon(ref self: T, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, dojomon_type: DojomonType, position: Position) -> u32;
     fn catchDojomon(ref self: T, dojomon_id: u32);
     
@@ -15,38 +15,14 @@ trait IActions<T> {
 // Dojo contract
 #[dojo::contract]
 pub mod actions {
-    use super::{IActions, PlayerStats, Counter, DojoMon,DojoBall, DojoBallType, DojomonType, Position, League};
-    use starknet::{ContractAddress, get_caller_address, contract_address_const};
+    use super::{IActions, PlayerStats, Counter, Dojomon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby, PlayerSpawned, DojomonCreated, DojomonCaptured};
     use dojo::model::{ModelStorage, ModelValueStorage};
+    use starknet::{ContractAddress, get_caller_address, contract_address_const};
+
     use dojo::event::EventStorage;
     use core::starknet::contract_address::contract_address_to_felt252;
     use dojo::world::WorldStorage;
     use dojo::world::IWorldDispatcherTrait;
-    use core::poseidon::poseidon_hash_span;
-
-    #[derive(Drop, Serde, Debug)]
-    #[dojo::event]
-    pub struct PlayerSpawned {
-        #[key]
-        pub player: ContractAddress,
-        pub stats: PlayerStats,
-    }
-
-    #[derive(Copy, Drop, Serde, Debug)]
-    #[dojo::event]
-    pub struct DojoMonCreated {
-        #[key]
-        pub dojomon_id: u32,
-        pub player: ContractAddress,
-    }
-
-    #[derive(Copy, Drop, Serde)]
-    #[dojo::event]
-    pub struct DojoMonCaptured {
-        #[key]
-        pub dojomon_id: u32,
-        pub player: ContractAddress,
-    }
 
     const COUNTER_ID: u32 = 999;
     const DOJOMON : felt252 = 'DOJOMON';
@@ -185,26 +161,26 @@ pub mod actions {
 
         }
         
-        fn feedDojoMon(ref self: ContractState, dojomon_id: u32, quantity: u32) {
+        fn feedDojomon(ref self: ContractState, dojomon_id: u32, quantity: u32) {
             let mut world = self.world_default();
             let player = get_caller_address();
 
-            // Check if the DojoMon exists
+            // Check if the Dojomon exists
 
-            let mut dojomon: DojoMon = world.read_model(dojomon_id);
+            let mut dojomon: Dojomon = world.read_model(dojomon_id);
 
-            // Ensure the DojoMon is owned by the player
+            // Ensure the Dojomon is owned by the player
             if dojomon.player != player {
-                panic!("DojoMon is not owned by the player!");
+                panic!("Dojomon is not owned by the player!");
             }
 
-            // Increase the DojoMon's health
+            // Increase the Dojomon's health
             dojomon.health += INCREASE_HEALTH_PER_FOOD * quantity;
 
             world.write_model(@dojomon);
         }
 
-        /// Creates a new DojoMon for the calling player.
+        /// Creates a new Dojomon for the calling player.
         fn createDojomon(
             ref self: ContractState,
             name: felt252,
@@ -233,8 +209,8 @@ pub mod actions {
 
 
 
-            // Create new DojoMon
-            let dojomon = DojoMon {
+            // Create new Dojomon
+            let dojomon = Dojomon {
                 dojomon_id,
                 player,
                 name,
@@ -242,7 +218,7 @@ pub mod actions {
                 attack,
                 defense,
                 speed,
-                level: 1, // New DojoMons start at level 1
+                level: 1, // New Dojomons start at level 1
                 exp: 0,   // Initial experience
                 dojomon_type,
                 position
@@ -250,37 +226,37 @@ pub mod actions {
 
             world.write_model(@dojomon);
 
-            // // Emit event for DojoMon creation
-            world.emit_event(@DojoMonCreated { dojomon_id, player });
+            // // Emit event for Dojomon creation
+            world.emit_event(@DojomonCreated { dojomon_id, player });
 
             dojomon_id
         }
 
-        /// Captures an unowned DojoMon and assigns it to the calling player.
+        /// Captures an unowned Dojomon and assigns it to the calling player.
         fn catchDojomon(ref self: ContractState, dojomon_id: u32) {
             let mut world = self.world_default();
             let player = get_caller_address();
 
-            // Check if the DojoMon exists
-            //let mut dojomon = DojoMon::get(dojomon_id).expect("DojoMon does not exist!");
+            // Check if the Dojomon exists
+            //let mut dojomon = Dojomon::get(dojomon_id).expect("Dojomon does not exist!");
 
-            let mut dojomon: DojoMon = world.read_model(dojomon_id);
+            let mut dojomon: Dojomon = world.read_model(dojomon_id);
 
-            // Ensure the DojoMon is unowned
+            // Ensure the Dojomon is unowned
             // if dojomon.player != ContractAddress::default() {
-            //     panic!("DojoMon is already owned!");
+            //     panic!("Dojomon is already owned!");
             // }
 
-            // Assign the DojoMon to the player
+            // Assign the Dojomon to the player
             dojomon.player = player;
             world.write_model(@dojomon);
 
-            // Add the DojoMon to the player's list
+            // Add the Dojomon to the player's list
             let mut player_stats: PlayerStats = world.read_model(player);
             world.write_model(@player_stats);
 
-            // Emit event for DojoMon capture
-            world.emit_event(@DojoMonCaptured{ dojomon_id, player });
+            // Emit event for Dojomon capture
+            world.emit_event(@DojomonCaptured{ dojomon_id, player });
         }
 
         
