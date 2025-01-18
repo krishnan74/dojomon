@@ -25,8 +25,6 @@ trait IBattle<T> {
     fn endBattle(
         ref self: T,
         lobby_code: u32,
-        lost_player_address: ContractAddress,
-        won_player_address: ContractAddress,
         lost_dojomon_id: u32,
         won_dojomon_id: u32
     );
@@ -66,18 +64,23 @@ pub mod battle {
             let mut defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
 
             // Retrieve the selected move
-            let selected_move: Move = world.read_model(move_id);
+            let selected_move: Move = world.read_model((move_id, 
+                attacker_dojomon_id
+            ));
 
             // Critical hit chance (10%)
             let mut randomizer = RandomImpl::new('world');
             let is_critical = randomizer.between::<u32>(1, 100) <= 10; // Generates 1 if critical hit
             let critical_multiplier = if is_critical { 150 } else { 100 }; // 150% for critical, scaled by 100
 
+            println!("Selected Move: {:?}", selected_move);
             // Base damage calculation (scaled by 100 for precision)
             let base_damage = selected_move.power * attacker_dojomon.attack * critical_multiplier / (defender_dojomon.defense * 100);
+            println!("Base Damage: {}", base_damage);
 
             // Apply type effectiveness (scaled by 100 for precision)
             let type_effectiveness = self.calculate_type_effectiveness(selected_move.move_type, defender_dojomon.dojomon_type);
+
 
             let rand_variation = randomizer.between::<u32>(attacker_dojomon.level,attacker_dojomon.level+10);
             let adding_damage_percent = 10 * type_effectiveness + rand_variation;
@@ -85,10 +88,12 @@ pub mod battle {
             
             let final_damage = base_damage + ( base_damage * adding_damage_percent / 100 );
 
+            println!("Damage: {}", final_damage);
+
             // Update defender's health
             if defender_dojomon.health <= final_damage {
                 defender_dojomon.health = 0;
-                self.endBattle(lobby_code, defender_dojomon.player, attacker_dojomon.player, defender_dojomon.dojomon_id, attacker_dojomon.dojomon_id);
+                self.endBattle(lobby_code, defender_dojomon.dojomon_id, attacker_dojomon.dojomon_id);
             } else {
                 defender_dojomon.health -= final_damage;
                 self.apply_move_effect(selected_move.effect, ref defender_dojomon);
@@ -130,22 +135,19 @@ pub mod battle {
         fn endBattle(
             ref self: ContractState,
             lobby_code: u32,
-            lost_player_address: ContractAddress,
-            won_player_address: ContractAddress,
             lost_dojomon_id: u32,
             won_dojomon_id: u32
         ){
             let mut world = self.world_default();
             let mut lobby: Lobby = world.read_model(lobby_code);
 
-            // Update the player stats
-            let mut lost_player :PlayerStats = world.read_model(lost_player_address);
-            let mut won_player :PlayerStats = world.read_model(won_player_address);
-
             // Update the dojomon stats
             let mut lost_dojomon :Dojomon = world.read_model(lost_dojomon_id);
             let mut won_dojomon :Dojomon = world.read_model(won_dojomon_id);
 
+            // Update the player stats
+            let mut lost_player :PlayerStats = world.read_model(lost_dojomon.player);
+            let mut won_player :PlayerStats = world.read_model(won_dojomon.player);
 
             let trophy_change: TrophyChange =  self.calculate_trophy_adjustment(
                 won_player,
@@ -218,7 +220,12 @@ pub mod battle {
             match effect {
                 MoveEffect::Burn => {
                     defender.health -= 5; // Burn deals 5 damage per turn
-                    defender.attack -= 5; // Burn reduces attack by half
+                    if( defender.attack < 5 ){
+                        defender.attack = 5;
+                    }
+                    else{
+                        defender.attack -= 5; // Lower attack by a fixed amount
+                    }
                 },
                 MoveEffect::Paralyze => {
                     defender.speed /= 2; // Paralysis halves speed

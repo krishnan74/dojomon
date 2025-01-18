@@ -101,6 +101,8 @@ struct Counter {
 struct Move {
     #[key]
     id: u32,
+    #[key]
+    dojomon_id: u32,
     name: felt252,
     description: ByteArray,
     power: u32,

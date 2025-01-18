@@ -1,8 +1,10 @@
 #[cfg(test)]
 mod tests {
     use dojo_cairo_test::WorldStorageTestTrait;
-use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
+    use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
     use dojo::world::WorldStorageTrait;
+    use dojo::world::WorldStorage;
+    use dojo::world::IWorldDispatcherTrait;
     use dojo_cairo_test::{spawn_test_world, NamespaceDef, TestResource, ContractDefTrait, ContractDef};
     use core::starknet::contract_address::contract_address_to_felt252;
 
@@ -150,7 +152,7 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
         let player1_name: felt252 = 'Player1';
         let player2_name: felt252 = 'Player2';
 
-        actions_system.spawnPlayer(
+        let attacker_dojomon_id = actions_system.spawnPlayer(
             player1_address, player1_name,
             DojomonType::Fire(())
         );
@@ -161,7 +163,7 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
 
         println!("");
 
-        actions_system.spawnPlayer(
+        let defender_dojomon_id = actions_system.spawnPlayer(
             player2_address, player2_name,
             DojomonType::Fire(())
         );
@@ -188,39 +190,39 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
         //     'wrong initial stats'
         // );
 
-        let attacker_dojomon_id : u32 = actions_system.createDojomon(
-            player1_address,
-            'Charmander',
-            100,
-            40,
-            30,
-            40,
-            0,
-            DojomonType::Fire(()),
-            Position{
-                x: 0,
-                y: 0,
-            },
-            false,
-            false,
-        );
+        // let attacker_dojomon_id : u32 = actions_system.createDojomon(
+        //     player1_address,
+        //     'Charmander',
+        //     100,
+        //     40,
+        //     30,
+        //     40,
+        //     0,
+        //     DojomonType::Fire(()),
+        //     Position{
+        //         x: 0,
+        //         y: 0,
+        //     },
+        //     false,
+        //     false,
+        // );
 
-        let defender_dojomon_id : u32 = actions_system.createDojomon(
-            player2_address,
-            'Squirtle',
-            110,
-            30,
-            35,
-            35,
-            0,
-            DojomonType::Water(()),
-            Position{
-                x: 0,
-                y: 0,
-            },
-            false,
-            false
-        );
+        // let defender_dojomon_id : u32 = actions_system.createDojomon(
+        //     player2_address,
+        //     'Squirtle',
+        //     110,
+        //     30,
+        //     35,
+        //     35,
+        //     0,
+        //     DojomonType::Water(()),
+        //     Position{
+        //         x: 0,
+        //         y: 0,
+        //     },
+        //     false,
+        //     false
+        // );
 
         //let attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
         //let defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
@@ -235,21 +237,7 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
 
         println!("");
 
-        let move_id : u32 = 4;
-        let move_name : felt252 = 'Ember';
-        let move_description : ByteArray = "A small flame attack that may leave the opponent burned." ;
-
-        let move = Move {
-            id: move_id,
-            name: move_name,
-            power: 40,
-            accuracy: 100,
-            move_type: DojomonType::Fire(()),
-            description: move_description,
-            effect: MoveEffect::Burn(()),
-        };
-
-        world.write_model(@move);
+        
 
         let lobby_code: u32 = lobby_system.createLobby(
             LobbyType::Public(()),
@@ -263,12 +251,15 @@ use dojo::model::{ModelStorage, ModelValueStorage, ModelStorageTest};
 
             if( 
                 attacker_dojomon.health == 0 || 
-                defender_dojomon.health == 0
+                defender_dojomon.health == 0 || attacker_dojomon.attack == 0 ||
+                defender_dojomon.attack == 0 || attacker_dojomon.defense == 0 ||
+                defender_dojomon.defense == 0 || attacker_dojomon.speed == 0 ||
+                defender_dojomon.speed == 0
             ) {
                 break;
             }
         
-            battle_system.attack(lobby_code, attacker_dojomon_id, defender_dojomon_id, move_id);
+            battle_system.attack(lobby_code, attacker_dojomon_id, defender_dojomon_id, 1);
 
             let after_attack_attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
 
