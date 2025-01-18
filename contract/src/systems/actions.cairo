@@ -5,8 +5,8 @@ use starknet::{ContractAddress, get_caller_address, contract_address_const};
 // Define the interface
 #[starknet::interface]
 trait IActions<T> {
-    fn spawnPlayer(ref self: T, player_address: ContractAddress, name: felt252, starting_dojo_mon: DojomonType) -> u32;
-    fn createDojomon(ref self: T, player_address: ContractAddress, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, evolution: u32, dojomon_type: DojomonType, position: Position, is_free: bool, is_being_caught: bool) -> u32;
+    fn spawnPlayer(ref self: T, player_address_felt252: felt252, name: felt252, starting_dojo_mon: DojomonType) -> u32;
+    fn createDojomon(ref self: T, player_address_felt252: felt252, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, evolution: u32, dojomon_type: DojomonType, position: Position, is_free: bool, is_being_caught: bool) -> u32;
     fn buyDojoBall( ref self: T, dojoball_type: DojoBallType, quantity: u32, dojomon_id: u32, has_dojomon: bool);
     fn feedDojomon(ref self: T, dojomon_id: u32, quantity: u32);
     fn catchDojomon(ref self: T, dojomon_id: u32);
@@ -61,7 +61,7 @@ pub mod actions {
 
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
-        fn spawnPlayer(ref self: ContractState, player_address: ContractAddress, name: felt252, starting_dojo_mon: DojomonType) -> u32 {
+        fn spawnPlayer(ref self: ContractState, player_address_felt252: felt252, name: felt252, starting_dojo_mon: DojomonType) -> u32 {
 
             
             let mut world = self.world_default();
@@ -79,11 +79,12 @@ pub mod actions {
 
             world.write_model(@counter);
 
-            
+            let player_address: ContractAddress = player_address_felt252.try_into().unwrap();
+
             //creating starting dojomon based on the input
             let created_dojomon_id = match starting_dojo_mon {
                 DojomonType::Fire => {
-                    let dojomon_id = self.createDojomon( player_address, 'Charmander', charmander.health, charmander.attack, charmander.defense, charmander.speed, 0, DojomonType::Fire, Position { x: 0, y: 0 }, false, false);
+                    let dojomon_id = self.createDojomon( player_address_felt252, 'Charmander', charmander.health, charmander.attack, charmander.defense, charmander.speed, 0, DojomonType::Fire, Position { x: 0, y: 0 }, false, false);
                     let move: Move = Move {
                         id: world.dispatcher.uuid(),
                         dojomon_id,
@@ -95,14 +96,13 @@ pub mod actions {
                         effect: MoveEffect::Burn,
                     };
 
-                    print!("move id: {}", move.id);
                     world.write_model(@move);
                     dojomon_id                    
 
                 },
                 
                 DojomonType::Grass =>{
-                    let dojomon_id = self.createDojomon( player_address, 'Bulbasaur', bulbasaur.health, bulbasaur.attack, bulbasaur.defense, bulbasaur.speed, 0, DojomonType::Grass, Position { x: 0, y: 0 }, false, false);
+                    let dojomon_id = self.createDojomon( player_address_felt252, 'Bulbasaur', bulbasaur.health, bulbasaur.attack, bulbasaur.defense, bulbasaur.speed, 0, DojomonType::Grass, Position { x: 0, y: 0 }, false, false);
                     let move: Move = Move {
                         id: world.dispatcher.uuid(),
                         dojomon_id,
@@ -114,14 +114,13 @@ pub mod actions {
                         effect: MoveEffect::Paralyze,
                     };
 
-                    print!("move id: {}", move.id);
 
                     world.write_model(@move);
                     dojomon_id
                 },
 
                 DojomonType::Water =>{
-                    let dojomon_id = self.createDojomon( player_address, 'Squirtle', squirtle.health, squirtle.attack, squirtle.defense, squirtle.speed, 0, DojomonType::Water, Position { x: 0, y: 0 }, false, false);
+                    let dojomon_id = self.createDojomon( player_address_felt252, 'Squirtle', squirtle.health, squirtle.attack, squirtle.defense, squirtle.speed, 0, DojomonType::Water, Position { x: 0, y: 0 }, false, false);
                     let move: Move = Move {
                         id: world.dispatcher.uuid(),
                         dojomon_id,
@@ -133,7 +132,6 @@ pub mod actions {
                         effect: MoveEffect::Confuse,
                     };
 
-                    print!("move id: {}", move.id);
 
                     world.write_model(@move);
                     dojomon_id 
@@ -249,7 +247,7 @@ pub mod actions {
         /// Creates a new Dojomon for the calling player.
         fn createDojomon(
             ref self: ContractState,
-            player_address: ContractAddress,
+            player_address_felt252: felt252,
             name: felt252,
             health: u32,
             attack: u32,
@@ -272,7 +270,8 @@ pub mod actions {
 
 
             let dojomon_id = world.dispatcher.uuid();
-
+            
+            let player_address: ContractAddress = player_address_felt252.try_into().unwrap();
 
 
             // Create new Dojomon

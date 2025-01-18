@@ -146,8 +146,8 @@ mod tests {
 
         println!("world created");
 
-        let player1_address = starknet::contract_address_const::<0x0>();
-        let player2_address = starknet::contract_address_const::<0x1>();
+        let player1_address: felt252 = '0x0';
+        let player2_address: felt252 = '0x1';
 
         let player1_name: felt252 = 'Player1';
         let player2_name: felt252 = 'Player2';
@@ -259,7 +259,7 @@ mod tests {
                 break;
             }
         
-            battle_system.attack(lobby_code, attacker_dojomon_id, defender_dojomon_id, 1);
+            battle_system.attack(lobby_code, attacker_dojomon_id, defender_dojomon_id, 1, false);
 
             let after_attack_attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
 

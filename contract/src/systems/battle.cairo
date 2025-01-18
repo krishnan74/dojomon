@@ -17,6 +17,7 @@ trait IBattle<T> {
         attacker_dojomon_id: u32,
         defender_dojomon_id: u32,
         move_id: u32,
+        against_AI: bool
     );
     fn changeTurn(
         ref self: T,
@@ -26,7 +27,8 @@ trait IBattle<T> {
         ref self: T,
         lobby_code: u32,
         lost_dojomon_id: u32,
-        won_dojomon_id: u32
+        won_dojomon_id: u32,
+        against_AI: bool
     );
 }
 
@@ -56,6 +58,7 @@ pub mod battle {
             attacker_dojomon_id: u32,
             defender_dojomon_id: u32,
             move_id: u32,
+            against_AI: bool
         ) {
             let mut world = self.world_default();
 
@@ -89,29 +92,30 @@ pub mod battle {
             let final_damage = base_damage + ( base_damage * adding_damage_percent / 100 );
 
             println!("Damage: {}", final_damage);
-
+            
             // Update defender's health
             if defender_dojomon.health <= final_damage {
                 defender_dojomon.health = 0;
-                self.endBattle(lobby_code, defender_dojomon.dojomon_id, attacker_dojomon.dojomon_id);
+                self.endBattle(lobby_code, defender_dojomon.dojomon_id, attacker_dojomon.dojomon_id, against_AI);
             } else {
                 defender_dojomon.health -= final_damage;
                 self.apply_move_effect(selected_move.effect, ref defender_dojomon);
-                self.changeTurn(lobby_code);
 
+                if !against_AI {
+                    self.changeTurn(lobby_code);
+                    // Emit an event for the attack
+                    world.emit_event(@PlayerAttacked {
+                        attacker_dojomon: world.read_model(attacker_dojomon_id),
+                        defender_dojomon: world.read_model(defender_dojomon_id),
+                        move: selected_move,
+                        lobby: world.read_model(lobby_code),
+                    });
+                }
             }
 
             // Update models in the world
             world.write_model(@attacker_dojomon);
             world.write_model(@defender_dojomon);
-
-            // Emit an event for the attack
-            world.emit_event(@PlayerAttacked {
-                attacker_dojomon: world.read_model(attacker_dojomon_id),
-                defender_dojomon: world.read_model(defender_dojomon_id),
-                move: selected_move,
-                lobby: world.read_model(lobby_code),
-            });
 
         }
 
@@ -136,7 +140,8 @@ pub mod battle {
             ref self: ContractState,
             lobby_code: u32,
             lost_dojomon_id: u32,
-            won_dojomon_id: u32
+            won_dojomon_id: u32, 
+            against_AI: bool
         ){
             let mut world = self.world_default();
             let mut lobby: Lobby = world.read_model(lobby_code);
@@ -145,32 +150,53 @@ pub mod battle {
             let mut lost_dojomon :Dojomon = world.read_model(lost_dojomon_id);
             let mut won_dojomon :Dojomon = world.read_model(won_dojomon_id);
 
-            // Update the player stats
-            let mut lost_player :PlayerStats = world.read_model(lost_dojomon.player);
-            let mut won_player :PlayerStats = world.read_model(won_dojomon.player);
+            if against_AI {
+                won_dojomon.exp += 50;
+                lost_dojomon.exp += 10;
+                let mut won_player :PlayerStats = world.read_model(won_dojomon.player);
+                won_player.exp += 50;
+                world.write_model(@won_player);
 
-            let trophy_change: TrophyChange =  self.calculate_trophy_adjustment(
-                won_player,
-                lost_player,
-                won_dojomon,
-                lost_dojomon,
-            );
+                world.emit_event(@BattleEnded{
+                    lobby_code,
+                    host_player: lobby.host_player,
+                    guest_player: lobby.guest_player,
+                });
+            }
 
-            // Update the player trophies
-            won_player.trophies += trophy_change.won_player_trophy_addition;
-            lost_player.trophies -= trophy_change.lost_player_trophy_subtraction;
+            else{
 
-            lost_dojomon.exp += 10;
-            won_dojomon.exp += 50;
+                // Update the player stats
+                let mut lost_player :PlayerStats = world.read_model(lost_dojomon.player);
+                let mut won_player :PlayerStats = world.read_model(won_dojomon.player);
 
-            world.write_model(@lost_player);
-            world.write_model(@won_player);
+                let trophy_change: TrophyChange =  self.calculate_trophy_adjustment(
+                    won_player,
+                    lost_player,
+                    won_dojomon,
+                    lost_dojomon,
+                );
 
-            world.emit_event(@BattleEnded{
-                lobby_code,
-                host_player: lobby.host_player,
-                guest_player: lobby.guest_player,
-            });
+                // Update the player trophies
+                won_player.trophies += trophy_change.won_player_trophy_addition;
+                lost_player.trophies -= trophy_change.lost_player_trophy_subtraction;
+
+                won_player.exp += 50;
+                lost_player.exp += 10;
+
+                lost_dojomon.exp += 10;
+                won_dojomon.exp += 50;
+
+                world.write_model(@lost_player);
+                world.write_model(@won_player);
+
+                world.emit_event(@BattleEnded{
+                    lobby_code,
+                    host_player: lobby.host_player,
+                    guest_player: lobby.guest_player,
+                });
+
+            }
             
         }
     }

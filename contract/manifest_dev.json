@@ -1,7 +1,7 @@
 {
   "world": {
     "class_hash": "0x45575a88cc5cef1e444c77ce60b7b4c9e73a01cbbe20926d5a4c72a94011410",
-    "address": "0x525177c8afe8680d7ad1da30ca183e482cfcd6404c1e09d83fd3fa2994fd4b8",
+    "address": "0x2cca81d865a4f7606dfd5125a267fc8874f8ff541c49967c8b2736fdd17374d",
     "seed": "dojomon",
     "name": "Dojo starter",
     "entrypoints": [
@@ -1252,8 +1252,8 @@
   },
   "contracts": [
     {
-      "address": "0x47893ec0eb8e883bbe3862a953a9f8191b156162af9008c6f5c7a8b736a511c",
-      "class_hash": "0x634be1c3e908f3e73923efa505634001854a50c8e78c55f190f8349d4b38d3",
+      "address": "0x1b4f149cd75387220d9d7ee177acc1c313d0e896ec7d9b047ca2c075ee571bb",
+      "class_hash": "0x30b79d5119d294b2a75c1ba5827e87a314032158ec013dcacf47d565dc440bf",
       "abi": [
         {
           "type": "impl",
@@ -1389,6 +1389,34 @@
           ]
         },
         {
+          "type": "struct",
+          "name": "dojomon::models::Position",
+          "members": [
+            {
+              "name": "x",
+              "type": "core::integer::u32"
+            },
+            {
+              "name": "y",
+              "type": "core::integer::u32"
+            }
+          ]
+        },
+        {
+          "type": "enum",
+          "name": "core::bool",
+          "variants": [
+            {
+              "name": "False",
+              "type": "()"
+            },
+            {
+              "name": "True",
+              "type": "()"
+            }
+          ]
+        },
+        {
           "type": "enum",
           "name": "dojomon::models::DojoBallType",
           "variants": [
@@ -1411,34 +1439,6 @@
           ]
         },
         {
-          "type": "enum",
-          "name": "core::bool",
-          "variants": [
-            {
-              "name": "False",
-              "type": "()"
-            },
-            {
-              "name": "True",
-              "type": "()"
-            }
-          ]
-        },
-        {
-          "type": "struct",
-          "name": "dojomon::models::Position",
-          "members": [
-            {
-              "name": "x",
-              "type": "core::integer::u32"
-            },
-            {
-              "name": "y",
-              "type": "core::integer::u32"
-            }
-          ]
-        },
-        {
           "type": "interface",
           "name": "dojomon::systems::actions::IActions",
           "items": [
@@ -1447,11 +1447,79 @@
               "name": "spawnPlayer",
               "inputs": [
                 {
+                  "name": "player_address_felt252",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "name",
+                  "type": "core::felt252"
+                },
+                {
                   "name": "starting_dojo_mon",
                   "type": "dojomon::models::DojomonType"
                 }
               ],
-              "outputs": [],
+              "outputs": [
+                {
+                  "type": "core::integer::u32"
+                }
+              ],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "createDojomon",
+              "inputs": [
+                {
+                  "name": "player_address_felt252",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "name",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "health",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "attack",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "defense",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "speed",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "evolution",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "dojomon_type",
+                  "type": "dojomon::models::DojomonType"
+                },
+                {
+                  "name": "position",
+                  "type": "dojomon::models::Position"
+                },
+                {
+                  "name": "is_free",
+                  "type": "core::bool"
+                },
+                {
+                  "name": "is_being_caught",
+                  "type": "core::bool"
+                }
+              ],
+              "outputs": [
+                {
+                  "type": "core::integer::u32"
+                }
+              ],
               "state_mutability": "external"
             },
             {
@@ -1480,7 +1548,7 @@
             },
             {
               "type": "function",
-              "name": "feedDojoMon",
+              "name": "feedDojomon",
               "inputs": [
                 {
                   "name": "dojomon_id",
@@ -1492,46 +1560,6 @@
                 }
               ],
               "outputs": [],
-              "state_mutability": "external"
-            },
-            {
-              "type": "function",
-              "name": "createDojomon",
-              "inputs": [
-                {
-                  "name": "name",
-                  "type": "core::felt252"
-                },
-                {
-                  "name": "health",
-                  "type": "core::integer::u32"
-                },
-                {
-                  "name": "attack",
-                  "type": "core::integer::u32"
-                },
-                {
-                  "name": "defense",
-                  "type": "core::integer::u32"
-                },
-                {
-                  "name": "speed",
-                  "type": "core::integer::u32"
-                },
-                {
-                  "name": "dojomon_type",
-                  "type": "dojomon::models::DojomonType"
-                },
-                {
-                  "name": "position",
-                  "type": "dojomon::models::Position"
-                }
-              ],
-              "outputs": [
-                {
-                  "type": "core::integer::u32"
-                }
-              ],
               "state_mutability": "external"
             },
             {
@@ -1668,16 +1696,16 @@
       "selector": "0x6be4852ae0101a92edf2e76edf8f43bbc9d2afb1dd5e72b7b724b13fe8ba673",
       "systems": [
         "spawnPlayer",
-        "buyDojoBall",
-        "feedDojoMon",
         "createDojomon",
+        "buyDojoBall",
+        "feedDojomon",
         "catchDojomon",
         "upgrade"
       ]
     },
     {
-      "address": "0x2ace7ba85361738513fca947c70b25ceda7a758500e8c505f3a100566767737",
-      "class_hash": "0x49069788c949a685bc8c98830892084e200b389d314dcf009ecabbdd438dde9",
+      "address": "0x9d2c75a037d870f39e4e7ef3db27f9ea31e24a2de4a15eb914e991cfd7a4ec",
+      "class_hash": "0x75b6db9640f34effadfc7368213e821db3d2f237dbf58d5863cde54ac589040",
       "abi": [
         {
           "type": "impl",
@@ -1735,6 +1763,20 @@
           "interface_name": "dojomon::systems::battle::IBattle"
         },
         {
+          "type": "enum",
+          "name": "core::bool",
+          "variants": [
+            {
+              "name": "False",
+              "type": "()"
+            },
+            {
+              "name": "True",
+              "type": "()"
+            }
+          ]
+        },
+        {
           "type": "interface",
           "name": "dojomon::systems::battle::IBattle",
           "items": [
@@ -1757,6 +1799,10 @@
                 {
                   "name": "move_id",
                   "type": "core::integer::u32"
+                },
+                {
+                  "name": "against_AI",
+                  "type": "core::bool"
                 }
               ],
               "outputs": [],
@@ -1769,6 +1815,30 @@
                 {
                   "name": "lobby_code",
                   "type": "core::integer::u32"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "endBattle",
+              "inputs": [
+                {
+                  "name": "lobby_code",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "lost_dojomon_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "won_dojomon_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "against_AI",
+                  "type": "core::bool"
                 }
               ],
               "outputs": [],
@@ -1897,11 +1967,12 @@
       "systems": [
         "attack",
         "changeTurn",
+        "endBattle",
         "upgrade"
       ]
     },
     {
-      "address": "0x633a45a4700d1e6cc3a4fc91e4562edd42664d4687b117267ad67424c614d48",
+      "address": "0x74adf429f0484603a007de9f56ff493465241d6e13214e8ef02d65a75c5956c",
       "class_hash": "0x40aa3dca9d5583d09352bb998674aaee035ef2e564e0dd213c484b1f7c0aeaa",
       "abi": [
         {
@@ -2114,8 +2185,8 @@
       ]
     },
     {
-      "address": "0x67a591b7a24ce9fc909dfd57e7a3c47955971a289f61340977a46f33c65b000",
-      "class_hash": "0x71cb77611901d7870fa91293352835ea76166b6eb7cc966f2523335a72bc9eb",
+      "address": "0x39a89b92fe48ef8e3429eb1d664c2cd62023fbbe70f7c5f6b663cf2f0f1ffa3",
+      "class_hash": "0x56a70f96815ae58f7d189c81a9a5cda0e9b4c5614f305fbc16ef6a158b73750",
       "abi": [
         {
           "type": "impl",
@@ -2237,18 +2308,6 @@
             {
               "type": "function",
               "name": "readyForBattle",
-              "inputs": [
-                {
-                  "name": "lobby_code",
-                  "type": "core::integer::u32"
-                }
-              ],
-              "outputs": [],
-              "state_mutability": "external"
-            },
-            {
-              "type": "function",
-              "name": "endBattle",
               "inputs": [
                 {
                   "name": "lobby_code",
@@ -2383,7 +2442,6 @@
         "joinLobby",
         "selectDojomon",
         "readyForBattle",
-        "endBattle",
         "upgrade"
       ]
     }
@@ -2403,9 +2461,9 @@
     },
     {
       "members": [],
-      "class_hash": "0x6623ebd567746b599c17d104f13a10d92859d023eaeddfb1b8d738b8fd6ea65",
-      "tag": "dojomon-DojoMon",
-      "selector": "0x6b516466e66f8ddc1c8a9051b4f8c29bc5b0f3be20e83b54ee7f7efa7e04d64"
+      "class_hash": "0x4d6d5303807f7c8cca27a9530a33a869626402c136ed96792fe30b4fce8f67f",
+      "tag": "dojomon-Dojomon",
+      "selector": "0x7bfac2cc75361162f84c4b80a71fa4f00efe1c5c357603a49ebd22dea299f5d"
     },
     {
       "members": [],
@@ -2421,13 +2479,13 @@
     },
     {
       "members": [],
-      "class_hash": "0x10068055962c079cd8ac277fa1a1d279cb1db02f9bc2f173fbc85d42d9b358a",
+      "class_hash": "0x1de7eaa4071a8f445a058edc1e6941f2abbaa86948731a59efeafc48bf05a88",
       "tag": "dojomon-Move",
       "selector": "0x222b385f238e4114266b6310252b567e4f91d1112d5949f6657f575986a87ca"
     },
     {
       "members": [],
-      "class_hash": "0x4f20c60514e97cccfb2a2bccd6daa37bbec1ee22346076b65896e0db12092cc",
+      "class_hash": "0x5af433bdfaaf3a1905558ba372d8d1f8fe71fd9f62a3572ca0694f9770ef2b1",
       "tag": "dojomon-PlayerStats",
       "selector": "0x6d42a379121634eae52d9afe766849f9b7ded5ed81663d2cda5751c3f26a3f9"
     },
@@ -2441,49 +2499,49 @@
   "events": [
     {
       "members": [],
-      "class_hash": "0x6cef8b293e9319d34dc5b95b11188a331b2d138236d800118632b7b9ba42e35",
+      "class_hash": "0x6ed2fb0580157237dd406b04a6ed1cd4611f2ca2475a5883132f97c452db574",
       "tag": "dojomon-BattleEnded",
       "selector": "0x774e0d30577407cd4663436e49bb993fbe9671bd8e6cd86500ed524c109489a"
     },
     {
       "members": [],
-      "class_hash": "0x36bcd10e797851a2115e528bdc7ac5f07ac45033dc3348111ca3d19c25f565b",
-      "tag": "dojomon-DojoMonCaptured",
-      "selector": "0x536e08bdf0c2daddcce56b8abbcb28415fd95c90b9cb2f1a538350dadf13180"
+      "class_hash": "0x5e44c9efa9e163d95434e9a816430b267f8ef60b9f338174353147d120bd396",
+      "tag": "dojomon-DojomonCaptured",
+      "selector": "0x79f768aabd49991f7b46e3fe61125bc626cf3e7f96f62e0742af9986aa2c9e8"
     },
     {
       "members": [],
-      "class_hash": "0x43d45708952b3da538479a6ac915ea139b33cf928b8d1bdb72376f860f4cfdd",
-      "tag": "dojomon-DojoMonCreated",
-      "selector": "0x379834c8120a1f9537bf66d4d86848d99f6768e9e8e7bce86860fa8f39c6825"
+      "class_hash": "0x48ca62123ea0c52ce82eb1df37948a88c4d71ee89158634ac8d3dd84c27fc07",
+      "tag": "dojomon-DojomonCreated",
+      "selector": "0x3e873a97c206915bfd3a99636e274fcaab6c3c6d051aa855ceae73eee15ad76"
     },
     {
       "members": [],
-      "class_hash": "0x76932abf4ea3062465b84b558a79fd623c581129ac6ba94151ff877f8d86398",
+      "class_hash": "0x72dfb2a76fe25457c666faa9e995457d3c056583f62e5f6f6f680580ca64adc",
       "tag": "dojomon-PlayerAttacked",
       "selector": "0x3e2286bc30a3c518902e7cb2f5300824bf7e48abffe68b0b190afbf6bd15677"
     },
     {
       "members": [],
-      "class_hash": "0x76b275e2dc81b6755d115e339a3a61cffd08a0a597f16b7b2d19179d4e1787c",
+      "class_hash": "0x5008cbd45d14c3274c0070de9bb79d1cf3754b8bd0c956a3818ed02919fb8da",
       "tag": "dojomon-PlayerJoined",
       "selector": "0x1e09b29c4dc1af94e49a151b7a98d7fc8b8f611b90011e355ae849b9a29b51e"
     },
     {
       "members": [],
-      "class_hash": "0x647aaca1dbe8e31452fa477754132a392e2d25d2068f302ef692bffd2995c37",
+      "class_hash": "0x2ebe2000ea2686218f7ac38db688ccb4f64f6316d29be6cd0fb61398bc60b80",
       "tag": "dojomon-PlayerReady",
       "selector": "0x45f7be9c049786d4544b2a18633d93ac9770a9f023773a7e5ee9805124cac18"
     },
     {
       "members": [],
-      "class_hash": "0x7754029ed9df0695a9051a918a07b08f8b4f92b0ba5ddcfcc5f693ac9bd4bf3",
+      "class_hash": "0x344fcf3cc44e76549b70fa3ffd8357122095ce183ac920015472f74cde81aa4",
       "tag": "dojomon-PlayerSelectedDojomon",
       "selector": "0x4b26edb39adbe09fb60c80b64ef2f803865b3e1b5f90b74e3b26d711f9b2a49"
     },
     {
       "members": [],
-      "class_hash": "0x54bd80186613995a630fe863737bf1b6fe7cb5104698c90f08214d964bcae55",
+      "class_hash": "0x3d96d0b2e4eab6746dbc422dee919bcaac5cee299c20be89160799fcb37a32c",
       "tag": "dojomon-PlayerSpawned",
       "selector": "0x449d92d5de50b46eae30316a12cfb7aa6133a7cb049b4e3a9ce8dc9606d92ed"
     }
