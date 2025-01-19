@@ -13,3 +13,7 @@ export const copyToClipboard = (copyText: string) => {
   navigator.clipboard.writeText(copyText);
   alert("Address copied to clipboard!");
 };
+
+export const withGrid = (grid: number) => {
+  return grid * 12;
+}

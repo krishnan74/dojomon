@@ -31,6 +31,45 @@ export class Boundary {
     ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
   }
 }
+
+export class Crop  {
+  static width = 60;
+  static height = 60;
+
+  position: { x: number; y: number };
+  width: number;
+  height: number;
+
+  constructor({ position }: { position: { x: number; y: number } }) {
+    this.position = position;
+    this.width = Crop.width;
+    this.height = Crop.height;
+  }
+
+  grow({ renderedSpritesGame }: { renderedSpritesGame: Sprite[] }) {
+    const cropImage = new Image();
+    cropImage.src = "../assets/cherry.png"; // Ensure the path is correct
+  
+    const cropSprite = new Sprite({
+      position: { x: this.position.x, y: this.position.y },
+      image: cropImage,
+      frames: { max: 1 },
+      sprites: {
+        up: cropImage,
+        left: cropImage,
+        right: cropImage,
+        down: cropImage,
+      },
+    });
+    renderedSpritesGame.push(cropSprite);
+  }
+
+  harvest({ renderedSpritesGame }: { renderedSpritesGame: Sprite[] }) {
+    renderedSpritesGame.pop();
+  }
+}
+
+
 interface PlayerOptions {
   position: { x: number; y: number };
   image: HTMLImageElement;

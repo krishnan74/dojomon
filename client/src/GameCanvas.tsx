@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from "react";
-import { Boundary, Monster, Player, Position } from "./interfaces";
+import { Boundary, Crop, Monster, Player, Position, Sprite } from "./interfaces";
 import { Collision } from "../assets/collisionData";
 import { BattleZoneData } from "../assets/battleZoneData";
+import { FarmZoneData } from "../assets/farmData";
 import Profile from "../assets/pfp.jpg"
 import Trophy from "../assets/trophy.png";
 import Gold from "../assets/gold.png";
@@ -16,13 +17,16 @@ const GameCanvas = ({ pokeballPosition }: { pokeballPosition: Position }) => {
   const battleBackgroundPosition = { x: 0, y: 0 }; // External battle position object
   const [boundaries, setBoundaries] = useState<Boundary[]>([]);
   const [battleZone, setBattleZone] = useState<Boundary[]>([]);
+  const [farmZone, setFarmZone] = useState<Crop[]>([]);
   const [battle, setBattle] = useState({ initiate: false });
   const [move, setMove] = useState<string | null>(null);
   const [isPokemonTabOpened, setIsPokemonTabOpened] = useState(false);
   const battleAnimationIdRef = useRef<number | null>(null);
   const animationIdRef = useRef<number | null>(null);
+  const [farm, setFarm] = useState({ initiate: false });  
 
   let isAnimating = false;
+  const renderedSpritesGame: Sprite[] = [];
 
   const attacks = {
     Tackle: {
@@ -82,9 +86,33 @@ const GameCanvas = ({ pokeballPosition }: { pokeballPosition: Position }) => {
         }
       });
     });
+
+    const farmMap: number[][] = [];
+    for (let i = 0; i < FarmZoneData.length; i += 160) {
+      farmMap.push(FarmZoneData.slice(i, i + 160));
+    }
+
+    const farmZoneInstances: Crop[] = [];
+    farmMap.forEach((row, rowIndex) => {
+      row.forEach((cell, colIndex) => {
+        if (cell === 1025) {
+          farmZoneInstances.push(
+            new Crop({
+              position: {
+                x: colIndex * Crop.width + offset.x,
+                y: rowIndex * Crop.height + offset.y,
+              },
+            })
+          );
+        }
+      });
+    });
+
+
     setBoundaries(boundaryInstances);
     setBattleZone(battleZoneInstances);
-  }, [battle.initiate]);
+    setFarmZone(farmZoneInstances);
+  }, [battle.initiate,farm.initiate]);
 
 
   useEffect(() => {
@@ -191,9 +219,13 @@ const GameCanvas = ({ pokeballPosition }: { pokeballPosition: Position }) => {
       { position: backgroundPosition },
       ...boundaries.map((boundary) => ({ position: boundary.position })),
       ...battleZone.map((battleZone) => ({ position: battleZone.position })),
+      ...farmZone.map((farmZone) => ({ position: farmZone.position })),
+      ...renderedSpritesGame.map((sprite) => ({ position: sprite.position })),
     ]
 
     const renderedSpritesBattle = [myPet, enemy];
+   
+
 
     function rectangularCollision({
       rectangle1,
@@ -215,7 +247,34 @@ const GameCanvas = ({ pokeballPosition }: { pokeballPosition: Position }) => {
       console.log("battle", battle.initiate);
       let moving = true;
       player.moving = false;
+      if(farm.initiate){
+        // for (let i = 0; i < farmZone.length; i++) {
+        //   const farmZoneSq = farmZone[i];
+        //   const overlappingArea = (Math.min(
+        //     player.position.x + player.width,
+        //     farmZoneSq.position.x + farmZoneSq.width
+        //   ) - Math.max(player.position.x, farmZoneSq.position.x)) *
+        //     (Math.min(
+        //       player.position.y + player.height,
+        //       farmZoneSq.position.y + farmZoneSq.height
+        //     ) - Math.max(player.position.y, farmZoneSq.position.y))
+        //   if (
+        //     rectangularCollision({
+        //       rectangle1: player,
+        //       rectangle2: farmZoneSq
+        //     })
+        //     && overlappingArea > (player.width * player.height) / 2
+        //   ) {
+        //     console.log("collision with farmZone");
+        //     setFarm({ initiate: false });
+        //     return;
+        //   }
+        // }
 
+       
+        // setFarm({initiate:false});
+        
+      }
       if (!battle.initiate) {
         for (let i = 0; i < battleZone.length; i++) {
           const battleZoneSq = battleZone[i];
@@ -323,6 +382,9 @@ const GameCanvas = ({ pokeballPosition }: { pokeballPosition: Position }) => {
         battleZoneSq.draw(ctx)
       })
 
+      renderedSpritesGame.forEach((sprite) => {
+        sprite.draw(ctx); 
+      });
 
       player.draw(ctx);
 
@@ -457,6 +519,22 @@ const GameCanvas = ({ pokeballPosition }: { pokeballPosition: Position }) => {
     }
   }
 
+  const handleFarm = () => {
+    setFarm({ initiate: true });
+    farmZone.forEach((farmZoneSq) => {
+      farmZoneSq.grow(
+        {renderedSpritesGame: renderedSpritesGame});
+    });
+    console.log("Farm initiated");
+  }
+
+  const handleHarvest = () => {
+    farmZone.forEach((farmZoneSq) => {
+      farmZoneSq.harvest(
+        {renderedSpritesGame: renderedSpritesGame});
+    });
+    console.log("Harvest initiated");}
+
   return (
     <div className="">
       <div
@@ -549,7 +627,12 @@ const GameCanvas = ({ pokeballPosition }: { pokeballPosition: Position }) => {
             <div>
               <img src={BattleLogo} alt="" width={70} className="bg-blue-500 border-2 border-black" />
             </div>
-            <div></div>
+            <div className="bg-white p-2 ml-2">
+              <button onClick={handleFarm}>Farm</button>
+            </div>
+            <div className="bg-white p-2 ml-2">
+              <button onClick={handleHarvest}>Harvest</button>
+            </div>
           </div>
 
         </div>
