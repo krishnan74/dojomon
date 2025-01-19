@@ -165,7 +165,7 @@ mod tests {
 
         let defender_dojomon_id = actions_system.spawnPlayer(
             player2_address, player2_name,
-            DojomonType::Fire(())
+            DojomonType::Water(())
         );
 
         println!("player2 spawned");

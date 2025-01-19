@@ -1,7 +1,7 @@
 use dojomon::models::{
     PlayerStats,
     Lobby, LobbyType,
-    Dojomon, Player
+    Dojomon, Player, DojomonStruct, DojomonType
 };
 use dojomon::events::{
     PlayerSelectedDojomon,
@@ -22,9 +22,8 @@ trait ILobby<T> {
 // Dojo contract
 #[dojo::contract]
 pub mod lobby {
-    
     use super::{
-            ILobby, PlayerStats, Lobby, LobbyType, PlayerSelectedDojomon, PlayerReady, PlayerJoined, Dojomon, Player
+            ILobby, PlayerStats, Lobby, LobbyType, PlayerSelectedDojomon, PlayerReady, PlayerJoined, Dojomon, Player, DojomonStruct, DojomonType
         };
     use starknet::{ContractAddress, get_caller_address};
     use dojo::model::{ModelStorage, ModelValueStorage};
@@ -65,6 +64,36 @@ pub mod lobby {
                 trophies: 0,
             };
 
+            let host_dojomon = DojomonStruct{
+                dojomon_id: Zeroable::zero(),
+                player: Zeroable::zero(),
+                name: Zeroable::zero(),
+                health: 0,
+                attack: 0,
+                defense: 0,
+                speed: 0,
+                level: 1, // New Dojomons start at level 1
+                exp: 0,   // Initial experience
+                evolution: 0,
+                dojomon_type: Zeroable::zero(),
+            };
+
+
+            let guest_dojomon = DojomonStruct{
+                dojomon_id: Zeroable::zero(),
+                player: Zeroable::zero(),
+                name: Zeroable::zero(),
+                health: 0,
+                attack: 0,
+                defense: 0,
+                speed: 0,
+                level: 1, // New Dojomons start at level 1
+                exp: 0,   // Initial experience
+                evolution: 0,
+                dojomon_type: Zeroable::zero(),
+            };
+
+
             // Creating new lobby
             let lobby = Lobby {
                 lobby_code,
@@ -72,8 +101,8 @@ pub mod lobby {
                 guest_player,
                 host_ready: false,
                 guest_ready: false,
-                host_dojomon_id: 0,
-                guest_dojomon_id: 0,
+                host_dojomon,
+                guest_dojomon,
                 is_vacant: true,
                 lobby_type,
                 turn: host_player.address,
@@ -145,10 +174,26 @@ pub mod lobby {
 
             let mut lobby: Lobby = world.read_model(lobby_code);
 
+            let selected_dojomon: Dojomon = world.read_model(dojomon_id);
+
+            let selected_dojomon_struct = DojomonStruct{
+                dojomon_id: selected_dojomon.dojomon_id,
+                player: selected_dojomon.player,
+                name: selected_dojomon.name,
+                health: selected_dojomon.health,
+                attack: selected_dojomon.attack,
+                defense: selected_dojomon.defense,
+                speed: selected_dojomon.speed,
+                level: selected_dojomon.level,
+                exp: selected_dojomon.exp,
+                evolution: selected_dojomon.evolution,
+                dojomon_type: selected_dojomon.dojomon_type.into(),
+            };
+
             if player_address == lobby.host_player.address {
-                lobby.host_dojomon_id = dojomon_id;
+                lobby.host_dojomon = selected_dojomon_struct;
             } else {
-                lobby.guest_dojomon_id = dojomon_id;
+                lobby.guest_dojomon = selected_dojomon_struct;
             }
 
             let dojomon: Dojomon = world.read_model(dojomon_id);
@@ -172,6 +217,32 @@ pub mod lobby {
         /// Returns the default world storage for the contract.
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
             self.world(@"dojomon")
+        }
+    }
+
+    impl DojomonTypeIntoFelt252 of Into<DojomonType, felt252> {
+        fn into(self: DojomonType) -> felt252 {
+            match self {
+                DojomonType::Fire => 'Fire',
+                DojomonType::Grass => 'Grass',
+                DojomonType::Water => 'Water',
+                DojomonType::Electric => 'Electric',
+                DojomonType::Ice => 'Ice',
+                DojomonType::Psychic => 'Psychic',
+                DojomonType::Normal => 'Normal',
+                DojomonType::Ghost => 'Ghost',
+                DojomonType::Flying => 'Flying',
+                DojomonType::Rock => 'Rock',
+                DojomonType::Ground => 'Ground',
+                DojomonType::Bug => 'Bug',
+                DojomonType::Dark => 'Dark',
+                DojomonType::Steel => 'Steel',
+                DojomonType::Dragon => 'Dragon',
+                DojomonType::Fairy => 'Fairy',
+                DojomonType::Poison => 'Poison',
+                DojomonType::Fighting => 'Fighting',
+
+            }
         }
     }
 

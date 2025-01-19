@@ -105,6 +105,7 @@ pub mod battle {
                     self.changeTurn(lobby_code);
                     // Emit an event for the attack
                     world.emit_event(@PlayerAttacked {
+                        lobby_code,
                         attacker_dojomon: world.read_model(attacker_dojomon_id),
                         defender_dojomon: world.read_model(defender_dojomon_id),
                         move: selected_move,

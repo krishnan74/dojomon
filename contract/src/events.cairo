@@ -27,15 +27,12 @@ pub struct DojomonCaptured {
     pub player: ContractAddress,
 }
 
-//battle events
 #[derive(Drop, Serde, Debug)]
 #[dojo::event]
-pub struct PlayerAttacked {
+pub struct PlayerJoined {
     #[key]
-    pub attacker_dojomon: Dojomon,
-    pub defender_dojomon: Dojomon,
-    pub move: Move,
-    pub lobby: Lobby,
+    lobby_code: u32,
+    player: ContractAddress,
 }
 
 //lobby events
@@ -56,12 +53,16 @@ pub struct PlayerReady {
     player: ContractAddress,
 }
 
+//battle events
 #[derive(Drop, Serde, Debug)]
 #[dojo::event]
-pub struct PlayerJoined {
+pub struct PlayerAttacked {
     #[key]
-    lobby_code: u32,
-    player: ContractAddress,
+    pub lobby_code: u32,
+    pub attacker_dojomon: Dojomon,
+    pub defender_dojomon: Dojomon,
+    pub move: Move,
+    pub lobby: Lobby,
 }
 
 #[derive(Drop, Serde, Debug)]
