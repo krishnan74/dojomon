@@ -33,3 +33,7 @@ export const felt252ToString = (felt252: string | undefined) => {
 
   return cleanedString;
 };
+
+export const withGrid = (grid: number) => {
+  return grid * 12;
+}
