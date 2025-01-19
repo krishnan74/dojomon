@@ -1,18 +1,31 @@
+@import url(https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap);
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+  font-family: "Press Start 2P", display;
+}
+
+body {
+  background-color: #000;
+  overflow-y: hidden;
+}
+
 @layer base {
   :root {
-    --radius: 0.5rem
+    --radius: 0.5rem;
   }
 }
 .flash-box {
   background-color: #00000000;
-  animation: flash 0.4s ;
+  animation: flash 0.4s;
 }
 
 @keyframes flash {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     background-color: black;
   }
@@ -21,7 +34,7 @@
   }
 }
 
-.font-pixel{
+.font-pixel {
   font-family: "Press Start 2P", serif;
   font-weight: 400;
   font-style: normal;

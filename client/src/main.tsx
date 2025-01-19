@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App.tsx";
 
 import "./index.css";
@@ -11,6 +11,11 @@ import { DojoSdkProvider } from "./dojo-sdk-provider.tsx";
 import { setupBurnerManager } from "@dojoengine/create-burner";
 import StarknetProvider from "./starknet-provider.tsx";
 import Navbar from "./components/Navbar.tsx";
+import GameCanvas from "./GameCanvas.tsx";
+import Home from "./pages/Home.tsx";
+import Battle from "./pages/Battle.tsx";
+import WaitLobby from "./pages/WaitLobby.tsx";
+import NoPage from "./pages/NoPage.tsx";
 
 /**
  * Initializes and bootstraps the Dojo application.
@@ -44,8 +49,18 @@ async function main() {
         burnerManager={await setupBurnerManager(dojoConfig)}
       >
         <StarknetProvider>
-          <Navbar />
-          <App />
+          <BrowserRouter>
+            <Routes>
+              <Route index element={<Home />} />
+              <Route
+                path="game"
+                element={<GameCanvas pokeballPosition={{ x: 0, y: 0 }} />}
+              />
+              <Route path="blogs" element={<Battle />} />
+              <Route path="contact" element={<WaitLobby />} />
+              <Route path="*" element={<NoPage />} />
+            </Routes>
+          </BrowserRouter>
           {/* <GameCanvas pokeballPosition={{ x: 0, y: 0 }} /> */}
         </StarknetProvider>
       </DojoSdkProvider>

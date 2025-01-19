@@ -11,22 +11,26 @@ import { useAccount } from "@starknet-react/core";
 import { copyToClipboard, shortenAddress } from "../lib/utils";
 import { MetaMaskAvatar } from "react-metamask-avatar";
 import { ConnectButton } from "./wallet/ConnectButton";
+import { Outlet } from "react-router-dom";
 
 const Navbar = () => {
-  const { address } = useAccount();
+  const { account, address } = useAccount();
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <div className="flex items-center px-8 py-4 justify-between border-b bg-white bg-opacity-90 ">
+    <div className="flex items-center px-10 py-8 justify-between z-20 ">
       <a className="" href={"/"}>
-        <p className="text-2xl font-semibold text-gray-900">DOJOMON</p>
+        <p className="text-2xl font-semibold text-white">
+          <span className="text-[#ff3f3f] mr-1">DOJO</span>
+          MON
+        </p>
       </a>
 
       <div className="flex gap-8 items-center">
-        <Select onValueChange={() => {}}>
+        {/* <Select onValueChange={() => {}}>
           <SelectTrigger
             id="network"
-            className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#845DCC] focus:border-transparent"
+            className="px-4 py-2 border text-white border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#fff] focus:border-transparent"
           >
             <SelectValue placeholder="Select Network" />
           </SelectTrigger>
@@ -37,7 +41,6 @@ const Navbar = () => {
                 <p>Starknet</p>
               </div>
             </SelectItem>
-
             <SelectItem value="696969">
               <div className="flex w-fit gap-2 items-center">
                 <img
@@ -51,13 +54,12 @@ const Navbar = () => {
               </div>
             </SelectItem>
           </SelectContent>
-        </Select>
-
+        </Select> */}
         <div className="relative">
           {address ? (
             <div>
               <span
-                className="cursor-pointer px-4 py-2 text-gray-700 bg-gray-100 rounded-lg"
+                className="cursor-pointer px-4 py-2 text-black bg-gray-100 rounded-lg"
                 onClick={() => setShowDetails(!showDetails)}
               >
                 {shortenAddress(address)}

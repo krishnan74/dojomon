@@ -33,7 +33,7 @@ export function WalletAccount() {
 
   if (undefined !== address) {
     return (
-      <div className="mb-6">
+      <div className="">
         <div style={{ display: "flex", gap: "1rem" }}>
           <button
             onClick={() => disconnect()}
