@@ -1,5 +1,5 @@
 import { BigNumberish } from "starknet";
-import { useDojoStore } from "../App.tsx";
+import { useDojoStore } from "./useDojoStore.tsx";
 import { SchemaType } from "../typescript/models.gen.ts";
 
 /**

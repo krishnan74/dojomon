@@ -14,13 +14,13 @@ export const copyToClipboard = (copyText: string) => {
   alert("Address copied to clipboard!");
 };
 
-export const felt252ToString = (felt252: string) => {
+export const felt252ToString = (felt252: string | undefined) => {
   // Remove the "0x" prefix
-  const felt252WithOutPrefix = felt252.slice(2);
+  const felt252WithOutPrefix = felt252?.slice(2);
 
   // Convert the hex string to a byte array
   const byteArray = new Uint8Array(
-    (felt252WithOutPrefix.match(/.{2}/g) || []).map((byte) =>
+    (felt252WithOutPrefix?.match(/.{2}/g) || []).map((byte) =>
       parseInt(byte, 16)
     )
   );

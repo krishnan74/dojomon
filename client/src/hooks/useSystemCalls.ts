@@ -1,4 +1,4 @@
-import { useDojoStore } from "../App";
+import { useDojoStore } from "./useDojoStore";
 import { DojoContext } from "../dojo-sdk-provider";
 import { v4 as uuidv4 } from "uuid";
 import { useAccount } from "@starknet-react/core";
@@ -21,7 +21,7 @@ export const useSystemCalls = (entityId: BigNumberish) => {
   const { account } = useAccount();
 
   const spawn = useCallback(
-    async (dojomon_type: DojomonType) => {
+    async (name: string, dojomon_type: DojomonType) => {
       // Generate a unique transaction ID
       const transactionId = uuidv4();
 
@@ -83,7 +83,7 @@ export const useSystemCalls = (entityId: BigNumberish) => {
 
       try {
         // Execute the spawn action from the client
-        await client.actions.spawnPlayer(account!, dojomon_type);
+        await client.actions.spawnPlayer(account!, name, dojomon_type);
 
         // Wait for the entity to be updated with the new state
         await state.waitForEntityChange(entityId.toString(), (entity) => {
@@ -92,8 +92,10 @@ export const useSystemCalls = (entityId: BigNumberish) => {
             entity?.models?.dojo_starter?.PlayerStats?.level === levelCount &&
             entity?.models?.dojo_starter?.PlayerStats?.exp === expCount &&
             entity?.models?.dojo_starter?.PlayerStats?.food === foodCount &&
-            // @ts-expect-error inner enum is not hydrated there
-            entity?.models?.dojo_starter?.PlayerStats?.league?.Some ===  league.activeVariant() &&
+            entity?.models?.dojo_starter?.PlayerStats?.league?.Some ===
+              // @ts-expect-error
+
+              league.activeVariant() &&
             entity?.models?.dojo_starter?.PlayerStats?.trophies ===
               trophyCount &&
             entity?.models?.dojo_starter?.PlayerStats?.host_lobby_code ===

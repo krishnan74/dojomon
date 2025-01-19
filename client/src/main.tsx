@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import App from "./App.tsx";
+//import App from "./App.tsx";
 
 import "./index.css";
 import { init } from "@dojoengine/sdk";
@@ -56,8 +56,9 @@ async function main() {
                 path="game"
                 element={<GameCanvas pokeballPosition={{ x: 0, y: 0 }} />}
               />
-              <Route path="blogs" element={<Battle />} />
-              <Route path="contact" element={<WaitLobby />} />
+              {/* <Route path="test" element={<App />}></Route> */}
+              <Route path="battle" element={<Battle />} />
+              <Route path="lobby/:lobbyCode" element={<WaitLobby />} />
               <Route path="*" element={<NoPage />} />
             </Routes>
           </BrowserRouter>
