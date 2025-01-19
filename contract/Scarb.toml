@@ -1,6 +1,6 @@
 [package]
 cairo-version = "=2.8.4"
-name = "dojo_starter"
+name = "dojomon"
 version = "1.0.12"
 
 [cairo]
@@ -8,9 +8,9 @@ sierra-replace-ids = true
 
 [scripts]
 migrate = "sozo build && sozo migrate"                      # scarb run migrate
-spawnPlayer = "sozo execute dojo_starter-actions spawnPlayer -c str:'Fire' --wait"    # scarb run spawn
-createDojomon = "sozo execute dojo_starter-actions createDojomon -c str:'Balbasaur' 60 20 20 1 str:'Grass' {0,0} --wait"
-catchDojomon = "sozo execute dojo_starter-actions catchDojomon -c 1 --wait"
+spawnPlayer = "sozo execute dojomon-actions spawnPlayer -c str:'Fire' --wait"    # scarb run spawn
+createDojomon = "sozo execute dojomon-actions createDojomon -c str:'Balbasaur' 60 20 20 1 str:'Grass' {0,0} --wait"
+catchDojomon = "sozo execute dojomon-actions catchDojomon -c 1 --wait"
 
 
 

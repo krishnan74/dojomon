@@ -14,6 +14,26 @@ export const copyToClipboard = (copyText: string) => {
   alert("Address copied to clipboard!");
 };
 
+export const felt252ToString = (felt252: string | undefined) => {
+  // Remove the "0x" prefix
+  const felt252WithOutPrefix = felt252?.slice(2);
+
+  // Convert the hex string to a byte array
+  const byteArray = new Uint8Array(
+    (felt252WithOutPrefix?.match(/.{2}/g) || []).map((byte) =>
+      parseInt(byte, 16)
+    )
+  );
+
+  // Decode the byte array into a string
+  const decodedString = new TextDecoder().decode(byteArray);
+
+  // Filter out non-printable characters
+  const cleanedString = decodedString.replace(/[^\x20-\x7E]/g, "");
+
+  return cleanedString;
+};
+
 export const withGrid = (grid: number) => {
   return grid * 12;
 }

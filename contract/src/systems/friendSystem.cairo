@@ -1,4 +1,4 @@
-use dojo_starter::models::{
+use dojomon::models::{
     PlayerStats,
     ReceiverFriendRequest, Friend
 };
@@ -77,7 +77,7 @@ pub mod friendSystem {
     impl InternalImpl of InternalTrait {
         /// Returns the default world storage for the contract.
         fn world_default(self: @ContractState) -> dojo::world::WorldStorage {
-            self.world(@"dojo_starter")
+            self.world(@"dojomon")
         }
     }
 

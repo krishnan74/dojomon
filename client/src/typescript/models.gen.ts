@@ -4,27 +4,39 @@ import { CairoOption, CairoOptionVariant, BigNumberish } from "starknet";
 
 type WithFieldOrder<T> = T & { fieldOrder: string[] };
 
-// Type definition for `dojo_starter::models::PlayerStats` struct
+// Type definition for `dojomon::models::PlayerStats` struct
 export interface PlayerStats {
-  player: string;
+  address: string;
+  name: string;
   gold: BigNumberish;
   level: BigNumberish;
   exp: BigNumberish;
   food: BigNumberish;
   trophies: BigNumberish;
   league: CairoOption<League>;
-  host_lobby_code: string;
 }
 
 export interface Lobby {
-  lobby_code: string;
-  host_player: string;
-  guest_player: string;
+  lobby_code: BigNumberish;
+  host_player: PlayerStats;
+  guest_player: PlayerStats;
   host_ready: boolean;
   guest_ready: boolean;
-  host_dojomon_id: string;
-  guest_dojomon_id: string;
-  can_join: boolean;
+  host_dojomon_id: BigNumberish;
+  guest_dojomon_id: BigNumberish;
+  is_vacant: boolean;
+  lobby_type: CairoOption<LobbyType>;
+  turn: string;
+
+  lobby_league: CairoOption<League>;
+  lobby_exp: BigNumberish;
+  lobby_level: BigNumberish;
+}
+
+export interface PlayerSelectedDojomon {
+  player: string;
+  dojomon: Dojomon;
+  lobby_code: BigNumberish;
 }
 
 export interface Friend {
@@ -33,15 +45,15 @@ export interface Friend {
 }
 
 export interface ReceiverFriendRequest {
-  sender: string;
   receiver: string;
+  sender: string;
   active: boolean;
   accepted: boolean;
 }
 
-// Type definition for `dojo_starter::models::DojoMon` struct
-export interface DojoMon {
-  dojomon_id: string;
+// Type definition for `dojomon::models::Dojomon` struct
+export interface Dojomon {
+  dojomon_id: BigNumberish;
   player: string;
   name: string;
   health: BigNumberish;
@@ -50,21 +62,24 @@ export interface DojoMon {
   speed: BigNumberish;
   level: BigNumberish;
   exp: BigNumberish;
+  evolution: BigNumberish;
   dojomon_type: CairoOption<DojomonType>;
   position: Position;
+  is_free: boolean;
+  is_being_caught: boolean;
 }
 
-// Type definition for `dojo_starter::models::DojoBall` struct
+// Type definition for `dojomon::models::DojoBall` struct
 export interface DojoBall {
-  dojoball_id: string;
+  dojoball_id: BigNumberish;
   player: string;
-  dojomon_id: string;
+  dojomon_id: BigNumberish;
   position: Position;
   dojoball_type: CairoOption<DojoBallType>;
   has_dojomon: boolean;
 }
 
-// Type definition for `dojo_starter::models::Counter` struct
+// Type definition for `dojomon::models::Counter` struct
 export interface Counter {
   counter: BigNumberish;
   player_count: BigNumberish;
@@ -72,20 +87,60 @@ export interface Counter {
   dojomon_count: BigNumberish;
 }
 
-// Type definition for `dojo_starter::models::Position` struct
+export interface Move {
+  id: BigNumberish;
+  name: string;
+  description: string;
+  power: BigNumberish;
+  accuracy: BigNumberish;
+  move_type: CairoOption<DojoBallType>;
+  effect: CairoOption<MoveEffect>;
+}
+
+// Type definition for `dojomon::models::Position` struct
 export interface Position {
   x: BigNumberish;
   y: BigNumberish;
 }
 
-// Type definition for `dojo_starter::models::DojomonType` enum
+export enum MoveEffect {
+  Burn,
+  Paralyze,
+  Confuse,
+  LowerSpecialDefense,
+  Flinch,
+  Freeze,
+}
+
+// Type definition for `dojomon::models::LobbyType` enum
+export enum LobbyType {
+  Public,
+  Private,
+}
+
+// Type definition for `dojomon::models::DojomonType` enum
 export enum DojomonType {
   Fire,
   Water,
   Grass,
+  Electric,
+  Normal,
+  Flying,
+  Rock,
+  Ground,
+  Ice,
+  Bug,
+  Psychic,
+  Dark,
+  Steel,
+  Dragon,
+  Fairy,
+  Ghost,
+  Poison,
+  Fighting,
 }
 
-// Type definition for `dojo_starter::models::DojoBallType` enum
+// Type definition for `dojomon::models::DojoBallType` enum
 export enum DojoBallType {
   Dojoball,
   Greatball,
@@ -93,7 +148,7 @@ export enum DojoBallType {
   Masterball,
 }
 
-// Type definition for `dojo_starter::models::League` enum
+// Type definition for `dojomon::models::League` enum
 export enum League {
   Bronze,
   Silver,
@@ -105,39 +160,40 @@ export enum League {
 }
 
 export interface SchemaType extends ISchemaType {
-  dojo_starter: {
+  dojomon: {
     PlayerStats: WithFieldOrder<PlayerStats>;
     Lobby: WithFieldOrder<Lobby>;
     Friend: WithFieldOrder<Friend>;
     ReceiverFriendRequest: WithFieldOrder<ReceiverFriendRequest>;
-    DojoMon: WithFieldOrder<DojoMon>;
+    Dojomon: WithFieldOrder<Dojomon>;
     DojoBall: WithFieldOrder<DojoBall>;
     Counter: WithFieldOrder<Counter>;
     Position: WithFieldOrder<Position>;
+    Move: WithFieldOrder<Move>;
   };
 }
 
 export const schema: SchemaType = {
-  dojo_starter: {
+  dojomon: {
     PlayerStats: {
       fieldOrder: [
         "player",
+        "name",
         "gold",
         "level",
         "exp",
         "food",
         "trophies",
         "league",
-        "host_lobby_code",
       ],
-      player: "",
+      address: "",
+      name: "",
       gold: 0,
       level: 0,
       exp: 0,
       food: 0,
       trophies: 0,
       league: new CairoOption<League>(CairoOptionVariant.None),
-      host_lobby_code: "",
     },
 
     Lobby: {
@@ -149,16 +205,44 @@ export const schema: SchemaType = {
         "guest_ready",
         "host_dojomon_id",
         "guest_dojomon_id",
-        "can_join",
+        "is_vaceant",
+        "lobby_type",
+        "turn",
+        "lobby_league",
+        "lobby_exp",
+        "lobby_level",
       ],
-      lobby_code: "",
-      host_player: "",
-      guest_player: "",
+      lobby_code: 0,
+      host_player: {
+        address: "",
+        name: "",
+        gold: 0,
+        level: 0,
+        exp: 0,
+        food: 0,
+        trophies: 0,
+        league: new CairoOption<League>(CairoOptionVariant.None),
+      },
+      guest_player: {
+        address: "",
+        name: "",
+        gold: 0,
+        level: 0,
+        exp: 0,
+        food: 0,
+        trophies: 0,
+        league: new CairoOption<League>(CairoOptionVariant.None),
+      },
       host_ready: false,
       guest_ready: false,
-      host_dojomon_id: "",
-      guest_dojomon_id: "",
-      can_join: false,
+      host_dojomon_id: 0,
+      guest_dojomon_id: 0,
+      is_vacant: false,
+      lobby_type: new CairoOption<LobbyType>(CairoOptionVariant.None),
+      turn: "",
+      lobby_league: new CairoOption<League>(CairoOptionVariant.None),
+      lobby_exp: 0,
+      lobby_level: 0,
     },
 
     Friend: {
@@ -175,7 +259,7 @@ export const schema: SchemaType = {
       accepted: false,
     },
 
-    DojoMon: {
+    Dojomon: {
       fieldOrder: [
         "dojomon_id",
         "player",
@@ -186,10 +270,13 @@ export const schema: SchemaType = {
         "speed",
         "level",
         "exp",
+        "evolution",
         "dojomon_type",
         "position",
+        "is_free",
+        "is_being_caught",
       ],
-      dojomon_id: "",
+      dojomon_id: 0,
       player: "",
       name: "",
       health: 0,
@@ -198,8 +285,11 @@ export const schema: SchemaType = {
       speed: 0,
       level: 0,
       exp: 0,
+      evolution: 0,
       dojomon_type: new CairoOption<DojomonType>(CairoOptionVariant.None),
       position: { x: 0, y: 0 },
+      is_free: true,
+      is_being_caught: false,
     },
 
     DojoBall: {
@@ -237,19 +327,39 @@ export const schema: SchemaType = {
       x: 0,
       y: 0,
     },
+
+    Move: {
+      fieldOrder: [
+        "id",
+        "name",
+        "description",
+        "power",
+        "accuracy",
+        "move_type",
+        "effect",
+      ],
+      id: 0,
+      name: "",
+      description: "",
+      power: 0,
+      accuracy: 0,
+      move_type: new CairoOption<DojoBallType>(CairoOptionVariant.None),
+      effect: new CairoOption<MoveEffect>(CairoOptionVariant.None),
+    },
   },
 };
 export enum ModelsMapping {
-  PlayerStats = "dojo_starter-PlayerStats",
-  Lobby = "dojo_starter-Lobby",
-  Friend = "dojo_starter-Friend",
-  SenderFriendRequest = "dojo_starter-SenderFriendRequest",
-  ReceiverFriendRequest = "dojo_starter-ReceiverFriendRequest",
-  DojoMon = "dojo_starter-DojoMon",
-  DojoBall = "dojo_starter-DojoBall",
-  Counter = "dojo_starter-Counter",
-  Position = "dojo_starter-Position",
-  DojomonType = "dojo_starter-DojomonType",
-  DojoBallType = "dojo_starter-DojoBallType",
-  League = "dojo_starter-League",
+  PlayerStats = "dojomon-PlayerStats",
+  Lobby = "dojomon-Lobby",
+  Friend = "dojomon-Friend",
+  SenderFriendRequest = "dojomon-SenderFriendRequest",
+  ReceiverFriendRequest = "dojomon-ReceiverFriendRequest",
+  Dojomon = "dojomon-Dojomon",
+  DojoBall = "dojomon-DojoBall",
+  Counter = "dojomon-Counter",
+  Position = "dojomon-Position",
+  DojomonType = "dojomon-DojomonType",
+  DojoBallType = "dojomon-DojoBallType",
+  League = "dojomon-League",
+  Move = "dojomon-Move",
 }

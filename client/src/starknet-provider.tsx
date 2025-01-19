@@ -94,7 +94,7 @@ export default function StarknetProvider({ children }: PropsWithChildren) {
     <StarknetConfig
       chains={[mainnet]}
       provider={provider}
-      connectors={[connector]}
+      connectors={pa}
       explorer={voyager}
       autoConnect
     >
