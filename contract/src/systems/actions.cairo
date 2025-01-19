@@ -143,7 +143,7 @@ pub mod actions {
             
             let start_stats = PlayerStats {
                 name,
-                player: player_address,
+                address: player_address,
                 gold: 100,
                 level: 1,
                 exp: 0,

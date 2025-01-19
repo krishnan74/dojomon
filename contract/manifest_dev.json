@@ -1704,8 +1704,8 @@
       ]
     },
     {
-      "address": "0x9d2c75a037d870f39e4e7ef3db27f9ea31e24a2de4a15eb914e991cfd7a4ec",
-      "class_hash": "0x75b6db9640f34effadfc7368213e821db3d2f237dbf58d5863cde54ac589040",
+      "address": "0x64cda59c06a0af39f7e17ce7919a03c1e901b60b17fd98221a48c47cb7e3433",
+      "class_hash": "0x11d2cb7004ac4d1d06b0e89690929ad9657d14c0c1e0a8a9eb236cf26c461dc",
       "abi": [
         {
           "type": "impl",
@@ -2185,8 +2185,8 @@
       ]
     },
     {
-      "address": "0x39a89b92fe48ef8e3429eb1d664c2cd62023fbbe70f7c5f6b663cf2f0f1ffa3",
-      "class_hash": "0x56a70f96815ae58f7d189c81a9a5cda0e9b4c5614f305fbc16ef6a158b73750",
+      "address": "0x2a86d76e26847ac38fbaf925ffd650621036d225321d5598463ba5808746360",
+      "class_hash": "0x265c4fdb2f80a8670b086a77a7ed800151854aabb6c832b16832adbb31a1d8",
       "abi": [
         {
           "type": "impl",
@@ -2473,7 +2473,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x26fbc9713bfeec7d524f17c76d79698e1ead4046176459d8d8fc91a14def72a",
+      "class_hash": "0x5a0c2f03f0a8b186c8879a982bddfb94f1b078305f7614e68d56a768c65b9a0",
       "tag": "dojomon-Lobby",
       "selector": "0x20b9896398e6985a029bdb4918e62a83cd4cb691993a47067f85922460e76f2"
     },
@@ -2485,7 +2485,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x5af433bdfaaf3a1905558ba372d8d1f8fe71fd9f62a3572ca0694f9770ef2b1",
+      "class_hash": "0x6139c48bcf1170eabf528ba8480248888aa2c81fc6227353e8191a615084a40",
       "tag": "dojomon-PlayerStats",
       "selector": "0x6d42a379121634eae52d9afe766849f9b7ded5ed81663d2cda5751c3f26a3f9"
     },
@@ -2517,7 +2517,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x72dfb2a76fe25457c666faa9e995457d3c056583f62e5f6f6f680580ca64adc",
+      "class_hash": "0x2e6bfec7f840b5e509a251f3ea0eaa420217c4f7050fa67b2c21adbe6d280a6",
       "tag": "dojomon-PlayerAttacked",
       "selector": "0x3e2286bc30a3c518902e7cb2f5300824bf7e48abffe68b0b190afbf6bd15677"
     },
@@ -2535,13 +2535,13 @@
     },
     {
       "members": [],
-      "class_hash": "0x344fcf3cc44e76549b70fa3ffd8357122095ce183ac920015472f74cde81aa4",
+      "class_hash": "0x779983fca6a440eea1cc83642833464314aaf5f8a26f1645c096810faf3ceae",
       "tag": "dojomon-PlayerSelectedDojomon",
       "selector": "0x4b26edb39adbe09fb60c80b64ef2f803865b3e1b5f90b74e3b26d711f9b2a49"
     },
     {
       "members": [],
-      "class_hash": "0x3d96d0b2e4eab6746dbc422dee919bcaac5cee299c20be89160799fcb37a32c",
+      "class_hash": "0x4daf2bb52849e6bb5dd009d1e448abc43d305819cd7dc882687d67428fe6760",
       "tag": "dojomon-PlayerSpawned",
       "selector": "0x449d92d5de50b46eae30316a12cfb7aa6133a7cb049b4e3a9ce8dc9606d92ed"
     }

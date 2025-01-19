@@ -45,7 +45,7 @@ pub struct PlayerSelectedDojomon {
     #[key]
     lobby_code: u32,
     player: ContractAddress,
-    dojomon_id: u32,
+    dojomon: Dojomon,
 }
 
 #[derive(Drop, Serde, Debug)]

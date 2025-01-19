@@ -1,6 +1,6 @@
 use dojomon::models::{
     PlayerStats,
-    ReceiverFriendRequest, Dojomon, DojomonType, MoveEffect, Move, Lobby, League
+    ReceiverFriendRequest, Dojomon, DojomonType, MoveEffect, Move, Lobby, League, Player
 };
 use dojomon::events::{PlayerAttacked, 
     BattleEnded
@@ -124,13 +124,13 @@ pub mod battle {
             lobby_code: u32
         ){
             let mut world = self.world_default();
-            let player = get_caller_address();
+            let player_address = get_caller_address();
             let mut lobby: Lobby = world.read_model(lobby_code);
 
-            if lobby.host_player == player {
-                lobby.turn = lobby.guest_player;
+            if lobby.host_player.address == player_address {
+                lobby.turn = lobby.guest_player.address;
             } else {
-                lobby.turn = lobby.host_player;
+                lobby.turn = lobby.host_player.address;
             }
 
             world.write_model(@lobby);
@@ -159,8 +159,8 @@ pub mod battle {
 
                 world.emit_event(@BattleEnded{
                     lobby_code,
-                    host_player: lobby.host_player,
-                    guest_player: lobby.guest_player,
+                    host_player: lobby.host_player.address,
+                    guest_player: lobby.guest_player.address,
                 });
             }
 
@@ -192,8 +192,8 @@ pub mod battle {
 
                 world.emit_event(@BattleEnded{
                     lobby_code,
-                    host_player: lobby.host_player,
-                    guest_player: lobby.guest_player,
+                    host_player: lobby.host_player.address,
+                    guest_player: lobby.guest_player.address,
                 });
 
             }

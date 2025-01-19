@@ -4,7 +4,7 @@ use starknet::{ContractAddress};
 #[dojo::model]
 pub struct PlayerStats{
     #[key]
-    pub player: ContractAddress,
+    pub address: ContractAddress,
     pub name: felt252,
     pub gold: u32,
     pub level: u32,
@@ -19,8 +19,8 @@ pub struct PlayerStats{
 pub struct Lobby{
     #[key]
     pub lobby_code: u32,
-    pub host_player: ContractAddress,
-    pub guest_player: ContractAddress,
+    pub host_player: Player,
+    pub guest_player: Player,
     pub host_ready: bool,
     pub guest_ready: bool,
     pub host_dojomon_id: u32,
@@ -115,6 +115,17 @@ struct Move {
 pub struct Position{
     pub x: u32,
     pub y: u32,
+}
+
+#[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
+pub struct Player{
+    pub address: ContractAddress,
+    pub name: felt252,
+    pub gold: u32,
+    pub level: u32,
+    pub exp: u32,
+    pub food: u32,
+    pub trophies: u32,
 }
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]
