@@ -1,4 +1,6 @@
 import { GameObject } from "./GameObject";
+import { Person } from "./Person";
+import { withGrid } from "../lib/utils";
 
 export class Sprite {
   image: HTMLImageElement;
@@ -86,13 +88,13 @@ export class Sprite {
     }
   }
 
-  draw(ctx: CanvasRenderingContext2D): void {
-    const x = this.gameObject.x * 12 ;
-    const y = this.gameObject.y * 12 ;
+  draw({ctx, player}:{ctx:CanvasRenderingContext2D, player : GameObject}): void {
+    const x = this.gameObject.x * 12 + withGrid(10) - player.x;
+    const y = this.gameObject.y * 12 + withGrid(5) - player.y;
 
-    // if (this.isShadowLoaded) {
-    //   ctx.drawImage(this.shadow, x, y);
-    // }
+    if (this.isShadowLoaded) {
+      ctx.drawImage(this.shadow, x, y);
+    }
 
     const [frameX, frameY] = this.frame;
 

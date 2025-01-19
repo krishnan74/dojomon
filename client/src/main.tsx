@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-//import App from "./App.tsx";
+
+import App from "./App.tsx";
 
 import "./index.css";
 import { init } from "@dojoengine/sdk";
@@ -12,6 +12,7 @@ import { setupBurnerManager } from "@dojoengine/create-burner";
 import StarknetProvider from "./starknet-provider.tsx";
 import Navbar from "./components/Navbar.tsx";
 import GameCanvas from "./GameCanvas.tsx";
+
 import Home from "./pages/Home.tsx";
 import Battle from "./pages/Battle.tsx";
 import WaitLobby from "./pages/WaitLobby.tsx";
@@ -50,6 +51,7 @@ async function main() {
         burnerManager={await setupBurnerManager(dojoConfig)}
       >
         <StarknetProvider>
+
           <BrowserRouter>
             <Routes>
               <Route index element={<Home />} />
