@@ -1,25 +1,24 @@
-import React, { useContext, useState, useEffect } from "react";
-import { useDojomonData } from "@/hooks/useDojomonData";
+import React, { useContext, useState, useEffect, useRef } from "react";
 import { useAccount } from "@starknet-react/core";
-import DojomonCard from "@/components/DojomonCard";
+import { useParams, useLocation } from "react-router-dom";
 import { DojoContext } from "@/dojo-sdk-provider";
-import { useParams } from "react-router-dom";
 import { useLobbyData } from "@/hooks/useLobbyData";
-import { BigNumberish } from "starknet";
-import { felt252ToString } from "@/lib/utils";
-import { Dojomon, DojomonStruct, Move } from "@/typescript/models.gen";
-import { useMovesData } from "@/hooks/useMovesData";
-import MoveCard from "@/components/MoveCard";
-import { Button } from "@/components/ui/button";
-import { useLocation } from "react-router-dom";
-import { usePlayerAttackedData } from "@/hooks/usePlayerAttackedData";
-import { useOpponentDojomonData } from "@/hooks/useOpponentDojomonData";
 import { useMyDojomonData } from "@/hooks/useMyDojomonData";
+import { useOpponentDojomonData } from "@/hooks/useOpponentDojomonData";
+import { useMovesData } from "@/hooks/useMovesData";
+import { felt252ToString } from "@/lib/utils";
+import DojomonCard from "@/components/DojomonCard";
+import MoveCard from "@/components/MoveCard";
+import { Monster } from "@/interfaces";
+import { BigNumberish } from "starknet";
+import { Dojomon, Move } from "@/typescript/models.gen";
 
+// Custom hook to parse query params
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
+// Player interface
 interface Player {
   address: string;
   name: string;
@@ -31,31 +30,42 @@ interface Player {
 }
 
 const Battle = () => {
-  const { client } = useContext(DojoContext); // Access the Dojo SDK client
-  const { address, account } = useAccount(); // Get user account details
-  const { lobbyCode } = useParams<{ lobbyCode: string }>(); // Extract lobby code from URL params
-  let query = useQuery();
-  let selected_dojomon_id = query.get("my_dojomon_id");
-  let opponent_dojomon_id = query.get("opponent_dojomon_id");
+  const { client } = useContext(DojoContext);
+  const { address, account } = useAccount();
+  const { lobbyCode } = useParams<{ lobbyCode: string }>();
+  const query = useQuery();
+  const selected_dojomon_id = query.get("my_dojomon_id");
+  const opponent_dojomon_id = query.get("opponent_dojomon_id");
 
   const { lobbySubscribeData, lobbyQueryData } = useLobbyData(
-    account?.address,
+    address,
     lobbyCode
-  ); // Fetch lobby data
+  );
 
+  // States for tracking players' stats
   const [myStats, setMyStats] = useState<Player | null>(null);
   const [opponentStats, setOpponentStats] = useState<Player | null>(null);
 
-  const { myDojomonQueryData, myDojomonSubscribeData } = useMyDojomonData(
-    account?.address,
-    selected_dojomon_id
+  // Fetch Dojomon data for the player and opponent
+  const { myDojomonQueryData } = useMyDojomonData(address, selected_dojomon_id);
+  const { opponentDojomonQueryData } = useOpponentDojomonData(
+    address,
+    opponent_dojomon_id
   );
 
-  const { opponentDojomonQueryData, opponentDojomonSubscribeData } =
-    useOpponentDojomonData(account?.address, opponent_dojomon_id);
+  // Max health for Dojomon
+  const myDojomonMaxHealth = myDojomonQueryData?.health;
+  const opponentDojomonMaxHealth = opponentDojomonQueryData?.health;
 
+  // Moves data for Dojomon actions
   const { movesQueryData } = useMovesData(selected_dojomon_id || "");
 
+  const [attacked, setAttacked] = useState(false);
+
+  // Track when all data is loaded
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  // UseEffect for updating battle state based on lobby data
   useEffect(() => {
     const updateBattleState = () => {
       const lobby_data =
@@ -72,85 +82,182 @@ const Battle = () => {
       }
     };
 
-    if (account) updateBattleState();
-  }, [lobbyQueryData, lobbySubscribeData, address, account]);
+    if (address) updateBattleState();
+  }, [lobbyQueryData, lobbySubscribeData, address]);
 
-  const renderPlayerInfo = (
-    stats: Player | null,
-    dojomon_stats: Dojomon | null,
-    isOpponent: boolean
-  ) => (
-    <div className={`flex flex-col items-center space-y-4 w-[50%]`}>
-      <div
-        className={`w-24 h-24 flex items-center justify-center font-bold text-3xl ${
-          stats ? (isOpponent ? "bg-red-500" : "bg-green-500") : "bg-gray-500"
-        }`}
-      >
-        {stats ? felt252ToString(stats.name) : "???"}
-      </div>
-      <div className="text-center">
-        <p className="text-xl font-bold text-white">
-          {stats ? felt252ToString(stats.name) : "Waiting..."}
-        </p>
-        <p className="text-gray-300">{isOpponent ? "Opponent" : "You"}</p>
-      </div>
+  // Data loaded effect
+  useEffect(() => {
+    if (myDojomonQueryData && opponentDojomonQueryData && movesQueryData) {
+      setIsDataLoaded(true); // Set to true when all data is loaded
+    }
+  }, [myDojomonQueryData, opponentDojomonQueryData, movesQueryData]);
 
-      <DojomonCard
-        dojomon={dojomon_stats} // Pass Dojomon data to card
-      />
-    </div>
-  );
+  // Game Over check based on health data
+  useEffect(() => {
+    if (
+      myDojomonQueryData?.health === 0 ||
+      opponentDojomonQueryData?.health === 0
+    ) {
+      console.log("Game Over");
+    }
+  }, [myDojomonQueryData, opponentDojomonQueryData]);
+
+  // Canvas setup for battle animations
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const battleAnimationIdRef = useRef<number | null>(null);
+  const viewportSize = { width: 1200, height: 650 };
+
+  useEffect(() => {
+    if (!isDataLoaded) return; // Don't run until data is loaded
+
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    canvas.width = viewportSize.width;
+    canvas.height = viewportSize.height;
+
+    const myPetImage = new Image();
+    myPetImage.src = "../assets/embySprite.png";
+
+    const enemyImage = new Image();
+    enemyImage.src = "../assets/draggleSprite.png";
+
+    const battleZoneImage = new Image();
+    battleZoneImage.src = "../assets/battleBackground.png";
+
+    const myPet = new Monster({
+      position: { x: canvas.width / 3.5, y: canvas.height / 2 + 50 },
+      image: myPetImage,
+      frames: { max: 4 },
+      sprites: {
+        up: myPetImage,
+        left: myPetImage,
+        right: myPetImage,
+        down: myPetImage,
+      },
+      animate: true,
+    });
+
+    const enemy = new Monster({
+      position: { x: canvas.width / 1.3, y: canvas.height / 5 },
+      image: enemyImage,
+      frames: { max: 4 },
+      sprites: {
+        up: enemyImage,
+        left: enemyImage,
+        right: enemyImage,
+        down: enemyImage,
+      },
+      animate: true,
+      isEnemy: true,
+    });
+
+    const renderedSpritesBattle = [myPet, enemy];
+
+    const updateBattle = () => {
+      if (enemy.health <= 0) {
+        enemy.faint();
+        return;
+      }
+      if (attacked) {
+        // Logic to trigger an attack
+        myPet.attack({
+          attack: { name: "Fireball", damage: 25, type: "Fire" },
+          recipient: enemy,
+          renderedSpritesBattle: renderedSpritesBattle,
+        });
+
+        // enemy.attack({
+        //   attack: { name: "Fireball", damage: 25, type: "Fire" },
+        //   recipient: myPet,
+        //   renderedSpritesBattle: renderedSpritesBattle,
+        // });
+      }
+    };
+
+    const renderBattle = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(battleZoneImage, 0, 0);
+      renderedSpritesBattle.forEach((sprite) => {
+        sprite.draw(ctx);
+      });
+    };
+
+    const gameBattleLoop = () => {
+      updateBattle();
+      renderBattle();
+      battleAnimationIdRef.current = requestAnimationFrame(gameBattleLoop);
+    };
+
+    battleZoneImage.onload = () => {
+      gameBattleLoop();
+    };
+  }, [isDataLoaded, attacked]); // Run only when data is fully loaded
+
+  if (!isDataLoaded) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900">
-      <div className="relative w-full max-w-4xl flex items-center justify-between p-8">
-        {/* Left Section: Player Info */}
-        {renderPlayerInfo(
-          myStats,
-          myDojomonSubscribeData ? myDojomonSubscribeData : myDojomonQueryData,
-          false
-        )}
-
-        {/* Center Section: Loader or VS Image */}
-        <div className="flex flex-col items-center">
-          {!opponentStats ? (
-            <div className="w-16 h-16 border-4 border-t-transparent border-yellow-500 rounded-full animate-spin"></div>
-          ) : (
-            <img
-              src="../assets/website-design/vs.png"
-              alt="VS"
-              className="w-24 h-24"
-            />
-          )}
+      {/* Player Health Bars */}
+      <div className="absolute bg-white h-[80px] w-[20%] border-4 border-black top-12 left-12 p-3">
+        <h1 className="font-bold font-pixel">
+          {felt252ToString(myDojomonQueryData?.name)}
+        </h1>
+        <div className="relative mt-2">
+          <div
+            className="h-2 bg-green-500 rounded-full"
+            style={{
+              width: `${
+                (Number(myDojomonQueryData?.health) /
+                  Number(myDojomonMaxHealth)) *
+                100
+              }%`,
+            }}
+          ></div>
         </div>
-
-        {/* Right Section: Opponent Info */}
-        {renderPlayerInfo(
-          opponentStats,
-          opponentDojomonSubscribeData
-            ? opponentDojomonSubscribeData
-            : opponentDojomonQueryData,
-          true
-        )}
       </div>
 
-      {/* Moves Section */}
-      <div className="flex flex-col items-center mt-8">
-        {movesQueryData &&
-        myDojomonQueryData &&
-        opponentDojomonQueryData &&
-        lobbyCode ? (
+      {/* Opponent Health Bars */}
+      <div className="absolute bg-white h-[80px] w-[20%] border-4 border-black bottom-[200px] right-12 p-3">
+        <h1 className="font-bold font-pixel">
+          {felt252ToString(opponentDojomonQueryData?.name)}
+        </h1>
+        <div className="relative mt-2">
+          <div
+            className="h-2 overflow-hidden bg-green-500 rounded-full"
+            style={{
+              width: `${
+                (Number(opponentDojomonQueryData?.health) /
+                  Number(opponentDojomonMaxHealth)) *
+                100
+              }%`,
+            }}
+          ></div>
+        </div>
+      </div>
+
+      {/* Move Cards */}
+      <div className="bg-white border-2 border-black absolute w-full h-[150px] bottom-0 left-0 flex">
+        {movesQueryData && movesQueryData.length > 0 ? (
           movesQueryData.map((move_model, index) => (
             <MoveCard
               key={index}
-              //@ts-expect-error
+              // @ts-expect-error
               move={move_model.models.dojomon.Move}
               client={client}
               account={account}
-              lobby_code={lobbyCode}
-              myDojomonId={myDojomonQueryData.dojomon_id}
-              opponentDojomonId={opponentDojomonQueryData.dojomon_id}
+              lobby_code={lobbyCode!}
+              myDojomonId={myDojomonQueryData?.dojomon_id!}
+              opponentDojomonId={opponentDojomonQueryData?.dojomon_id!}
               in_battle={true}
+              setAttacked={setAttacked}
             />
           ))
         ) : (
@@ -158,11 +265,11 @@ const Battle = () => {
         )}
       </div>
 
-      <Button
-        onClick={() => client.battle.attack(account!, 9, 0, 10, 4, false)}
-      >
-        Attack
-      </Button>
+      {/* Battle Canvas */}
+      <canvas
+        ref={canvasRef}
+        style={{ width: viewportSize.width, height: viewportSize.height }}
+      />
     </div>
   );
 };
