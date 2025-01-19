@@ -3,7 +3,12 @@ import { League, Lobby, LobbyType, SchemaType } from "../typescript/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { addAddressPadding, CairoOption, CairoOptionVariant } from "starknet";
+import {
+  addAddressPadding,
+  CairoCustomEnum,
+  CairoOption,
+  CairoOptionVariant,
+} from "starknet";
 import { useDojoStore } from "./useDojoStore";
 
 export function useLobbyData(
@@ -43,8 +48,34 @@ export function useLobbyData(
     },
     host_ready: false,
     guest_ready: false,
-    host_dojomon_id: 0,
-    guest_dojomon_id: 0,
+
+    host_dojomon: {
+      dojomon_id: 0,
+      player: "",
+      name: "",
+      dojomon_type: "",
+      level: 0,
+      health: 0,
+      attack: 0,
+      defense: 0,
+      speed: 0,
+      exp: 0,
+      evolution: 0,
+    },
+
+    guest_dojomon: {
+      dojomon_id: 0,
+      player: "",
+      name: "",
+      dojomon_type: "",
+      level: 0,
+      health: 0,
+      attack: 0,
+      defense: 0,
+      speed: 0,
+      exp: 0,
+      evolution: 0,
+    },
     is_vacant: false,
     lobby_type: new CairoOption<LobbyType>(
       CairoOptionVariant.Some,
@@ -83,8 +114,34 @@ export function useLobbyData(
     },
     host_ready: false,
     guest_ready: false,
-    host_dojomon_id: 0,
-    guest_dojomon_id: 0,
+
+    host_dojomon: {
+      dojomon_id: 0,
+      player: "",
+      name: "",
+      dojomon_type: "",
+      level: 0,
+      health: 0,
+      attack: 0,
+      defense: 0,
+      speed: 0,
+      exp: 0,
+      evolution: 0,
+    },
+
+    guest_dojomon: {
+      dojomon_id: 0,
+      player: "",
+      name: "",
+      dojomon_type: "",
+      level: 0,
+      health: 0,
+      attack: 0,
+      defense: 0,
+      speed: 0,
+      exp: 0,
+      evolution: 0,
+    },
     is_vacant: false,
     lobby_type: new CairoOption<LobbyType>(
       CairoOptionVariant.Some,
@@ -153,8 +210,10 @@ export function useLobbyData(
             }
             if (resp.data) {
               state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
-              console.log(resp);
-              console.log(address);
+              // @ts-expect-error
+              setLobbyQueryData(resp.data[0].models.dojomon.Lobby);
+              // @ts-expect-error
+              console.log(resp.data[0].models.dojomon.Lobby);
             }
           },
         });

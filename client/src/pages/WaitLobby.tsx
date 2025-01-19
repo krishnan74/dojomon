@@ -4,23 +4,28 @@ import { useAccount } from "@starknet-react/core";
 import { DojoContext } from "@/dojo-sdk-provider";
 import { useDojoStore, usePlayerData } from "@/hooks";
 import { QueryBuilder, ParsedEntity } from "@dojoengine/sdk";
-import {
-  DojomonType,
-  Lobby,
-  LobbyType,
-  PlayerStats,
-  SchemaType,
-} from "@/typescript/models.gen";
+import { DojomonType, LobbyType, PlayerStats } from "@/typescript/models.gen";
 import { felt252ToString } from "@/lib/utils";
 import { useLobbyData } from "@/hooks/useLobbyData";
+import { BigNumberish } from "starknet";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
+interface Player {
+  address: string;
+  name: string;
+  gold: BigNumberish;
+  level: BigNumberish;
+  exp: BigNumberish;
+  food: BigNumberish;
+  trophies: BigNumberish;
+}
+
 const WaitLobby = () => {
-  const [player1, setPlayer1] = useState<PlayerStats>();
-  const [player2, setPlayer2] = useState<PlayerStats>();
+  const [player1, setPlayer1] = useState<Player>();
+  const [player2, setPlayer2] = useState<Player>();
   const { client } = useContext(DojoContext);
 
   const { account, address } = useAccount();
@@ -40,6 +45,12 @@ const WaitLobby = () => {
         setPlayer1(lobbySubscribeData.guest_player);
         setPlayer2(lobbySubscribeData.host_player);
       }
+
+      if (lobbySubscribeData.guest_player.address !== "") {
+        setTimeout(() => {
+          window.location.href = `/selectDojomon/${lobbyCode}`;
+        }, 5000);
+      }
     }
   }, [lobbySubscribeData, address]);
 
@@ -49,7 +60,7 @@ const WaitLobby = () => {
         <button
           className="border-black border text-black px-3 py-1"
           onClick={async () => {
-            await client.actions.createLobby(account!, LobbyType.Public);
+            await client.lobby.createLobby(account!, LobbyType.Public);
           }}
         >
           Create Lobby
@@ -57,7 +68,7 @@ const WaitLobby = () => {
         <button
           className="border-black border text-black px-3 py-1"
           onClick={async () => {
-            await client.actions.joinLobby(account!, lobbyCode!);
+            await client.lobby.joinLobby(account!, lobbyCode!);
           }}
         >
           Join Lobby

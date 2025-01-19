@@ -23,8 +23,8 @@ pub struct Lobby{
     pub guest_player: Player,
     pub host_ready: bool,
     pub guest_ready: bool,
-    pub host_dojomon_id: u32,
-    pub guest_dojomon_id: u32,
+    pub host_dojomon: DojomonStruct,
+    pub guest_dojomon: DojomonStruct,
     pub is_vacant: bool,
     pub lobby_type: LobbyType,
     pub turn: ContractAddress,
@@ -126,6 +126,21 @@ pub struct Player{
     pub exp: u32,
     pub food: u32,
     pub trophies: u32,
+}
+
+#[derive(Copy, Drop, Serde, IntrospectPacked, Debug)]
+pub struct DojomonStruct{
+    pub dojomon_id: u32,
+    pub player: ContractAddress,
+    pub name: felt252,
+    pub health: u32,
+    pub attack: u32,
+    pub defense: u32,
+    pub speed: u32,
+    pub level: u32,
+    pub exp: u32,
+    pub evolution: u32,
+    pub dojomon_type: felt252,
 }
 
 #[derive(Serde, Copy, Drop, Introspect, PartialEq, Debug)]

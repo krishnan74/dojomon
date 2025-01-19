@@ -188,7 +188,8 @@ export function setupWorld(provider: DojoProvider) {
     lobby_code: BigNumberish,
     attacker_dojomon_id: BigNumberish,
     defender_dojomon_id: BigNumberish,
-    move_id: BigNumberish
+    move_id: BigNumberish,
+    against_AI: boolean
   ) => {
     try {
       return await provider.execute(
@@ -197,7 +198,8 @@ export function setupWorld(provider: DojoProvider) {
           lobby_code,
           attacker_dojomon_id,
           defender_dojomon_id,
-          move_id
+          move_id,
+          against_AI
         ),
         "dojomon"
       );
@@ -246,11 +248,17 @@ export function setupWorld(provider: DojoProvider) {
       createDojomon: actions_createDojomon,
       feedDojomon: actions_feedDojomon,
       catchDojomon: actions_createDojomon,
+    },
+    lobby: {
       createLobby: lobby_createLobby,
       joinLobby: lobby_joinLobby,
       selectDojomon: lobby_selectDojomon,
       readyForBattle: lobby_readyForBattle,
+    },
+    battle: {
       attack: battle_attack,
+    },
+    friendSystem: {
       sendFriendRequest: friendSystem_sendFriendRequest,
       acceptFriendRequest: friendSystem_acceptFriendRequest,
     },
