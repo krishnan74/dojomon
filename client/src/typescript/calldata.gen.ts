@@ -154,12 +154,19 @@ export const build_battle_attack_calldata = (
   lobby_code: BigNumberish,
   attacker_dojomon_id: BigNumberish,
   defender_dojomon_id: BigNumberish,
-  move_id: BigNumberish
+  move_id: BigNumberish,
+  against_AI: boolean
 ) => {
   return {
     contractName: "battle",
     entrypoint: "attack",
-    calldata: [lobby_code, attacker_dojomon_id, defender_dojomon_id, move_id],
+    calldata: [
+      lobby_code,
+      attacker_dojomon_id,
+      defender_dojomon_id,
+      move_id,
+      against_AI,
+    ],
   };
 };
 

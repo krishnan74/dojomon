@@ -22,8 +22,8 @@ export interface Lobby {
   guest_player: PlayerStats;
   host_ready: boolean;
   guest_ready: boolean;
-  host_dojomon_id: BigNumberish;
-  guest_dojomon_id: BigNumberish;
+  host_dojomon: DojomonStruct;
+  guest_dojomon: DojomonStruct;
   is_vacant: boolean;
   lobby_type: CairoOption<LobbyType>;
   turn: string;
@@ -69,6 +69,20 @@ export interface Dojomon {
   is_being_caught: boolean;
 }
 
+export interface DojomonStruct {
+  dojomon_id: BigNumberish;
+  player: string;
+  name: string;
+  health: BigNumberish;
+  attack: BigNumberish;
+  defense: BigNumberish;
+  speed: BigNumberish;
+  level: BigNumberish;
+  exp: BigNumberish;
+  evolution: BigNumberish;
+  dojomon_type: string;
+}
+
 // Type definition for `dojomon::models::DojoBall` struct
 export interface DojoBall {
   dojoball_id: BigNumberish;
@@ -93,7 +107,7 @@ export interface Move {
   description: string;
   power: BigNumberish;
   accuracy: BigNumberish;
-  move_type: CairoOption<DojoBallType>;
+  move_type: CairoOption<DojomonType>;
   effect: CairoOption<MoveEffect>;
 }
 
@@ -159,6 +173,15 @@ export enum League {
   Grandmaster,
 }
 
+//events
+export interface PlayerAttacked {
+  lobby_code: BigNumberish;
+  attacker_dojomon: Dojomon;
+  defender_dojomon: Dojomon;
+  move: Move;
+  lobby: Lobby;
+}
+
 export interface SchemaType extends ISchemaType {
   dojomon: {
     PlayerStats: WithFieldOrder<PlayerStats>;
@@ -203,9 +226,9 @@ export const schema: SchemaType = {
         "guest_player",
         "host_ready",
         "guest_ready",
-        "host_dojomon_id",
-        "guest_dojomon_id",
-        "is_vaceant",
+        "host_dojomon",
+        "guest_dojomon",
+        "is_vacant",
         "lobby_type",
         "turn",
         "lobby_league",
@@ -235,8 +258,32 @@ export const schema: SchemaType = {
       },
       host_ready: false,
       guest_ready: false,
-      host_dojomon_id: 0,
-      guest_dojomon_id: 0,
+      host_dojomon: {
+        dojomon_id: 0,
+        player: "",
+        name: "",
+        health: 0,
+        attack: 0,
+        defense: 0,
+        speed: 0,
+        level: 0,
+        exp: 0,
+        evolution: 0,
+        dojomon_type: "",
+      },
+      guest_dojomon: {
+        dojomon_id: 0,
+        player: "",
+        name: "",
+        health: 0,
+        attack: 0,
+        defense: 0,
+        speed: 0,
+        level: 0,
+        exp: 0,
+        evolution: 0,
+        dojomon_type: "",
+      },
       is_vacant: false,
       lobby_type: new CairoOption<LobbyType>(CairoOptionVariant.None),
       turn: "",
@@ -343,11 +390,12 @@ export const schema: SchemaType = {
       description: "",
       power: 0,
       accuracy: 0,
-      move_type: new CairoOption<DojoBallType>(CairoOptionVariant.None),
+      move_type: new CairoOption<DojomonType>(CairoOptionVariant.None),
       effect: new CairoOption<MoveEffect>(CairoOptionVariant.None),
     },
   },
 };
+
 export enum ModelsMapping {
   PlayerStats = "dojomon-PlayerStats",
   Lobby = "dojomon-Lobby",
