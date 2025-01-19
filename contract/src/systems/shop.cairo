@@ -1,5 +1,5 @@
 use dojomon::models::{
-    PlayerStats,DojoBallType
+    PlayerStats,DojoBallType, Counter
 
 };
 use starknet::{ContractAddress, get_caller_address};
@@ -15,11 +15,17 @@ trait IShop<T> {
 pub mod shop {
     
     use super::{
-            IShop, PlayerStats, DojoBallType
+            IShop, PlayerStats, DojoBallType, Counter
         };
         use starknet::{ContractAddress, get_caller_address};
         use dojo::model::{ModelStorage, ModelValueStorage};
         use dojo::event::EventStorage;
+
+    const COUNTER_ID: u32 = 999;
+    const DOJOBALL_PRICE : u32 = 50;
+    const GREATBALL_PRICE : u32 = 100;
+    const ULTRABALL_PRICE : u32 = 200;
+    const MASTERBALL_PRICE : u32 = 300;
 
     #[abi(embed_v0)]
     impl ShopImpl of IShop<ContractState> {
@@ -30,7 +36,6 @@ pub mod shop {
 
             let mut counter : Counter = world.read_model(COUNTER_ID);
             
-            let mut dojoball_count = counter.dojoball_count;
 
             //incrementing the counter
             counter.dojoball_count += quantity;

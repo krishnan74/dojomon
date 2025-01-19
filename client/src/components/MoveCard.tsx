@@ -37,14 +37,14 @@ const MoveCard: React.FC<MoveCardProps> = ({
     <Card
       className="border bg-red-500 hover:bg-red-600 text-black w-1/4 rounded-none h-[150px] cursor-pointer"
       onClick={() => {
-        // client.battle.attack(
-        //   account!,
-        //   lobby_code,
-        //   myDojomonId,
-        //   opponentDojomonId,
-        //   move.id,
-        //   false
-        // );
+        client.battle.attack(
+          account!,
+          lobby_code,
+          myDojomonId,
+          opponentDojomonId,
+          move.id,
+          false
+        );
 
         // Set the attacked state to true
         setAttacked(true);

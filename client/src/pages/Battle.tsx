@@ -47,11 +47,12 @@ const Battle = () => {
   const [opponentStats, setOpponentStats] = useState<Player | null>(null);
 
   // Fetch Dojomon data for the player and opponent
-  const { myDojomonQueryData } = useMyDojomonData(address, selected_dojomon_id);
-  const { opponentDojomonQueryData } = useOpponentDojomonData(
+  const { myDojomonQueryData, myDojomonSubscribeData } = useMyDojomonData(
     address,
-    opponent_dojomon_id
+    selected_dojomon_id
   );
+  const { opponentDojomonQueryData, opponentDojomonSubscribeData } =
+    useOpponentDojomonData(address, opponent_dojomon_id);
 
   // Max health for Dojomon
   const myDojomonMaxHealth = myDojomonQueryData?.health;
@@ -118,10 +119,14 @@ const Battle = () => {
     canvas.height = viewportSize.height;
 
     const myPetImage = new Image();
-    myPetImage.src = "../assets/embySprite.png";
+    myPetImage.src = `../assets/dojomons/back/${felt252ToString(
+      myDojomonQueryData?.name
+    ).toUpperCase()}.png`;
 
     const enemyImage = new Image();
-    enemyImage.src = "../assets/draggleSprite.png";
+    enemyImage.src = `../assets/dojomons/front/${felt252ToString(
+      opponentDojomonQueryData?.name
+    ).toUpperCase()}.png`;
 
     const battleZoneImage = new Image();
     battleZoneImage.src = "../assets/battleBackground.png";
@@ -129,7 +134,7 @@ const Battle = () => {
     const myPet = new Monster({
       position: { x: canvas.width / 3.5, y: canvas.height / 2 + 50 },
       image: myPetImage,
-      frames: { max: 4 },
+      frames: { max: 1 },
       sprites: {
         up: myPetImage,
         left: myPetImage,
@@ -142,7 +147,7 @@ const Battle = () => {
     const enemy = new Monster({
       position: { x: canvas.width / 1.3, y: canvas.height / 5 },
       image: enemyImage,
-      frames: { max: 4 },
+      frames: { max: 1 },
       sprites: {
         up: enemyImage,
         left: enemyImage,
@@ -162,12 +167,17 @@ const Battle = () => {
       }
       if (attacked) {
         // Logic to trigger an attack
-        myPet.attack({
-          attack: { name: "Fireball", damage: 25, type: "Fire" },
-          recipient: enemy,
-          renderedSpritesBattle: renderedSpritesBattle,
-        });
 
+        setTimeout(() => {
+          myPet.attack({
+            attack: { name: "Fireball", damage: 25, type: "Fire" },
+            recipient: enemy,
+            //@ts-expect-error
+            renderedSpritesBattle: renderedSpritesBattle,
+          });
+        }, 3000);
+
+        setAttacked(false);
         // enemy.attack({
         //   attack: { name: "Fireball", damage: 25, type: "Fire" },
         //   recipient: myPet,
@@ -212,10 +222,18 @@ const Battle = () => {
         </h1>
         <div className="relative mt-2">
           <div
-            className="h-2 bg-green-500 rounded-full"
+            className="h-2 bg-gray-300 rounded-full absolute"
+            style={{ width: "100%" }}
+          ></div>
+          <div
+            className="h-2 bg-green-500 rounded-full absolute"
             style={{
               width: `${
-                (Number(myDojomonQueryData?.health) /
+                (Number(
+                  myDojomonSubscribeData
+                    ? myDojomonSubscribeData?.health
+                    : myDojomonMaxHealth
+                ) /
                   Number(myDojomonMaxHealth)) *
                 100
               }%`,
@@ -231,10 +249,18 @@ const Battle = () => {
         </h1>
         <div className="relative mt-2">
           <div
-            className="h-2 overflow-hidden bg-green-500 rounded-full"
+            className="h-2 bg-gray-300 rounded-full absolute"
+            style={{ width: "100%" }}
+          ></div>
+          <div
+            className="h-2  bg-green-500 rounded-full absolute"
             style={{
               width: `${
-                (Number(opponentDojomonQueryData?.health) /
+                (Number(
+                  opponentDojomonSubscribeData
+                    ? opponentDojomonSubscribeData?.health
+                    : opponentDojomonMaxHealth
+                ) /
                   Number(opponentDojomonMaxHealth)) *
                 100
               }%`,

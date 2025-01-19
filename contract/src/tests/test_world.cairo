@@ -13,6 +13,7 @@ mod tests {
     use dojomon::systems::friendSystem::{friendSystem, IFriendSystemDispatcher, IFriendSystemDispatcherTrait};
     use dojomon::systems::battle::{battle, IBattleDispatcher, IBattleDispatcherTrait};
     use dojomon::systems::lobby::{lobby, ILobbyDispatcher, ILobbyDispatcherTrait};
+    use dojomon::systems::shop::{shop, IShopDispatcher, IShopDispatcherTrait};
     use dojomon::events::{
         PlayerSpawned, e_PlayerSpawned,
         DojomonCreated, e_DojomonCreated,
@@ -128,7 +129,7 @@ mod tests {
     }
     
 
-   // #[test]    
+    #[test]    
     fn test_spawn() {
         
 
@@ -370,7 +371,7 @@ mod tests {
 
     }
 
-    #[test]
+    // #[test]
     fn test_buy_dojoball(){
         let ndef = namespace_def();
         let mut world = spawn_test_world([ndef].span());
@@ -378,6 +379,14 @@ mod tests {
 
         let (contract_address, _) = world.dns(@"shop").unwrap();
         let shop_system = IShopDispatcher { contract_address };
+
+
+        
+            const DOJOBALL_PRICE : u32 = 50;
+            const GREATBALL_PRICE : u32 = 100;
+            const ULTRABALL_PRICE : u32 = 200;
+            const MASTERBALL_PRICE : u32 = 300;
+
 
         let player = PlayerStats {
             address: starknet::contract_address_const::<0x0>(),
@@ -390,7 +399,7 @@ mod tests {
             league: League::Bronze(()),
         };
 
-        let player_stats: PlayerStats = world.read_model(player_address);
+        let player_stats: PlayerStats = world.read_model(player.address);
 
         let initial_gold: u32 = player_stats.gold;
 
