@@ -1,17 +1,22 @@
 import { DojoContext } from "../dojo-sdk-provider";
-import { League, PlayerStats, SchemaType } from "../typescript/models.gen";
+import {
+  Dojomon,
+  DojomonType,
+  PlayerAttacked,
+  PlayerSelectedDojomon,
+  SchemaType,
+} from "../typescript/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
-import {
-  addAddressPadding,
-  CairoCustomEnum,
-  CairoOption,
-  CairoOptionVariant,
-} from "starknet";
+import { addAddressPadding, CairoOption, CairoOptionVariant } from "starknet";
 import { useDojoStore } from "./useDojoStore";
 
-export function usePlayerData(address: string | undefined) {
+export function usePlayerAttackedData(
+  address: string | undefined,
+  lobby_code: string | undefined,
+  dojomon_id: string | null
+) {
   const { sdk } = useContext(DojoContext)!;
   const state = useDojoStore((state) => state);
   const entityId = useMemo(() => {
@@ -21,40 +26,43 @@ export function usePlayerData(address: string | undefined) {
     return BigInt(0);
   }, [address]);
 
-  const [playerQueryData, setPlayerQueryData] = useState<PlayerStats>({
-    address: "",
+  const [dojomonSubscribeData, setDojomonSubscribeData] = useState<Dojomon>({
+    dojomon_id: 0,
+    player: "",
     name: "",
-    gold: 0,
-    exp: 0,
+    health: 0,
+    attack: 0,
+    defense: 0,
+    speed: 0,
     level: 0,
-    league: new CairoOption<League>(CairoOptionVariant.Some, League.Bronze),
-    food: 0,
-    trophies: 0,
+    exp: 0,
+    evolution: 0,
+    dojomon_type: new CairoOption<DojomonType>(CairoOptionVariant.None),
+    position: { x: 0, y: 0 },
+    is_free: true,
+    is_being_caught: false,
   });
 
-  const [playerSubscribeData, setPlayerSubscribeData] = useState<PlayerStats>({
-    address: "",
-    name: "",
-    gold: 0,
-    exp: 0,
-    level: 0,
-    league: new CairoOption<League>(CairoOptionVariant.Some, League.Bronze),
-    food: 0,
-    trophies: 0,
-  });
+  const [attackEventSubscribeData, setAttackEventSubscribeData] =
+    useState<PlayerAttacked>();
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
     const subscribe = async (address: string) => {
-      const subscription = await sdk.subscribeEntityQuery({
-        query: new QueryBuilder<SchemaType>()
-          .namespace("dojomon", (n) =>
-            n.entity("PlayerStats", (e) =>
-              e.eq("player", addAddressPadding(address))
-            )
-          )
-          .build(),
+      const subscription = await sdk.subscribeEventQuery({
+        query: {
+          
+          event_messages_historical: {
+            PlayerAttacked: {
+              $: {
+                where: {
+                  lobby_code: { $is: lobby_code },
+                },
+              },
+            },
+          },
+        },
         callback: ({ error, data }) => {
           if (error) {
             console.error("Error setting up entity sync:", error);
@@ -63,8 +71,10 @@ export function usePlayerData(address: string | undefined) {
             (data[0] as ParsedEntity<SchemaType>).entityId !== "0x0"
           ) {
             state.updateEntity(data[0] as ParsedEntity<SchemaType>);
-            // @ts-expect-error
-            setPlayerSubscribeData(data[0].models.dojomon.PlayerStats);
+
+            console.log(data);
+            //setAttackEventSubscribeData(data[0].models.dojomon.PlayerAttacked);
+            console.log(data);
           }
         },
       });
@@ -89,7 +99,7 @@ export function usePlayerData(address: string | undefined) {
         await sdk.getEntities({
           query: new QueryBuilder<SchemaType>()
             .namespace("dojomon", (n) =>
-              n.entity("PlayerStats", (e) =>
+              n.entity("Dojomon", (e) =>
                 e.eq("player", addAddressPadding(address))
               )
             )
@@ -101,9 +111,9 @@ export function usePlayerData(address: string | undefined) {
             }
             if (resp.data) {
               state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
+              //console.log(resp.data);
 
-              // @ts-expect-error
-              setPlayerQueryData(resp.data[0].models.dojomon.PlayerStats);
+              //setDojomonQueryData(resp.data);
             }
           },
         });
@@ -115,7 +125,10 @@ export function usePlayerData(address: string | undefined) {
     if (address) {
       fetchEntities(address);
     }
-  }, [sdk, address]);
+  }, [sdk, address, dojomon_id]);
 
-  return { entityId, playerQueryData, playerSubscribeData };
+  return {
+    entityId,
+    dojomonSubscribeData,
+  };
 }

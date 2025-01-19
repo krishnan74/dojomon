@@ -1,17 +1,20 @@
 import { DojoContext } from "../dojo-sdk-provider";
-import { League, PlayerStats, SchemaType } from "../typescript/models.gen";
+import {
+  Dojomon,
+  DojomonType,
+  PlayerSelectedDojomon,
+  SchemaType,
+} from "../typescript/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
-import {
-  addAddressPadding,
-  CairoCustomEnum,
-  CairoOption,
-  CairoOptionVariant,
-} from "starknet";
+import { addAddressPadding, CairoOption, CairoOptionVariant } from "starknet";
 import { useDojoStore } from "./useDojoStore";
 
-export function usePlayerData(address: string | undefined) {
+export function useOpponentDojomonData(
+  address: string | undefined,
+  dojomon_id: string | null
+) {
   const { sdk } = useContext(DojoContext)!;
   const state = useDojoStore((state) => state);
   const entityId = useMemo(() => {
@@ -21,26 +24,24 @@ export function usePlayerData(address: string | undefined) {
     return BigInt(0);
   }, [address]);
 
-  const [playerQueryData, setPlayerQueryData] = useState<PlayerStats>({
-    address: "",
-    name: "",
-    gold: 0,
-    exp: 0,
-    level: 0,
-    league: new CairoOption<League>(CairoOptionVariant.Some, League.Bronze),
-    food: 0,
-    trophies: 0,
-  });
+  const [opponentDojomonSubscribeData, setDojomonSubscribeData] =
+    useState<Dojomon | null>(null);
 
-  const [playerSubscribeData, setPlayerSubscribeData] = useState<PlayerStats>({
-    address: "",
+  const [opponentDojomonQueryData, setDojomonQueryData] = useState<Dojomon>({
+    dojomon_id: 0,
+    player: "",
     name: "",
-    gold: 0,
-    exp: 0,
+    health: 0,
+    attack: 0,
+    defense: 0,
+    speed: 0,
     level: 0,
-    league: new CairoOption<League>(CairoOptionVariant.Some, League.Bronze),
-    food: 0,
-    trophies: 0,
+    exp: 0,
+    evolution: 0,
+    dojomon_type: new CairoOption<DojomonType>(CairoOptionVariant.None),
+    position: { x: 0, y: 0 },
+    is_free: true,
+    is_being_caught: false,
   });
 
   useEffect(() => {
@@ -50,9 +51,7 @@ export function usePlayerData(address: string | undefined) {
       const subscription = await sdk.subscribeEntityQuery({
         query: new QueryBuilder<SchemaType>()
           .namespace("dojomon", (n) =>
-            n.entity("PlayerStats", (e) =>
-              e.eq("player", addAddressPadding(address))
-            )
+            n.entity("Dojomon", (e) => e.eq("dojomon_id", dojomon_id))
           )
           .build(),
         callback: ({ error, data }) => {
@@ -63,8 +62,10 @@ export function usePlayerData(address: string | undefined) {
             (data[0] as ParsedEntity<SchemaType>).entityId !== "0x0"
           ) {
             state.updateEntity(data[0] as ParsedEntity<SchemaType>);
+
+            console.log(data);
             // @ts-expect-error
-            setPlayerSubscribeData(data[0].models.dojomon.PlayerStats);
+            setDojomonSubscribeData(data[0].models.dojomon.Dojomon);
           }
         },
       });
@@ -89,9 +90,7 @@ export function usePlayerData(address: string | undefined) {
         await sdk.getEntities({
           query: new QueryBuilder<SchemaType>()
             .namespace("dojomon", (n) =>
-              n.entity("PlayerStats", (e) =>
-                e.eq("player", addAddressPadding(address))
-              )
+              n.entity("Dojomon", (e) => e.eq("dojomon_id", dojomon_id))
             )
             .build(),
           callback: (resp) => {
@@ -101,9 +100,10 @@ export function usePlayerData(address: string | undefined) {
             }
             if (resp.data) {
               state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
+              console.log(resp.data);
 
               // @ts-expect-error
-              setPlayerQueryData(resp.data[0].models.dojomon.PlayerStats);
+              setDojomonQueryData(resp.data[0].models.dojomon.Dojomon);
             }
           },
         });
@@ -115,7 +115,11 @@ export function usePlayerData(address: string | undefined) {
     if (address) {
       fetchEntities(address);
     }
-  }, [sdk, address]);
+  }, [sdk, address, dojomon_id]);
 
-  return { entityId, playerQueryData, playerSubscribeData };
+  return {
+    entityId,
+    opponentDojomonSubscribeData,
+    opponentDojomonQueryData,
+  };
 }

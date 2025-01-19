@@ -16,6 +16,7 @@ import Home from "./pages/Home.tsx";
 import Battle from "./pages/Battle.tsx";
 import WaitLobby from "./pages/WaitLobby.tsx";
 import NoPage from "./pages/NoPage.tsx";
+import SelectDojomon from "./pages/SelectDojomon.tsx";
 
 /**
  * Initializes and bootstraps the Dojo application.
@@ -57,8 +58,12 @@ async function main() {
                 element={<GameCanvas pokeballPosition={{ x: 0, y: 0 }} />}
               />
               {/* <Route path="test" element={<App />}></Route> */}
-              <Route path="battle" element={<Battle />} />
+              <Route path="battle/:lobbyCode" element={<Battle />} />
               <Route path="lobby/:lobbyCode" element={<WaitLobby />} />
+              <Route
+                path="selectDojomon/:lobbyCode"
+                element={<SelectDojomon />}
+              />
               <Route path="*" element={<NoPage />} />
             </Routes>
           </BrowserRouter>
