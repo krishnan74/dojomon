@@ -6,7 +6,7 @@ type WithFieldOrder<T> = T & { fieldOrder: string[] };
 
 // Type definition for `dojomon::models::PlayerStats` struct
 export interface PlayerStats {
-  player: string;
+  address: string;
   name: string;
   gold: BigNumberish;
   level: BigNumberish;
@@ -18,19 +18,25 @@ export interface PlayerStats {
 
 export interface Lobby {
   lobby_code: BigNumberish;
-  host_player: string;
-  guest_player: string;
+  host_player: PlayerStats;
+  guest_player: PlayerStats;
   host_ready: boolean;
   guest_ready: boolean;
   host_dojomon_id: BigNumberish;
   guest_dojomon_id: BigNumberish;
-  is_vaceant: boolean;
+  is_vacant: boolean;
   lobby_type: CairoOption<LobbyType>;
   turn: string;
 
   lobby_league: CairoOption<League>;
   lobby_exp: BigNumberish;
   lobby_level: BigNumberish;
+}
+
+export interface PlayerSelectedDojomon {
+  player: string;
+  dojomon: Dojomon;
+  lobby_code: BigNumberish;
 }
 
 export interface Friend {
@@ -45,8 +51,8 @@ export interface ReceiverFriendRequest {
   accepted: boolean;
 }
 
-// Type definition for `dojomon::models::DojoMon` struct
-export interface DojoMon {
+// Type definition for `dojomon::models::Dojomon` struct
+export interface Dojomon {
   dojomon_id: BigNumberish;
   player: string;
   name: string;
@@ -159,7 +165,7 @@ export interface SchemaType extends ISchemaType {
     Lobby: WithFieldOrder<Lobby>;
     Friend: WithFieldOrder<Friend>;
     ReceiverFriendRequest: WithFieldOrder<ReceiverFriendRequest>;
-    DojoMon: WithFieldOrder<DojoMon>;
+    Dojomon: WithFieldOrder<Dojomon>;
     DojoBall: WithFieldOrder<DojoBall>;
     Counter: WithFieldOrder<Counter>;
     Position: WithFieldOrder<Position>;
@@ -180,7 +186,7 @@ export const schema: SchemaType = {
         "trophies",
         "league",
       ],
-      player: "",
+      address: "",
       name: "",
       gold: 0,
       level: 0,
@@ -207,13 +213,31 @@ export const schema: SchemaType = {
         "lobby_level",
       ],
       lobby_code: 0,
-      host_player: "",
-      guest_player: "",
+      host_player: {
+        address: "",
+        name: "",
+        gold: 0,
+        level: 0,
+        exp: 0,
+        food: 0,
+        trophies: 0,
+        league: new CairoOption<League>(CairoOptionVariant.None),
+      },
+      guest_player: {
+        address: "",
+        name: "",
+        gold: 0,
+        level: 0,
+        exp: 0,
+        food: 0,
+        trophies: 0,
+        league: new CairoOption<League>(CairoOptionVariant.None),
+      },
       host_ready: false,
       guest_ready: false,
       host_dojomon_id: 0,
       guest_dojomon_id: 0,
-      is_vaceant: false,
+      is_vacant: false,
       lobby_type: new CairoOption<LobbyType>(CairoOptionVariant.None),
       turn: "",
       lobby_league: new CairoOption<League>(CairoOptionVariant.None),
@@ -235,7 +259,7 @@ export const schema: SchemaType = {
       accepted: false,
     },
 
-    DojoMon: {
+    Dojomon: {
       fieldOrder: [
         "dojomon_id",
         "player",
@@ -330,7 +354,7 @@ export enum ModelsMapping {
   Friend = "dojomon-Friend",
   SenderFriendRequest = "dojomon-SenderFriendRequest",
   ReceiverFriendRequest = "dojomon-ReceiverFriendRequest",
-  DojoMon = "dojomon-DojoMon",
+  Dojomon = "dojomon-Dojomon",
   DojoBall = "dojomon-DojoBall",
   Counter = "dojomon-Counter",
   Position = "dojomon-Position",

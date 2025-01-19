@@ -30,11 +30,7 @@ export function setupWorld(provider: DojoProvider) {
     try {
       return await provider.execute(
         snAccount,
-        build_actions_spawn_calldata(
-          snAccount.address as string,
-          name,
-          dojomon_type
-        ),
+        build_actions_spawn_calldata(snAccount.address, name, dojomon_type),
         "dojomon"
       );
     } catch (error) {

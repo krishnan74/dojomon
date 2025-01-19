@@ -30,7 +30,7 @@ const dojoballTypeToString = {
 };
 
 export const build_actions_spawn_calldata = (
-  player_address: string,
+  address: string,
   name: string,
   dojomon_type: models.DojomonType
 ) => {
@@ -38,7 +38,7 @@ export const build_actions_spawn_calldata = (
     contractName: "actions",
     entrypoint: "spawnPlayer",
     calldata: [
-      player_address,
+      address,
       name,
       new CairoCustomEnum({ [dojomonTypeToString[dojomon_type]]: "()" }),
     ],
@@ -46,7 +46,7 @@ export const build_actions_spawn_calldata = (
 };
 
 export const build_actions_createDojomon_calldata = (
-  player_address: string,
+  address: string,
   name: string,
   health: BigNumberish,
   attack: BigNumberish,
@@ -62,7 +62,7 @@ export const build_actions_createDojomon_calldata = (
     contractName: "actions",
     entrypoint: "createDojomon",
     calldata: [
-      player_address,
+      address,
       name,
       health,
       attack,
