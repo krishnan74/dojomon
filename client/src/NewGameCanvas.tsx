@@ -8,6 +8,7 @@ import Trophy from "../assets/trophy.png";
 import Gold from "../assets/gold.png";
 import PokemonPfp from "../assets/pokemon_profile.png"
 import BattleLogo from "../assets/battle.png"
+import { GameObject } from './classes/GameObject';
 
 const NewGameCanvas = () => {
 
@@ -33,10 +34,17 @@ const NewGameCanvas = () => {
 
         const directionInput = new DirectionInput()
         directionInput.init()
+
         const player = new Person({
-            x: withGrid(2),
-            y: withGrid(1),
+            x: withGrid(1),
+            y: withGrid(2),
             isPlayerControlled: true,
+        })
+
+        const npc1 = new GameObject({
+            x: withGrid(4),
+            y: withGrid(4),
+            src: "../assets/npc1.png"
         })
 
 
@@ -53,10 +61,16 @@ const NewGameCanvas = () => {
             ctx.clearRect(0, 0, viewportSize.width, viewportSize.height)
             ctx.drawImage(
                 backgroundImage,
-                backgroundPosition.x,
-                backgroundPosition.y
+                withGrid(10) - player.x + backgroundImage.x,
+                withGrid(5) - player.y + backgroundImage.y
               );
-            player.sprite.draw(ctx)
+              player.sprite.draw({
+                ctx,
+                player: player 
+              });
+              
+              // npc1.sprite.draw({ctx})
+            
         }
 
         const gameLoop = () => {

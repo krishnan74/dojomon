@@ -5,6 +5,7 @@ interface PersonConfig {
   direction?: string;
   x?: number;
   y?: number;
+  src?: string;
 }
 
 class Person extends GameObject {
