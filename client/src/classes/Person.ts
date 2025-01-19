@@ -19,7 +19,7 @@ class Person extends GameObject {
     this.movingProgressRemaining = 0;
     this.isPlayerControlled = config.isPlayerControlled || false;
     this.direction = config.direction || "down"; // Provide a default value
-    const speedMultiplier = 0.25;
+    const speedMultiplier = 1.25;
 
     this.directionUpdate = {
       up: ["y", -1 * speedMultiplier],

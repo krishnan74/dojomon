@@ -88,28 +88,29 @@ export class Sprite {
     }
   }
 
-  draw({ctx, player}:{ctx:CanvasRenderingContext2D, player : GameObject}): void {
-    const x = this.gameObject.x * 12 + withGrid(10) - player.x;
-    const y = this.gameObject.y * 12 + withGrid(5) - player.y;
-
+  draw({ ctx, cameraX, cameraY }: { ctx: CanvasRenderingContext2D; cameraX: number; cameraY: number }): void {
+    const x = this.gameObject.x - cameraX; // Adjust for camera
+    const y = this.gameObject.y - cameraY; // Adjust for camera
+  
+    // Draw shadow
     if (this.isShadowLoaded) {
       ctx.drawImage(this.shadow, x, y);
     }
-
+  
+    // Draw sprite
     const [frameX, frameY] = this.frame;
-
     if (this.isLoaded) {
       ctx.drawImage(
-        this.image, 
-        frameX * 32, frameY * 48,
-        32, 
-        48, 
-        x, 
-        y, 
-        48, 
-        72,);
+        this.image,
+        frameX * 32, frameY * 48, // Source position in spritesheet
+        32, 48,                  // Source size
+        x, y,                    // Destination position on canvas
+        48, 72                   // Destination size
+      );
     }
-
+  
+    // Update animation frame
     this.updateAnimationProgress();
   }
+  
 }
