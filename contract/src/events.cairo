@@ -11,6 +11,7 @@ pub struct PlayerSpawned {
     pub stats: PlayerStats,
 }
 
+
 #[derive(Copy, Drop, Serde, Debug)]
 #[dojo::event]
 pub struct DojomonCreated {
@@ -36,6 +37,23 @@ pub struct PlayerJoined {
 }
 
 //lobby events
+
+#[derive(Drop, Serde, Debug)]
+#[dojo::event]
+pub struct LobbyCreated {
+    #[key]
+    player: u32,
+    lobby_code: u32,
+}
+
+#[derive(Drop, Serde, Debug)]
+#[dojo::event]
+pub struct PlayerJoinedLobby {
+    #[key]
+    lobby_code: u32,
+    player: ContractAddress,
+}
+
 #[derive(Drop, Serde, Debug)]
 #[dojo::event]
 pub struct PlayerSelectedDojomon {

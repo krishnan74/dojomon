@@ -21,6 +21,7 @@ import {
   build_battle_attack_calldata,
   build_actions_addGold_calldata,
   build_actions_addMove_calldata,
+  build_actions_harvestFood_calldata,
 } from "./calldata.gen.ts";
 
 export function setupWorld(provider: DojoProvider) {
@@ -151,6 +152,22 @@ export function setupWorld(provider: DojoProvider) {
           move_type,
           effect
         ),
+        "dojomon"
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const actions_harvestFood = async (
+    snAccount: Account | AccountInterface,
+    quantity: BigNumberish
+  ) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        build_actions_harvestFood_calldata(snAccount.address, quantity),
         "dojomon"
       );
     } catch (error) {
@@ -290,6 +307,7 @@ export function setupWorld(provider: DojoProvider) {
       catchDojomon: actions_createDojomon,
       addGold: actions_addGold,
       addMove: actions_addMove,
+      harvestFood: actions_harvestFood,
     },
     shop: {
       buyDojoBall: actions_buyDojoBall,

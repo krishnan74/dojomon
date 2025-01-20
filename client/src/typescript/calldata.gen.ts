@@ -133,6 +133,17 @@ export const build_actions_addMove_calldata = (
   };
 };
 
+export const build_actions_harvestFood_calldata = (
+  address: string,
+  quantity: BigNumberish
+) => {
+  return {
+    contractName: "actions",
+    entrypoint: "harvestFood",
+    calldata: [address, quantity],
+  };
+};
+
 export const build_shop_buyDojoBall_calldata = (
   dojoball_type: models.DojoBallType,
   quantity: BigNumberish

@@ -1,32 +1,46 @@
-
-import React, { useEffect, useRef, useState } from 'react';
-import { asGridCoord, withGrid } from './lib/utils';
-import { DirectionInput } from './classes/DirectionInput';
-import { Person } from './classes/Person';
-import { GameObject } from './classes/GameObject';
-import { OverworldMap } from './classes/Overworldmap';
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { asGridCoord, felt252ToString, withGrid } from "./lib/utils";
+import { DirectionInput } from "./classes/DirectionInput";
+import { Person } from "./classes/Person";
+import { GameObject } from "./classes/GameObject";
+import { OverworldMap } from "@/classes/OverworldMap";
 
 import Profile from "../assets/game-ui/pfp.jpg";
 import Trophy from "../assets/game-ui/trophy.png";
 import Gold from "../assets/game-ui/gold.png";
+import Carrot from "../assets/game-ui/carrot.png";
 import PokemonPfp from "../assets/game-ui/pokemon_profile.png";
 import BattleLogo from "../assets/game-ui/battle.png";
-import { FarmManager } from './classes/FarmManager';
+import { FarmManager } from "./classes/FarmManager";
+import { usePlayerData } from "./hooks";
+import { useAccount } from "@starknet-react/core";
+import { LobbyType, PlayerStats } from "./typescript/models.gen";
+import { DojoContext } from "./dojo-sdk-provider";
+import { useLobbyMatchMakingData } from "./hooks/useLobbyMatchMakingData";
 
 const NewGameCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const { client } = useContext(DojoContext);
+
+  const { account, address } = useAccount();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [farmState, setFarmState] = useState({
     isFarming: false,
     isHarvesting: false,
-    isHarvestReady: false
-  })
+    isHarvestReady: false,
+  });
+
+  const { playerQueryData, playerSubscribeData } = usePlayerData(address!);
+
+  const { lobby_code } = useLobbyMatchMakingData(address!);
+
+  const [playerDetails, setPlayerDetails] = useState<PlayerStats | null>();
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-
 
     const viewportSize = {
       width: 1200,
@@ -37,31 +51,35 @@ const NewGameCanvas = () => {
     canvas.height = viewportSize.height;
 
     const backgroundImage = new Image();
-    backgroundImage.src = "../assets/game-assets/dojomon-base-map-grid.png";
+    backgroundImage.src = "../assets/game-assets/dojomon-base-map2.png";
 
     const foregroundImage = new Image();
-    foregroundImage.src = "../assets/game-assets/dojomon-base-map-foreground.png";
+    foregroundImage.src =
+      "../assets/game-assets/dojomon-base-map-foreground.png";
 
     const cropImg = new Image();
     cropImg.src = "../assets/crop4.png";
 
-
     const directionInput = new DirectionInput();
     directionInput.init();
-
 
     const hero = new Person({
       x: withGrid(25),
       y: withGrid(18),
       isPlayerControlled: true,
     });
-    const npc1 = new GameObject({
 
+    const npc1 = new GameObject({
       x: withGrid(38),
       y: withGrid(18),
-      src: "../assets/characters/npc1.png"
+      src: "../assets/characters/npc1.png",
     });
 
+    const pokemon1 = new GameObject({
+      x: withGrid(20),
+      y: withGrid(23),
+      src: "../assets/dojomons/front/SQUIRTLE.png",
+    });
 
     const demoMapConfig = {
       walls: {},
@@ -75,11 +93,11 @@ const NewGameCanvas = () => {
     const farmManager = new FarmManager(
       {
         start: withGrid(26),
-        end: withGrid(32)
+        end: withGrid(32),
       },
       {
         start: withGrid(24),
-        end: withGrid(25)
+        end: withGrid(25),
       }
     );
 
@@ -87,7 +105,6 @@ const NewGameCanvas = () => {
     const renderedCrops: GameObject[] = [];
 
     const update = () => {
-
       hero.update({ arrow: directionInput.direction, map: overworldMap });
       hero.updateSprite({
         arrow: directionInput.direction,
@@ -99,7 +116,12 @@ const NewGameCanvas = () => {
 
         return;
       }
-      if (!farmState.isFarming && !farmState.isHarvestReady && !farmManager.hasInteracted && farmManager.isPlayerAtFarm(hero.x, hero.y)) {
+      if (
+        !farmState.isFarming &&
+        !farmState.isHarvestReady &&
+        !farmManager.hasInteracted &&
+        farmManager.isPlayerAtFarm(hero.x, hero.y)
+      ) {
         farmManager.hasInteracted = true;
         setIsPopupVisible(true);
         console.log("Farm interacted");
@@ -108,14 +130,11 @@ const NewGameCanvas = () => {
         setIsPopupVisible(true);
         console.log("Ready for Harvesting...");
       }
-      if(farmState.isHarvesting) {
+      if (farmState.isHarvesting) {
         setIsPopupVisible(false);
         farmManager.harvest(ctx, renderedCrops);
       }
-
-
     };
-
 
     const render = () => {
       ctx.clearRect(0, 0, viewportSize.width, viewportSize.height);
@@ -127,7 +146,7 @@ const NewGameCanvas = () => {
         backgroundImage,
 
         -cameraX,
-        -cameraY,
+        -cameraY
       );
 
       renderedCrops.forEach((crop) => {
@@ -136,27 +155,23 @@ const NewGameCanvas = () => {
 
       renderedSprites.forEach((sprite) => {
         sprite.sprite.draw({ ctx, cameraX, cameraY });
+      });
 
-        -cameraX - backgroundImage.x, // Offset by camera position
-        -cameraY - backgroundImage.y // Offset by camera position
-      );
+      pokemon1.sprite.drawPokemon({ ctx, cameraX, cameraY });
 
-      block.sprite.draw({ ctx, cameraX, cameraY });
       // Render game objects (hero and NPCs)
       hero.sprite.draw({
         ctx,
         cameraX,
         cameraY,
-
       });
 
       ctx.drawImage(
         foregroundImage,
         -cameraX - backgroundImage.x,
-        -cameraY - backgroundImage.y,
+        -cameraY - backgroundImage.y
       );
     };
-
 
     const gameLoop = () => {
       update();
@@ -164,39 +179,47 @@ const NewGameCanvas = () => {
       requestAnimationFrame(gameLoop);
     };
 
-
     backgroundImage.onload = () => {
       gameLoop();
     };
   }, []);
 
+  const handleStartBattle = async () => {
+    if (lobby_code) {
+      await client.lobby.joinLobby(account!, lobby_code);
+      setTimeout(() => {
+        window.location.href = `/lobby/${lobby_code}`;
+      }, 4000);
+    } else {
+      await client.lobby.createLobby(account!, LobbyType.Public);
+    }
+  };
 
   const handleStartFarming = () => {
     setIsPopupVisible(false);
     farmState.isFarming = true;
     setTimeout(() => {
-      farmState.isFarming = false
-      farmState.isHarvestReady = true
+      farmState.isFarming = false;
+      farmState.isHarvestReady = true;
     }, 10000);
   };
 
-  const handleHarvest = () => {
+  const handleHarvest = async () => {
+    await client.actions.harvestFood(account!, 20);
     setIsPopupVisible(false);
     farmState.isHarvesting = true;
     farmState.isFarming = false;
     setTimeout(() => {
-      farmState.isHarvesting = false
-      farmState.isHarvestReady = false
-    },200)
-  }
+      farmState.isHarvesting = false;
+      farmState.isHarvestReady = false;
+    }, 200);
+  };
 
   return (
-
     <div className="w-full h-screen flex justify-center items-center">
       <div className="absolute w-[1200px] h-[650px]">
         {/* Top Left */}
         <div className="absolute top-0 left-0 p-3 m-3 h-[70px] w-1/4 flex items-center bg-white border-2 border-black">
-
           {/* Profile Image */}
           <div className="flex-shrink-0">
             <img
@@ -208,12 +231,31 @@ const NewGameCanvas = () => {
           </div>
 
           {/* Info Section */}
-          <div className="ml-3 w-full">
+          <div className="ml-3 w-full relative">
             {/* Health Bar */}
+
+            <p>
+              {playerSubscribeData
+                ? felt252ToString(playerSubscribeData?.name)
+                : felt252ToString(playerQueryData?.name)}
+            </p>
+
+            <span className="text-xs ml-6 rounded-full p-1 bg-green-300 absolute right-0 top-0">
+              {playerSubscribeData
+                ? playerSubscribeData?.level.toString()
+                : playerQueryData?.level.toString()}
+            </span>
+
             <div className="relative h-2 bg-slate-300  overflow-hidden mb-2">
               <div
-                className="absolute h-full bg-green-500"
-                style={{ width: "70%" }}
+                className="bg-green-400 h-full"
+                style={{
+                  width: `${
+                    ((playerSubscribeData?.exp ??
+                      playerQueryData?.exp ??
+                      0) as number) / 100
+                  }%`,
+                }}
               ></div>
             </div>
 
@@ -222,12 +264,29 @@ const NewGameCanvas = () => {
               {/* Gold */}
               <div className="flex items-center space-x-1">
                 <img src={Gold} alt="Gold" width={20} />
-                <h2 className="text-sm font-medium font-pixel">20</h2>
+                <h2 className="text-sm font-medium font-pixel">
+                  {playerSubscribeData
+                    ? playerSubscribeData?.gold.toString()
+                    : playerQueryData?.gold.toString()}
+                </h2>
               </div>
               {/* Trophy */}
               <div className="flex items-center space-x-1">
                 <img src={Trophy} alt="Trophy" width={18} />
-                <h2 className="text-sm font-medium font-pixel">20</h2>
+                <h2 className="text-sm font-medium font-pixel">
+                  {playerSubscribeData
+                    ? playerSubscribeData?.trophies.toString()
+                    : playerQueryData?.trophies.toString()}
+                </h2>
+              </div>
+
+              <div className="flex items-center space-x-1">
+                <img src={Carrot} alt="Gold" width={20} />
+                <h2 className="text-sm font-medium font-pixel">
+                  {playerSubscribeData
+                    ? playerSubscribeData?.food.toString()
+                    : playerQueryData?.food.toString()}
+                </h2>
               </div>
             </div>
           </div>
@@ -252,28 +311,24 @@ const NewGameCanvas = () => {
         </div>
 
         <div className="absolute bottom-0 right-0 p-3 m-3 h-[70px] flex items-center">
-          <div>
+          <button onClick={handleStartBattle}>
             <img
               src={BattleLogo}
               alt=""
               width={70}
               className="bg-blue-500 border-2 border-black"
             />
-          </div>
+          </button>
           <div className="bg-white p-2 ml-2">
-
-            <button>
-              SHOP</button>
-
+            <button>SHOP</button>
           </div>
-         
         </div>
 
         {/* Bottom right popup */}
         {isPopupVisible && (
           <div className="absolute bottom-0 left-0 p-3 m-3 bg-white border-2 border-black flex items-center">
             <div className="p-2">
-              {!farmState.isFarming && !farmState.isHarvestReady? (
+              {!farmState.isFarming && !farmState.isHarvestReady ? (
                 <button
                   onClick={handleStartFarming}
                   className="bg-green-500 text-white p-2 rounded"
@@ -291,8 +346,6 @@ const NewGameCanvas = () => {
             </div>
           </div>
         )}
-
-
       </div>
       <canvas ref={canvasRef} />
     </div>

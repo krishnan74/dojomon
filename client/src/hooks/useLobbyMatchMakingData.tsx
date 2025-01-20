@@ -66,6 +66,7 @@ export function useLobbyMatchMakingData(address: string | undefined) {
             .namespace("dojomon", (n) =>
               n.entity("Lobby", (e) => {
                 e.eq("lobby_league", playerData?.league);
+                e.lt("lobby_level", Number(playerData?.level!) + 2);
                 e.eq("lobby_type", "Public");
                 e.eq("is_vacant", true);
               })
@@ -78,7 +79,10 @@ export function useLobbyMatchMakingData(address: string | undefined) {
             }
             if (resp.data) {
               state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
-              console.log(resp.data);
+              // @ts-expect-error
+              setLobbyCode(resp.data[0].models.dojomon.Lobby.lobby_code);
+              //@ts-expect-error
+              console.log(resp.data[0].models.dojomon.Lobby.lobby_code);
             }
           },
         });

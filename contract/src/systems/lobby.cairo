@@ -7,6 +7,8 @@ use dojomon::events::{
     PlayerSelectedDojomon,
     PlayerReady,
     PlayerJoined,
+    PlayerJoinedLobby,
+    LobbyCreated
 };
 use starknet::{ContractAddress, get_caller_address};
 
@@ -23,15 +25,13 @@ trait ILobby<T> {
 #[dojo::contract]
 pub mod lobby {
     use super::{
-            ILobby, PlayerStats, Lobby, LobbyType, PlayerSelectedDojomon, PlayerReady, PlayerJoined, Dojomon, Player, DojomonStruct, DojomonType
+            ILobby, PlayerStats, Lobby, LobbyType, PlayerSelectedDojomon, PlayerReady, PlayerJoined, Dojomon, Player, DojomonStruct, DojomonType,LobbyCreated, PlayerJoinedLobby
         };
     use starknet::{ContractAddress, get_caller_address};
     use dojo::model::{ModelStorage, ModelValueStorage};
     use dojo::event::EventStorage;
     use dojo::world::WorldStorage;
     use dojo::world::IWorldDispatcherTrait;
-
-    
 
     #[abi(embed_v0)]
     impl LobbyImpl of ILobby<ContractState> {
@@ -112,6 +112,8 @@ pub mod lobby {
             };
 
             world.write_model(@lobby);
+
+            world.emit_event(@LobbyCreated{player: host_player.address, lobby_code});
             lobby_code 
         }
 
