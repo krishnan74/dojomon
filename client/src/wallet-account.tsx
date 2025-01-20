@@ -49,14 +49,14 @@ export function WalletAccount() {
   return (
     <div className="mb-6">
       <h2 className="text-white">Connect Wallet</h2>
-      <div style={{ display: "flex", gap: "1rem" }}>
+      <div className="grid grid-cols-4 gap-10">
         {}
         {connectors.map((connector) => (
           <button
             key={connector.id}
             onClick={() => connect(connector)}
             disabled={!connector.available()}
-            className="text-black border border-black p-3"
+            className="text-black border border-black p-3 text-[8px] "
           >
             {connector.name}
 

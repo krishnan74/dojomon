@@ -41,6 +41,7 @@ export const ConnectButton = ({ variant = "pixelated", ...props }) => {
         display="flex"
         alignItems="center"
         justifyContent="center"
+        className="text-white border px-8 hover:bg-[#ff3f3f]"
         {...props}
       >
         {!account && (
@@ -83,12 +84,12 @@ export const ConnectButton = ({ variant = "pixelated", ...props }) => {
                       ? connector.icon
                       : connector.icon.light
                   }
-                  width="24px"
-                  height="24px"
+                  width="50px"
+                  height="50px"
                   alt={connector.name}
                 />
               )}
-              {connector && isController && <Cartridge />}
+              {connector && isController && <Cartridge size={"2xl"} />}
               <Text>
                 {isController
                   ? username
