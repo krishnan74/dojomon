@@ -1,9 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import { asGridCoord, withGrid } from './lib/utils';
-import { DirectionInput } from './classes/DirectionInput';
-import { Person } from './classes/Person';
-import { GameObject } from './classes/GameObject';
-import { OverworldMap } from './classes/Overworldmap'; // Import OverworldMap
+import React, { useEffect, useRef } from "react";
+import { asGridCoord, withGrid } from "./lib/utils";
+import { DirectionInput } from "./classes/DirectionInput";
+import { Person } from "./classes/Person";
+import { GameObject } from "./classes/GameObject";
+import { OverworldMap } from "@/classes/OverworldMap"; // Import OverworldMap
 import Profile from "../assets/game-ui/pfp.jpg";
 import Trophy from "../assets/game-ui/trophy.png";
 import Gold from "../assets/game-ui/gold.png";
@@ -46,14 +46,14 @@ const NewGameCanvas = () => {
     const npc1 = new GameObject({
       x: withGrid(70),
       y: withGrid(36),
-      src: "../assets/characters/npc1.png"
+      src: "../assets/characters/npc1.png",
     });
 
     const block = new GameObject({
       x: withGrid(79),
       y: withGrid(37),
-      src: "../assets/collision.png"
-    })
+      src: "../assets/collision.png",
+    });
 
     // Initialize the OverworldMap (we will use this for collision detection)
     const demoMapConfig = {
@@ -65,15 +65,14 @@ const NewGameCanvas = () => {
       },
       gameObjects: {
         hero,
-        npc1
-      }
+        npc1,
+      },
     };
-    
+
     const overworldMap = new OverworldMap(demoMapConfig);
 
     // Update function to handle player movement and collision detection
     const update = () => {
-  
       // Check if the new position is blocked (collision detection)
       hero.update({ arrow: directionInput.direction, map: overworldMap });
 
@@ -89,13 +88,13 @@ const NewGameCanvas = () => {
 
       // Calculate camera position
       const cameraX = hero.x - withGrid(49.5); // Center horizontally
-      const cameraY = hero.y - withGrid(27);  // Center vertically
+      const cameraY = hero.y - withGrid(27); // Center vertically
 
       // Render background with camera offset
       ctx.drawImage(
         backgroundImage,
         -cameraX - backgroundImage.x, // Offset by camera position
-        -cameraY - backgroundImage.y, // Offset by camera position
+        -cameraY - backgroundImage.y // Offset by camera position
       );
 
       block.sprite.draw({ ctx, cameraX, cameraY });
@@ -103,7 +102,7 @@ const NewGameCanvas = () => {
       hero.sprite.draw({
         ctx,
         cameraX,
-        cameraY
+        cameraY,
       });
 
       npc1.sprite.draw({ ctx, cameraX, cameraY });
@@ -123,13 +122,18 @@ const NewGameCanvas = () => {
   }, []);
 
   return (
-    <div className='w-full h-screen flex justify-center items-center'>
-      <div className='absolute w-[1200px] h-[650px]'>
+    <div className="w-full h-screen flex justify-center items-center">
+      <div className="absolute w-[1200px] h-[650px]">
         {/* Top Left */}
         <div className="absolute top-0 left-0 p-3 m-3 h-[70px] w-1/4 flex items-center bg-white border-2 border-black">
           {/* Profile Image */}
           <div className="flex-shrink-0">
-            <img src={Profile} alt="Profile" width={50} className="rounded-md" />
+            <img
+              src={Profile}
+              alt="Profile"
+              width={50}
+              className="rounded-md"
+            />
           </div>
 
           {/* Info Section */}
@@ -138,7 +142,7 @@ const NewGameCanvas = () => {
             <div className="relative h-2 bg-slate-300  overflow-hidden mb-2">
               <div
                 className="absolute h-full bg-green-500"
-                style={{ width: '70%' }}
+                style={{ width: "70%" }}
               ></div>
             </div>
 
@@ -161,10 +165,16 @@ const NewGameCanvas = () => {
         {/* Top Right */}
         <div className="absolute top-0 right-0 p-3 m-3 h-[70px] flex items-center">
           <div>
-            <div className=""
-            //   onClick={() => setIsPokemonTabOpened(!isPokemonTabOpened)}
+            <div
+              className=""
+              //   onClick={() => setIsPokemonTabOpened(!isPokemonTabOpened)}
             >
-              <img src={PokemonPfp} width={70} className="rounded-full border-2 border-black" alt="" />
+              <img
+                src={PokemonPfp}
+                width={70}
+                className="rounded-full border-2 border-black"
+                alt=""
+              />
             </div>
             <div></div>
           </div>
@@ -173,21 +183,28 @@ const NewGameCanvas = () => {
         {/* Bottom right */}
         <div className="absolute bottom-0 right-0 p-3 m-3 h-[70px] flex items-center">
           <div>
-            <img src={BattleLogo} alt="" width={70} className="bg-blue-500 border-2 border-black" />
+            <img
+              src={BattleLogo}
+              alt=""
+              width={70}
+              className="bg-blue-500 border-2 border-black"
+            />
           </div>
           <div className="bg-white p-2 ml-2">
             <button
             //   onClick={handleFarm}
             >
-              Farm</button>
+              Farm
+            </button>
           </div>
           <div className="bg-white p-2 ml-2">
             <button
             //   onClick={handleHarvest}
-            >Harvest</button>
+            >
+              Harvest
+            </button>
           </div>
         </div>
-
       </div>
       <canvas ref={canvasRef} />
     </div>
