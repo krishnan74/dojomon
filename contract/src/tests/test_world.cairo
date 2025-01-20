@@ -402,6 +402,7 @@ mod tests {
 
         let player_stats: PlayerStats = world.read_model(player.address);
 
+
         let initial_gold: u32 = player_stats.gold;
 
         shop_system.buyDojoBall(
@@ -410,6 +411,8 @@ mod tests {
         );
 
         let player_stats: PlayerStats = world.read_model(player_address);
+
+
 
         assert(
             player_stats.gold == initial_gold - DOJOBALL_PRICE,

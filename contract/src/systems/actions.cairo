@@ -1,4 +1,4 @@
-use dojomon::models::{PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, Position, League, Lobby, Move, MoveEffect};
+use dojomon::models::{PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, Position, League, Lobby, Move, MoveEffect, Inventory};
 use dojomon::events::{PlayerSpawned, DojomonCreated, DojomonCaptured};
 use starknet::{ContractAddress, get_caller_address, contract_address_const};
 use dojomon::utils::random::{Random, RandomImpl, RandomTrait};
@@ -19,7 +19,7 @@ trait IActions<T> {
 // Dojo contract
 #[dojo::contract]
 pub mod actions {
-    use super::{IActions, PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, Position, League, Lobby, PlayerSpawned, DojomonCreated, DojomonCaptured, Move, MoveEffect, ContractAddress, Random, RandomImpl, RandomTrait, get_caller_address, contract_address_const};
+    use super::{IActions, PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, Position, League, Lobby, PlayerSpawned, DojomonCreated, DojomonCaptured, Move, MoveEffect, ContractAddress, Random, RandomImpl, RandomTrait,Inventory, get_caller_address, contract_address_const};
     use dojo::model::{ModelStorage, ModelValueStorage};
     
     use dojo::event::EventStorage;
@@ -155,6 +155,16 @@ pub mod actions {
                 trophies: 100,
             };
 
+            let inventory = Inventory {
+                player: player_address,
+                dojoballs: 5,
+                greatballs: 3,
+                ultraballs: 1,
+                masterballs: 0,
+            };
+
+            world.write_model(@inventory);
+
             //writing the player stats
             world.write_model(@start_stats);
 
@@ -222,6 +232,7 @@ pub mod actions {
                 player: player_address,
                 name,
                 health,
+                max_health: health,
                 attack,
                 defense,
                 speed,
@@ -281,6 +292,16 @@ pub mod actions {
                 // // Emit event for failed capture attempt
                 // world.emit_event(@DojomonCaptureFailed { dojomon_id, player });
             }
+
+            let mut inventory: Inventory = world.read_model(player);
+            match dojoball_type {
+                DojoBallType::Dojoball => inventory.dojoballs -= 1,
+                DojoBallType::Greatball => inventory.greatballs -= 1,
+                DojoBallType::Ultraball => inventory.ultraballs -= 1,
+                DojoBallType::Masterball => inventory.masterballs -= 1,
+            }
+
+            world.write_model(@inventory);
         }
 
         fn addGold( ref self: ContractState, player_address_felt252: felt252, quantity: u32 ){

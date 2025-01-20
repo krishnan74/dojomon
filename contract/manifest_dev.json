@@ -1252,8 +1252,8 @@
   },
   "contracts": [
     {
-      "address": "0x57a6377949ade2eaf15acc9a57b1bf623b5791e70654df864b1428dfc041ace",
-      "class_hash": "0x16ca08c7cdf4de8e92e483620e362f6575ff3153e33e23bc34afa47db67ef89",
+      "address": "0x44d5d6d0bbdd40abb6650e5bc739ee8a5afcf8902d19c3204e34cbf2e0f7217",
+      "class_hash": "0x6e8d88446e79b5ae0b75340bd652334dfe940bfedc2e5ea25be9b84663b6fec",
       "abi": [
         {
           "type": "impl",
@@ -1439,6 +1439,36 @@
           ]
         },
         {
+          "type": "enum",
+          "name": "dojomon::models::MoveEffect",
+          "variants": [
+            {
+              "name": "Burn",
+              "type": "()"
+            },
+            {
+              "name": "Paralyze",
+              "type": "()"
+            },
+            {
+              "name": "Confuse",
+              "type": "()"
+            },
+            {
+              "name": "LowerSpecialDefense",
+              "type": "()"
+            },
+            {
+              "name": "Flinch",
+              "type": "()"
+            },
+            {
+              "name": "Freeze",
+              "type": "()"
+            }
+          ]
+        },
+        {
           "type": "interface",
           "name": "dojomon::systems::actions::IActions",
           "items": [
@@ -1553,6 +1583,74 @@
                 {
                   "name": "dojoball_type",
                   "type": "dojomon::models::DojoBallType"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "addGold",
+              "inputs": [
+                {
+                  "name": "player_address_felt252",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "quantity",
+                  "type": "core::integer::u32"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "addMove",
+              "inputs": [
+                {
+                  "name": "dojomon_id",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "name",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "description",
+                  "type": "core::byte_array::ByteArray"
+                },
+                {
+                  "name": "power",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "accuracy",
+                  "type": "core::integer::u32"
+                },
+                {
+                  "name": "move_type",
+                  "type": "dojomon::models::DojomonType"
+                },
+                {
+                  "name": "effect",
+                  "type": "dojomon::models::MoveEffect"
+                }
+              ],
+              "outputs": [],
+              "state_mutability": "external"
+            },
+            {
+              "type": "function",
+              "name": "harvestFood",
+              "inputs": [
+                {
+                  "name": "player_address_felt252",
+                  "type": "core::felt252"
+                },
+                {
+                  "name": "quantity",
+                  "type": "core::integer::u32"
                 }
               ],
               "outputs": [],
@@ -1683,12 +1781,15 @@
         "createDojomon",
         "feedDojomon",
         "catchDojomon",
+        "addGold",
+        "addMove",
+        "harvestFood",
         "upgrade"
       ]
     },
     {
-      "address": "0x650266f43afb264986a8738a0964c1968597c6bde505212e26b6063da2bd692",
-      "class_hash": "0x2a1adeae4319f052ac9535a9ff2c4e2147c4b77511b4af006056b637f7eeea6",
+      "address": "0xe1e8f437db8989172659277e05b8a0c349617cb9bd585e124ad0e785dd192b",
+      "class_hash": "0xf4e085717ce21f204644009fdbf9b80611dd4e0c1e7392bc58c3f1faa5f1f4",
       "abi": [
         {
           "type": "impl",
@@ -2168,8 +2269,8 @@
       ]
     },
     {
-      "address": "0x500fae744da1afe24828b485a99aa8e3b2f1595179184182a270a843b6cb3d6",
-      "class_hash": "0x6ec8e716d333a2e884206cf5ef95fdd9ef98789c763baba96f386e7edb438b4",
+      "address": "0x52f5cc3dd74bbf842ae7d349afc677996b5df849c5cbe1b0d90e2e1e4d3cc8a",
+      "class_hash": "0x5cc520636c69c7fb9ed11a08ffdaddb5d22e2ec2be19d43f64ab3aed85e45c1",
       "abi": [
         {
           "type": "impl",
@@ -2670,7 +2771,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x11315bbb63101ebb94b3b937de8f1aa930e275165c82bcb275f0421191314bb",
+      "class_hash": "0x4b4567a371ca609338a495045871e63c1db81cc9b3bb168c5768bc19ad7c4b2",
       "tag": "dojomon-Dojomon",
       "selector": "0x7bfac2cc75361162f84c4b80a71fa4f00efe1c5c357603a49ebd22dea299f5d"
     },
@@ -2714,7 +2815,7 @@
   "events": [
     {
       "members": [],
-      "class_hash": "0x6ed2fb0580157237dd406b04a6ed1cd4611f2ca2475a5883132f97c452db574",
+      "class_hash": "0x5ba6b8d4de0a0d7edb9a368e55b9b8b695f95b54b41e616eabed111103982b9",
       "tag": "dojomon-BattleEnded",
       "selector": "0x774e0d30577407cd4663436e49bb993fbe9671bd8e6cd86500ed524c109489a"
     },
@@ -2732,7 +2833,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x227e5d6b4237216b09f3c0400c3f35ec69659538a099a7e661a3833cd43171",
+      "class_hash": "0x797cc302bb1b5d31dec6f1716a908e2c1ad576c4eea8719568a57ef0cf7874c",
       "tag": "dojomon-PlayerAttacked",
       "selector": "0x3e2286bc30a3c518902e7cb2f5300824bf7e48abffe68b0b190afbf6bd15677"
     },
@@ -2750,7 +2851,7 @@
     },
     {
       "members": [],
-      "class_hash": "0x10a1fa55b91ecd3fe1490a7eae4ef6dd86361a402d9dab85f181c2468a1fe1",
+      "class_hash": "0x53f695aa13875eb3181a9a8e55d4f9638045c24c3a0b9652f8f1cf7d01d3072",
       "tag": "dojomon-PlayerSelectedDojomon",
       "selector": "0x4b26edb39adbe09fb60c80b64ef2f803865b3e1b5f90b74e3b26d711f9b2a49"
     },
