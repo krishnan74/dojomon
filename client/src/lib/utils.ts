@@ -36,28 +36,66 @@ export const felt252ToString = (felt252: string | undefined) => {
 
 export const withGrid = (grid: number) => {
   return grid * 12;
-}
+};
 
-export const asGridCoord = (x:number, y:number)=>{
-  return `${x*12},${y*12}`
-}
+export const asGridCoord = (x: number, y: number) => {
+  return `${x * 12},${y * 12}`;
+};
 
-export const nextPosition = (initialX: number, initialY: number, direction: string) =>{
+export const nextPosition = (
+  initialX: number,
+  initialY: number,
+  direction: string
+) => {
   let x = initialX;
   let y = initialY;
   const size = 12;
-  if (direction === "left") { 
-    console.log("left")
+  if (direction === "left") {
+    console.log("left");
     x -= size;
   } else if (direction === "right") {
-    console.log("right")
+    console.log("right");
     x += size;
   } else if (direction === "up") {
-    console.log("up")
+    console.log("up");
     y -= size;
   } else if (direction === "down") {
-    console.log("down")
+    console.log("down");
     y += size;
   }
-  return {x,y};
-}
+  return { x, y };
+};
+
+export const getRandomInt = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+export const dojomonData = [
+  {
+    name: "Charmander",
+    health: 100,
+    attack: 20,
+    defense: 10,
+    speed: 15,
+    dojomon_type: "Fire",
+    image_id: "004",
+  },
+  {
+    name: "Squirtle",
+    health: 100,
+    attack: 20,
+    defense: 10,
+    speed: 15,
+    dojomon_type: "Water",
+    image_id: "007",
+  },
+  {
+    name: "Bulbasaur",
+    health: 100,
+    attack: 20,
+    defense: 10,
+    speed: 15,
+    dojomon_type: "Grass",
+    image_id: "001",
+  },
+];

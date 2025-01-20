@@ -14,8 +14,7 @@ import { useDojoStore } from "./useDojoStore";
 
 export function usePlayerAttackedData(
   address: string | undefined,
-  lobby_code: string | undefined,
-  dojomon_id: string | null
+  lobby_code: string | undefined
 ) {
   const { sdk } = useContext(DojoContext)!;
   const state = useDojoStore((state) => state);
@@ -44,7 +43,7 @@ export function usePlayerAttackedData(
   });
 
   const [attackEventSubscribeData, setAttackEventSubscribeData] =
-    useState<PlayerAttacked>();
+    useState<PlayerAttacked | null>(null);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -52,7 +51,6 @@ export function usePlayerAttackedData(
     const subscribe = async (address: string) => {
       const subscription = await sdk.subscribeEventQuery({
         query: {
-          
           event_messages_historical: {
             PlayerAttacked: {
               $: {
@@ -73,8 +71,8 @@ export function usePlayerAttackedData(
             state.updateEntity(data[0] as ParsedEntity<SchemaType>);
 
             console.log(data);
-            //setAttackEventSubscribeData(data[0].models.dojomon.PlayerAttacked);
-            console.log(data);
+            //@ts-expect-error
+            setAttackEventSubscribeData(data[0].models.dojomon.PlayerAttacked);
           }
         },
       });
@@ -125,10 +123,12 @@ export function usePlayerAttackedData(
     if (address) {
       fetchEntities(address);
     }
-  }, [sdk, address, dojomon_id]);
+  }, [sdk, address]);
 
   return {
     entityId,
     dojomonSubscribeData,
+    attackEventSubscribeData,
+    setAttackEventSubscribeData,
   };
 }

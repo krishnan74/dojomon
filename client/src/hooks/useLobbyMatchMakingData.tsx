@@ -1,5 +1,11 @@
 import { DojoContext } from "../dojo-sdk-provider";
-import { League, PlayerStats, SchemaType } from "../typescript/models.gen";
+import {
+  League,
+  Lobby,
+  LobbyType,
+  PlayerStats,
+  SchemaType,
+} from "../typescript/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -11,7 +17,7 @@ import {
 } from "starknet";
 import { useDojoStore } from "./useDojoStore";
 
-export function usePlayerData(address: string | undefined) {
+export function useLobbyMatchMakingData(address: string | undefined) {
   const { sdk } = useContext(DojoContext)!;
   const state = useDojoStore((state) => state);
   const entityId = useMemo(() => {
@@ -21,18 +27,13 @@ export function usePlayerData(address: string | undefined) {
     return BigInt(0);
   }, [address]);
 
-  const [playerQueryData, setPlayerQueryData] = useState<PlayerStats | null>(
-    null
-  );
+  const [playerData, setPlayerData] = useState<PlayerStats | null>(null);
 
-  const [playerSubscribeData, setPlayerSubscribeData] =
-    useState<PlayerStats | null>(null);
+  const [lobby_code, setLobbyCode] = useState<string | null>(null);
 
-  useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-
-    const subscribe = async (address: string) => {
-      const subscription = await sdk.subscribeEntityQuery({
+  const fetchPlayerData = async (address: string) => {
+    try {
+      await sdk.getEntities({
         query: new QueryBuilder<SchemaType>()
           .namespace("dojomon", (n) =>
             n.entity("PlayerStats", (e) =>
@@ -40,43 +41,34 @@ export function usePlayerData(address: string | undefined) {
             )
           )
           .build(),
-        callback: ({ error, data }) => {
-          if (error) {
-            console.error("Error setting up entity sync:", error);
-          } else if (
-            data &&
-            (data[0] as ParsedEntity<SchemaType>).entityId !== "0x0"
-          ) {
-            state.updateEntity(data[0] as ParsedEntity<SchemaType>);
+        callback: (resp) => {
+          if (resp.error) {
+            console.error("resp.error.message:", resp.error.message);
+            return;
+          }
+          if (resp.data) {
+            state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
             // @ts-expect-error
-            setPlayerSubscribeData(data[0].models.dojomon.PlayerStats);
+            setPlayerData(resp.data[0].models.dojomon.PlayerStats);
           }
         },
       });
-
-      unsubscribe = () => subscription.cancel();
-    };
-
-    if (address) {
-      subscribe(address);
+    } catch (error) {
+      console.error("Error querying entities:", error);
     }
-
-    return () => {
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, [sdk, address]);
+  };
 
   useEffect(() => {
-    const fetchEntities = async (address: string) => {
+    const fetchMatchupLobbies = async () => {
       try {
         await sdk.getEntities({
           query: new QueryBuilder<SchemaType>()
             .namespace("dojomon", (n) =>
-              n.entity("PlayerStats", (e) =>
-                e.eq("address", addAddressPadding(address))
-              )
+              n.entity("Lobby", (e) => {
+                e.eq("lobby_league", playerData?.league);
+                e.eq("lobby_type", "Public");
+                e.eq("is_vacant", true);
+              })
             )
             .build(),
           callback: (resp) => {
@@ -86,10 +78,7 @@ export function usePlayerData(address: string | undefined) {
             }
             if (resp.data) {
               state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
-
-              console.log("resp.data:", resp.data);
-              // @ts-expect-error
-              setPlayerQueryData(resp.data[0].models.dojomon.PlayerStats);
+              console.log(resp.data);
             }
           },
         });
@@ -99,9 +88,13 @@ export function usePlayerData(address: string | undefined) {
     };
 
     if (address) {
-      fetchEntities(address);
+      fetchPlayerData(address!);
     }
-  }, [sdk, address]);
 
-  return { entityId, playerQueryData, playerSubscribeData };
+    if (playerData) {
+      fetchMatchupLobbies();
+    }
+  }, [sdk, address, playerData]);
+
+  return { entityId, lobby_code };
 }
