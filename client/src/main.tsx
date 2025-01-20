@@ -18,6 +18,7 @@ import Battle from "./pages/Battle.tsx";
 import WaitLobby from "./pages/WaitLobby.tsx";
 import NoPage from "./pages/NoPage.tsx";
 import SelectDojomon from "./pages/SelectDojomon.tsx";
+
 import NewGameCanvas from "./NewGameCanvas.tsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
@@ -56,6 +57,8 @@ async function main() {
           <BrowserRouter>
             <Routes>
               <Route index element={<Home />} />
+
+
               <Route path="game" element={<NewGameCanvas />} />
               {/* <Route path="test" element={<App />}></Route> */}
               <Route path="battle/:lobbyCode" element={<Battle />} />

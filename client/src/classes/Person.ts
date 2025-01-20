@@ -1,4 +1,5 @@
 import { GameObject } from "./GameObject";
+import { OverworldMap } from "./Overworldmap";
 
 interface PersonConfig {
   isPlayerControlled?: boolean;
@@ -19,7 +20,7 @@ class Person extends GameObject {
     this.movingProgressRemaining = 0;
     this.isPlayerControlled = config.isPlayerControlled || false;
     this.direction = config.direction || "down"; // Provide a default value
-    const speedMultiplier = 0.25;
+    const speedMultiplier = 1;
 
     this.directionUpdate = {
       up: ["y", -1 * speedMultiplier],
@@ -29,14 +30,37 @@ class Person extends GameObject {
     };
   }
 
-  update(state: { arrow?: string }): void {
-    this.updatePosition();
-
-    if (this.isPlayerControlled && this.movingProgressRemaining === 0 && state.arrow) {
-      this.direction = state.arrow; // No type conflict
-      this.movingProgressRemaining = 12;
+  update(state: { arrow?: string, map: OverworldMap }): void {
+    if (this.movingProgressRemaining > 0) {
+      this.updatePosition(); // Update the player's position if they are moving
+    } else {
+      if (this.isPlayerControlled && state.arrow) {
+        // Start behavior if the player controls the character and an arrow is pressed
+        this.startBehavior(state, {
+          type: "walk",
+          direction: state.arrow
+        });
+      }
+      this.updateSprite(state); // Update sprite based on the player's state (idle or walking)
     }
   }
+  
+  startBehavior(state: { arrow?: string, map: OverworldMap }, behavior: { type: string, direction: string }): void {
+    // Set character direction to the specified direction in the behavior
+    this.direction = behavior.direction;
+  
+    if (behavior.type === "walk") {
+      // Stop here if space is not free (check if there is a wall in the target position)
+      console.log(state.map.isSpaceTaken(this.x, this.y, this.direction))
+      if (state.map.isSpaceTaken(this.x, this.y, this.direction)) {
+        return; // If space is taken, do not allow movement
+      }
+  
+      state.map.moveWall(this.x, this.y, this.direction);
+      this.movingProgressRemaining = 12; // Set progress to move the character
+    }
+  }
+  
 
   updatePosition(): void {
     if (this.movingProgressRemaining > 0) {
@@ -56,7 +80,7 @@ class Person extends GameObject {
 
     if (this.movingProgressRemaining > 0) {
       this.sprite.setAnimation("walk-"+this.direction);
-      console.log("walk"+this.direction)
+      // console.log("walk"+this.direction)
     }
   }
 }
