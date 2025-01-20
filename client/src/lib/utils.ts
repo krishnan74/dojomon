@@ -35,12 +35,14 @@ export const felt252ToString = (felt252: string | undefined) => {
 };
 
 export const withGrid = (grid: number) => {
-  return grid * 12;
-};
 
-export const asGridCoord = (x: number, y: number) => {
-  return `${x * 12},${y * 12}`;
-};
+  return grid * 60;
+}
+
+export const asGridCoord = (x:number, y:number)=>{
+  return `${x*60},${y*60}`
+}
+
 
 export const nextPosition = (
   initialX: number,
@@ -49,18 +51,16 @@ export const nextPosition = (
 ) => {
   let x = initialX;
   let y = initialY;
-  const size = 12;
-  if (direction === "left") {
-    console.log("left");
+
+  const size = 60;
+  if (direction === "left") { 
     x -= size;
   } else if (direction === "right") {
-    console.log("right");
     x += size;
   } else if (direction === "up") {
-    console.log("up");
     y -= size;
   } else if (direction === "down") {
-    console.log("down");
+
     y += size;
   }
   return { x, y };

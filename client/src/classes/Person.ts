@@ -20,7 +20,7 @@ class Person extends GameObject {
     this.movingProgressRemaining = 0;
     this.isPlayerControlled = config.isPlayerControlled || false;
     this.direction = config.direction || "down"; // Provide a default value
-    const speedMultiplier = 1;
+    const speedMultiplier = 15;
 
     this.directionUpdate = {
       up: ["y", -1 * speedMultiplier],
@@ -50,10 +50,9 @@ class Person extends GameObject {
     this.direction = behavior.direction;
   
     if (behavior.type === "walk") {
-      // Stop here if space is not free (check if there is a wall in the target position)
-      console.log(state.map.isSpaceTaken(this.x, this.y, this.direction))
+     
       if (state.map.isSpaceTaken(this.x, this.y, this.direction)) {
-        return; // If space is taken, do not allow movement
+        return; 
       }
   
       state.map.moveWall(this.x, this.y, this.direction);
