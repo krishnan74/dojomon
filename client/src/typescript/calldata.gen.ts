@@ -77,24 +77,6 @@ export const build_actions_createDojomon_calldata = (
   };
 };
 
-export const build_actions_buyDojoBall_calldata = (
-  dojoball_type: models.DojoBallType,
-  quantity: BigNumberish,
-  dojomon_id: BigNumberish,
-  has_dojomon: boolean
-) => {
-  return {
-    contractName: "actions",
-    entrypoint: "buyDojoBall",
-    calldata: [
-      new CairoCustomEnum({ [dojoballTypeToString[dojoball_type]]: "()" }),
-      quantity,
-      dojomon_id,
-      has_dojomon,
-    ],
-  };
-};
-
 export const build_actions_feedDojomon_calldata = (
   dojomon_id: BigNumberish,
   quantity: BigNumberish
@@ -103,6 +85,20 @@ export const build_actions_feedDojomon_calldata = (
     contractName: "actions",
     entrypoint: "feedDojomon",
     calldata: [dojomon_id, quantity],
+  };
+};
+
+export const build_shop_buyDojoBall_calldata = (
+  dojoball_type: models.DojoBallType,
+  quantity: BigNumberish
+) => {
+  return {
+    contractName: "shop",
+    entrypoint: "buyDojoBall",
+    calldata: [
+      new CairoCustomEnum({ [dojoballTypeToString[dojoball_type]]: "()" }),
+      quantity,
+    ],
   };
 };
 
