@@ -21,6 +21,7 @@ import SelectDojomon from "./pages/SelectDojomon.tsx";
 
 import NewGameCanvas from "./NewGameCanvas.tsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import SpawnPlayer from "./pages/SpawnPlayer.tsx";
 
 /**
  * Initializes and bootstraps the Dojo application.
@@ -57,14 +58,12 @@ async function main() {
           <BrowserRouter>
             <Routes>
               <Route index element={<Home />} />
-
-
+              <Route path="createPlayer" element={<SpawnPlayer />} />
               <Route path="game" element={<NewGameCanvas />} />
-              {/* <Route path="test" element={<App />}></Route> */}
               <Route path="battle/:lobbyCode" element={<Battle />} />
               <Route path="lobby/:lobbyCode" element={<WaitLobby />} />
               <Route
-                path="selectDojomon/:lobbyCode"
+                path="selectYourDojomon/:lobbyCode"
                 element={<SelectDojomon />}
               />
               <Route path="*" element={<NoPage />} />

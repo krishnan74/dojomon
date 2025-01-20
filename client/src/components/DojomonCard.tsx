@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -7,8 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { felt252ToString } from "@/lib/utils";
-import { Dojomon, DojomonStruct } from "@/typescript/models.gen";
-import React, { useContext } from "react";
+import { Dojomon } from "@/typescript/models.gen";
 import { Button } from "./ui/button";
 
 interface DojomonCardProps {
@@ -26,23 +26,40 @@ const DojomonCard: React.FC<DojomonCardProps> = ({
   account,
   in_battle,
 }) => {
+  const [isSelected, setIsSelected] = useState(false);
+
+  const handleSelectDojomon = () => {
+    if (client && account && lobby_code && dojomon?.dojomon_id) {
+      client.lobby.selectDojomon(account, lobby_code, dojomon.dojomon_id);
+      setIsSelected(true); // Trigger feedback
+      setTimeout(() => setIsSelected(false), 1500); // Remove feedback after 1.5 seconds
+    }
+  };
+
   return (
-    <Card className="max-w-sm bg-gray-800 text-white shadow-lg">
+    <Card
+      className={`max-w-sm bg-gradient-to-br from-purple-800 to-blue-600 text-white shadow-lg transition-transform duration-300 ${
+        isSelected ? "border-4 border-green-400 scale-105" : "hover:scale-105"
+      }`}
+    >
       <CardHeader>
-        <CardTitle className="text-2xl font-bold">
-          {felt252ToString(dojomon?.name)} - {dojomon?.dojomon_id!.toString()}
+        <CardTitle className="text-2xl font-extrabold flex items-center gap-2">
+          {felt252ToString(dojomon?.name)}
+          <span className="text-sm bg-gray-900 text-yellow-400 px-2 py-1 rounded-full">
+            ID #{dojomon?.dojomon_id.toString()}
+          </span>
         </CardTitle>
-        <CardDescription className="text-sm text-gray-400">
-          Type: {felt252ToString(dojomon?.dojomon_type.toString()) || "Unknown"}
+        <CardDescription className="text-sm text-gray-300">
+          Type: {dojomon?.dojomon_type.toString() || "Unknown"}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-4 text-center">
           <p>
             <strong>Level:</strong> {dojomon?.level.toString()}
           </p>
           <p>
-            <strong>Health:</strong> {dojomon?.health.toString()}
+            <strong>HP:</strong> {dojomon?.health.toString()}
           </p>
           <p>
             <strong>Attack:</strong> {dojomon?.attack.toString()}
@@ -56,34 +73,25 @@ const DojomonCard: React.FC<DojomonCardProps> = ({
           <p>
             <strong>EXP:</strong> {dojomon?.exp.toString()}
           </p>
-          <p>
-            <strong>Evolution:</strong> {dojomon?.evolution.toString()}
-          </p>
         </div>
       </CardContent>
       <CardFooter>
-        {/* <p className="text-xs text-gray-400">
-          {dojomon.is_free
-            ? "This Dojomon is free to catch!"
-            : dojomon.is_being_caught
-            ? "Currently being caught by another player."
-            : "Owned by a player."}
-        </p> */}
-
         {!in_battle && (
           <Button
-            onClick={() =>
-              client.lobby.selectDojomon(
-                account!,
-                lobby_code,
-                dojomon?.dojomon_id
-              )
-            }
+            className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-bold"
+            onClick={handleSelectDojomon}
           >
-            Select
+            Select {felt252ToString(dojomon?.name)}
           </Button>
         )}
       </CardFooter>
+      {isSelected && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/70 rounded-lg">
+          <p className="text-green-400 text-lg font-bold animate-pulse">
+            {felt252ToString(dojomon?.name)} Selected!
+          </p>
+        </div>
+      )}
     </Card>
   );
 };
