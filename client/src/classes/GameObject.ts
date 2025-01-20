@@ -12,7 +12,7 @@ export class GameObject {
     this.direction = "down";
     this.sprite = new Sprite({
       gameObject: this,
-      src: config.src || "../assets/boy_run.png",
+      src: config.src || "../assets/characters/boy_run.png",
     });
   }
 

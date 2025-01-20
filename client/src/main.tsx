@@ -18,6 +18,8 @@ import Battle from "./pages/Battle.tsx";
 import WaitLobby from "./pages/WaitLobby.tsx";
 import NoPage from "./pages/NoPage.tsx";
 import SelectDojomon from "./pages/SelectDojomon.tsx";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import NewGameCanvas from "./NewGameCanvas.tsx";
 
 /**
  * Initializes and bootstraps the Dojo application.
@@ -57,7 +59,7 @@ async function main() {
               <Route index element={<Home />} />
               <Route
                 path="game"
-                element={<GameCanvas pokeballPosition={{ x: 0, y: 0 }} />}
+                element={<NewGameCanvas/>}
               />
               {/* <Route path="test" element={<App />}></Route> */}
               <Route path="battle/:lobbyCode" element={<Battle />} />
