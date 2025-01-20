@@ -76,10 +76,8 @@ pub mod battle {
             let is_critical = randomizer.between::<u32>(1, 100) <= 10; // Generates 1 if critical hit
             let critical_multiplier = if is_critical { 150 } else { 100 }; // 150% for critical, scaled by 100
 
-            println!("Selected Move: {:?}", selected_move);
             // Base damage calculation (scaled by 100 for precision)
             let base_damage = selected_move.power * attacker_dojomon.attack * critical_multiplier / (defender_dojomon.defense * 100);
-            println!("Base Damage: {}", base_damage);
 
             // Apply type effectiveness (scaled by 100 for precision)
             let type_effectiveness = self.calculate_type_effectiveness(selected_move.move_type, defender_dojomon.dojomon_type);
@@ -91,7 +89,6 @@ pub mod battle {
             
             let final_damage = base_damage + ( base_damage * adding_damage_percent / 100 );
 
-            println!("Damage: {}", final_damage);
             
             // Update defender's health
             if defender_dojomon.health <= final_damage {
@@ -160,8 +157,8 @@ pub mod battle {
 
                 world.emit_event(@BattleEnded{
                     lobby_code,
-                    host_player: lobby.host_player.address,
-                    guest_player: lobby.guest_player.address,
+                    won_dojomon_id,
+                    lost_dojomon_id
                 });
             }
 
@@ -193,8 +190,8 @@ pub mod battle {
 
                 world.emit_event(@BattleEnded{
                     lobby_code,
-                    host_player: lobby.host_player.address,
-                    guest_player: lobby.guest_player.address,
+                    won_dojomon_id,
+                    lost_dojomon_id
                 });
 
             }

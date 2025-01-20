@@ -11,6 +11,9 @@ trait IActions<T> {
     fn createDojomon(ref self: T, player_address_felt252: felt252, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, evolution: u32, dojomon_type: DojomonType, position: Position, is_free: bool, is_being_caught: bool, image_id: u32) -> u32;
     fn feedDojomon(ref self: T, dojomon_id: u32, quantity: u32);
     fn catchDojomon(ref self: T, dojomon_id: u32, dojoball_type: DojoBallType);
+    fn addGold(ref self: T, player_address_felt252: felt252, quantity: u32);
+    fn addMove(ref self: T, dojomon_id: u32, name: felt252, description: ByteArray, power: u32, accuracy: u32, move_type: DojomonType, effect: MoveEffect);
+    fn harvestFood(ref self: T, player_address_felt252: felt252, quantity: u32);
 }
 
 // Dojo contract
@@ -25,7 +28,7 @@ pub mod actions {
     use dojo::world::IWorldDispatcherTrait;
 
     const COUNTER_ID: u32 = 999;
-    const INCREASE_HEALTH_PER_FOOD: u32 = 10;
+    const INCREASE_HEALTH_PER_FOOD: u32 = 5;
     const DOJOBALL_PRICE : u32 = 50;
     const GREATBALL_PRICE : u32 = 100;
     const ULTRABALL_PRICE : u32 = 200;
@@ -64,7 +67,6 @@ pub mod actions {
     impl ActionsImpl of IActions<ContractState> {
         fn spawnPlayer(ref self: ContractState, player_address_felt252: felt252, name: felt252, starting_dojo_mon: DojomonType) -> u32 {
 
-            
             let mut world = self.world_default();
             //let player = get_caller_address();
             
@@ -279,6 +281,47 @@ pub mod actions {
                 // // Emit event for failed capture attempt
                 // world.emit_event(@DojomonCaptureFailed { dojomon_id, player });
             }
+        }
+
+        fn addGold( ref self: ContractState, player_address_felt252: felt252, quantity: u32 ){
+            let mut world = self.world_default();
+            let player_address: ContractAddress = player_address_felt252.try_into().unwrap();
+
+            let mut player: PlayerStats = world.read_model(player_address);
+
+            player.gold += quantity;
+
+            world.write_model(@player);
+        }
+
+        fn addMove( ref self: ContractState, dojomon_id: u32, name: felt252, description: ByteArray, power: u32, accuracy: u32, move_type: DojomonType, effect: MoveEffect) {
+                        
+            let mut world = self.world_default();
+
+            let move: Move = Move {
+                id: world.dispatcher.uuid(),
+                dojomon_id,
+                name,
+                description,
+                power,
+                accuracy,
+                move_type,
+                effect,
+            };
+
+            world.write_model(@move);                
+                        
+        }
+
+        fn harvestFood ( ref self : ContractState, player_address_felt252: felt252, quantity: u32){
+            let mut world = self.world_default();
+            let player_address: ContractAddress = player_address_felt252.try_into().unwrap();
+
+            let mut player: PlayerStats = world.read_model(player_address);
+
+            player.food += quantity;
+
+            world.write_model(@player);
         }
 
         

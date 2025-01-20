@@ -11,6 +11,21 @@ const SpawnPlayer = () => {
   const { username } = useControllerUsername();
   const { client } = useContext(DojoContext);
 
+  const handleClick = async (dojomon_type: string) => {
+    await client.actions.spawnPlayer(
+      account!,
+      username,
+      dojomon_type === "Fire"
+        ? DojomonType.Fire
+        : dojomon_type === "Water"
+        ? DojomonType.Water
+        : DojomonType.Grass
+    );
+
+    setTimeout(() => {
+      window.location.href = "/game";
+    }, 3000);
+  };
   return (
     <div className="w-full  flex flex-col justify-center items-center">
       <Navbar />
@@ -22,20 +37,7 @@ const SpawnPlayer = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
           {dojomonData.map((dojomon, index) => (
             <div
-              onClick={
-                // Handle dojomon selection
-                async () => {
-                  await client.actions.spawnPlayer(
-                    account!,
-                    username,
-                    dojomon.dojomon_type === "Fire"
-                      ? DojomonType.Fire
-                      : dojomon.dojomon_type === "Water"
-                      ? DojomonType.Water
-                      : DojomonType.Grass
-                  );
-                }
-              }
+              onClick={() => handleClick(dojomon.dojomon_type)}
               key={index}
               className={`bg-white p-6 rounded-xl shadow-lg flex flex-col items-center text-center cursor-pointer 
           ${
