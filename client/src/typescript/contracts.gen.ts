@@ -19,6 +19,8 @@ import {
   build_lobby_selectDojomon_calldata,
   build_lobby_readyForBattle_calldata,
   build_battle_attack_calldata,
+  build_actions_addGold_calldata,
+  build_actions_addMove_calldata,
 } from "./calldata.gen.ts";
 
 export function setupWorld(provider: DojoProvider) {
@@ -103,6 +105,52 @@ export function setupWorld(provider: DojoProvider) {
       return await provider.execute(
         snAccount,
         build_actions_feedDojomon_calldata(dojomon_id, quantity),
+        "dojomon"
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const actions_addGold = async (
+    snAccount: Account | AccountInterface,
+    quantity: BigNumberish
+  ) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        build_actions_addGold_calldata(snAccount.address, quantity),
+        "dojomon"
+      );
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const actions_addMove = async (
+    snAccount: Account | AccountInterface,
+    dojomon_id: BigNumberish,
+    name: string,
+    description: string,
+    power: BigNumberish,
+    accuracy: BigNumberish,
+    move_type: models.DojomonType,
+    effect: models.MoveEffect
+  ) => {
+    try {
+      return await provider.execute(
+        snAccount,
+        build_actions_addMove_calldata(
+          dojomon_id,
+          name,
+          description,
+          power,
+          accuracy,
+          move_type,
+          effect
+        ),
         "dojomon"
       );
     } catch (error) {
@@ -240,6 +288,8 @@ export function setupWorld(provider: DojoProvider) {
       createDojomon: actions_createDojomon,
       feedDojomon: actions_feedDojomon,
       catchDojomon: actions_createDojomon,
+      addGold: actions_addGold,
+      addMove: actions_addMove,
     },
     shop: {
       buyDojoBall: actions_buyDojoBall,

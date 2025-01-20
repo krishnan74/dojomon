@@ -142,7 +142,6 @@ pub mod battle {
             against_AI: bool
         ){
             let mut world = self.world_default();
-            let mut lobby: Lobby = world.read_model(lobby_code);
 
             // Update the dojomon stats
             let mut lost_dojomon :Dojomon = world.read_model(lost_dojomon_id);

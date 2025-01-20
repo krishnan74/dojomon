@@ -279,7 +279,6 @@ pub mod actions {
                 dojomon.is_free = false;  // The Dojomon is no longer free
                 world.write_model(@dojomon);
 
-                println!("Dojomon was caught");
 
                 // Emit event for Dojomon capture
                 world.emit_event(@DojomonCaptured { dojomon_id, player });
@@ -288,7 +287,6 @@ pub mod actions {
                 dojomon.is_being_caught = false;
                 world.write_model(@dojomon);
 
-                println!("Dojomon escaped");
                 // // Emit event for failed capture attempt
                 // world.emit_event(@DojomonCaptureFailed { dojomon_id, player });
             }

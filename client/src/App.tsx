@@ -7,6 +7,8 @@ import {
   //ModelsMapping,
   SchemaType,
   LobbyType,
+  Move,
+  MoveEffect,
 } from "./typescript/models.gen.ts";
 
 import { useAccount } from "@starknet-react/core";
@@ -36,6 +38,7 @@ import { felt252ToString, shortenAddress } from "./lib/utils.ts";
 import { useLobbyData } from "./hooks/useLobbyData.tsx";
 import { useDojomonData } from "./hooks/useDojomonData.tsx";
 import { Button } from "./components/ui/button.tsx";
+import { CairoOption, CairoOptionVariant } from "starknet";
 
 // import useModel from "./hooks/useModel.tsx";
 // import { useSystemCalls } from "./hooks/useSystemCalls.ts";
@@ -56,16 +59,6 @@ export const useDojoStore = createDojoStore<SchemaType>();
 function App() {
   const { account } = useAccount();
   const entities = useDojoStore((state) => state.entities);
-  const { playerQueryData, playerSubscribeData } = usePlayerData(
-    account?.address,
-    undefined
-  );
-  const { lobbySubscribeData, lobbyQueryData } = useLobbyData(
-    account?.address,
-    undefined,
-    false,
-    () => {}
-  );
 
   const { client } = useContext(DojoContext);
 
@@ -73,7 +66,59 @@ function App() {
   const [lobbyType, setLobbyType] = useState<LobbyType>(LobbyType.Public);
   const [enterLobbyCode, setEnterLobbyCode] = useState("");
   const [friendAddress, setfriendAddress] = useState("");
-  const [selected_dojomon_id, setSelectedDojomonId] = useState(0);
+  const [selected_dojomon_id, setSelectedDojomonId] = useState("");
+
+  const movesData = [
+    {
+      name: "Flame Thrower",
+      description: "A powerful fire move",
+      power: 100,
+      accuracy: 100,
+      move_type: new CairoOption<DojomonType>(
+        CairoOptionVariant.Some,
+        DojomonType.Fire
+      ),
+      effect: MoveEffect.Burn,
+    },
+
+    {
+      name: "Fire Blast",
+      description: "A powerful fire move",
+      power: 60,
+      accuracy: 100,
+      move_type: new CairoOption<DojomonType>(
+        CairoOptionVariant.Some,
+        DojomonType.Fire
+      ),
+      effect: MoveEffect.Burn,
+    },
+    {
+      name: "Fire Punch",
+      description: "A powerful fire move",
+      power: 50,
+      accuracy: 100,
+      move_type: new CairoOption<DojomonType>(
+        CairoOptionVariant.Some,
+        DojomonType.Fire
+      ),
+      effect: MoveEffect.Burn,
+    },
+  ];
+
+  const handleCreateMoves = async () => {
+    for (let i = 0; i < movesData.length; i++) {
+      await client.actions.addMove(
+        account!,
+        0,
+        movesData[i].name,
+        movesData[i].description,
+        movesData[i].power,
+        movesData[i].accuracy,
+        DojomonType.Fire,
+        movesData[i].effect
+      );
+    }
+  };
 
   const {
     dojomonSubscribeData,
@@ -107,96 +152,6 @@ function App() {
           >
             Spawn Player
           </button>
-
-          <button
-            className="border-black border text-black px-3 py-1"
-            onClick={async () => {
-              const lobbyCode = await client.actions.createLobby(
-                account!,
-                lobbyType
-              );
-              console.log(lobbyCode); // This will log the returned string (lobby ID)
-            }}
-          >
-            Create Lobby
-          </button>
-
-          <Select
-            onValueChange={(e) => {
-              switch (e) {
-                case "public":
-                  setLobbyType(LobbyType.Public);
-                  break;
-                case "private":
-                  setLobbyType(LobbyType.Private);
-                  break;
-              }
-            }}
-          >
-            <SelectTrigger
-              id="lobby_type"
-              className="px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#845DCC] focus:border-transparent"
-            >
-              <SelectValue placeholder="Select Lobby Type" />
-            </SelectTrigger>
-            <SelectContent position="popper">
-              <SelectItem value={"public"}>
-                <div className="flex gap-2 items-center">
-                  <img src="/" height={25} width={25} alt="" />
-                  <p>Public</p>
-                </div>
-              </SelectItem>
-
-              <SelectItem value={"private"}>
-                <div className="flex gap-2 items-center">
-                  <img
-                    src="/"
-                    className="rounded-full"
-                    height={25}
-                    width={25}
-                    alt=""
-                  />
-                  <p>Private</p>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className="p-5 border-black border ">
-            <button
-              className="border-black border text-black px-3 py-1"
-              onClick={async () => {
-                await client.actions.joinLobby(account!, enterLobbyCode);
-              }}
-            >
-              Join Lobby
-            </button>
-
-            <input
-              type="text"
-              className="border-black border text-black px-3 py-1"
-              value={enterLobbyCode}
-              onChange={(e) => setEnterLobbyCode(e.target.value)}
-            />
-          </div>
-
-          <div className="p-5 border-black border ">
-            <button
-              className="border-black border text-black px-3 py-1"
-              onClick={async () => {
-                await client.actions.sendFriendRequest(account!, friendAddress);
-              }}
-            >
-              Send Friend Req
-            </button>
-
-            <input
-              type="text"
-              value={friendAddress}
-              className="border-black border text-black px-3 py-1"
-              onChange={(e) => setfriendAddress(e.target.value)}
-            />
-          </div>
         </div>
 
         <div className="flex gap-10 items-start mb-10">
@@ -262,16 +217,17 @@ function App() {
       <button
         className="border-black border text-black px-3 py-1"
         onClick={async () => {
-          await client.shop.buyDojoBall(
-            account!,
-            DojoBallType.Dojoball,
-            1,
-            "0",
-            false
-          );
+          await client.shop.buyDojoBall(account!, DojoBallType.Dojoball, 1);
         }}
       >
         Buy DojoBall
+      </button>
+
+      <button
+        className="border-black border text-black px-3 py-1"
+        onClick={handleCreateMoves}
+      >
+        CreateMoves
       </button>
     </div>
   );
