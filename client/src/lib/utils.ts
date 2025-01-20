@@ -35,6 +35,7 @@ export const felt252ToString = (felt252: string | undefined) => {
 };
 
 export const withGrid = (grid: number) => {
+
   return grid * 60;
 }
 
@@ -42,9 +43,15 @@ export const asGridCoord = (x:number, y:number)=>{
   return `${x*60},${y*60}`
 }
 
-export const nextPosition = (initialX: number, initialY: number, direction: string) =>{
+
+export const nextPosition = (
+  initialX: number,
+  initialY: number,
+  direction: string
+) => {
   let x = initialX;
   let y = initialY;
+
   const size = 60;
   if (direction === "left") { 
     x -= size;
@@ -53,7 +60,42 @@ export const nextPosition = (initialX: number, initialY: number, direction: stri
   } else if (direction === "up") {
     y -= size;
   } else if (direction === "down") {
+
     y += size;
   }
-  return {x,y};
-}
+  return { x, y };
+};
+
+export const getRandomInt = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+export const dojomonData = [
+  {
+    name: "Charmander",
+    health: 100,
+    attack: 20,
+    defense: 10,
+    speed: 15,
+    dojomon_type: "Fire",
+    image_id: "004",
+  },
+  {
+    name: "Squirtle",
+    health: 100,
+    attack: 20,
+    defense: 10,
+    speed: 15,
+    dojomon_type: "Water",
+    image_id: "007",
+  },
+  {
+    name: "Bulbasaur",
+    health: 100,
+    attack: 20,
+    defense: 10,
+    speed: 15,
+    dojomon_type: "Grass",
+    image_id: "001",
+  },
+];

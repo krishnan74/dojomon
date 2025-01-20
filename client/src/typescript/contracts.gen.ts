@@ -9,7 +9,7 @@ import {
 import * as models from "./models.gen";
 import {
   build_actions_spawn_calldata,
-  build_actions_buyDojoBall_calldata,
+  build_shop_buyDojoBall_calldata,
   build_lobby_createLobby_calldata,
   build_lobby_joinLobby_calldata,
   build_friendSystem_sendFriendRequest_calldata,
@@ -80,19 +80,12 @@ export function setupWorld(provider: DojoProvider) {
   const actions_buyDojoBall = async (
     snAccount: Account | AccountInterface,
     dojoball_type: models.DojoBallType,
-    quantity: BigNumberish,
-    dojomon_id: string,
-    has_dojomon: boolean
+    quantity: BigNumberish
   ) => {
     try {
       return await provider.execute(
         snAccount,
-        build_actions_buyDojoBall_calldata(
-          dojoball_type,
-          quantity,
-          dojomon_id,
-          has_dojomon
-        ),
+        build_shop_buyDojoBall_calldata(dojoball_type, quantity),
         "dojomon"
       );
     } catch (error) {
@@ -244,10 +237,12 @@ export function setupWorld(provider: DojoProvider) {
   return {
     actions: {
       spawnPlayer: actions_spawn,
-      buyDojoBall: actions_buyDojoBall,
       createDojomon: actions_createDojomon,
       feedDojomon: actions_feedDojomon,
       catchDojomon: actions_createDojomon,
+    },
+    shop: {
+      buyDojoBall: actions_buyDojoBall,
     },
     lobby: {
       createLobby: lobby_createLobby,

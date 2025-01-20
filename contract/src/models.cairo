@@ -73,6 +73,7 @@ pub struct Dojomon{
     pub player: ContractAddress,
     pub name: felt252,
     pub health: u32,
+    pub max_health: u32,
     pub attack: u32,
     pub defense: u32,
     pub speed: u32,

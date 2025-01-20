@@ -1,21 +1,20 @@
-import { DojoContext } from "../dojo-sdk-provider";
+import { DojoContext } from "../../dojo-sdk-provider";
 import {
   Dojomon,
   DojomonType,
   PlayerAttacked,
   PlayerSelectedDojomon,
   SchemaType,
-} from "../typescript/models.gen";
+} from "../../typescript/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { addAddressPadding, CairoOption, CairoOptionVariant } from "starknet";
-import { useDojoStore } from "./useDojoStore";
+import { useDojoStore } from "../useDojoStore";
 
 export function usePlayerAttackedData(
   address: string | undefined,
-  lobby_code: string | undefined,
-  dojomon_id: string | null
+  lobby_code: string | undefined
 ) {
   const { sdk } = useContext(DojoContext)!;
   const state = useDojoStore((state) => state);
@@ -31,6 +30,7 @@ export function usePlayerAttackedData(
     player: "",
     name: "",
     health: 0,
+    max_health: 0,
     attack: 0,
     defense: 0,
     speed: 0,
@@ -44,7 +44,7 @@ export function usePlayerAttackedData(
   });
 
   const [attackEventSubscribeData, setAttackEventSubscribeData] =
-    useState<PlayerAttacked>();
+    useState<PlayerAttacked | null>(null);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -52,7 +52,6 @@ export function usePlayerAttackedData(
     const subscribe = async (address: string) => {
       const subscription = await sdk.subscribeEventQuery({
         query: {
-          
           event_messages_historical: {
             PlayerAttacked: {
               $: {
@@ -73,8 +72,8 @@ export function usePlayerAttackedData(
             state.updateEntity(data[0] as ParsedEntity<SchemaType>);
 
             console.log(data);
-            //setAttackEventSubscribeData(data[0].models.dojomon.PlayerAttacked);
-            console.log(data);
+            //@ts-expect-error
+            setAttackEventSubscribeData(data[0].models.dojomon.PlayerAttacked);
           }
         },
       });
@@ -125,10 +124,12 @@ export function usePlayerAttackedData(
     if (address) {
       fetchEntities(address);
     }
-  }, [sdk, address, dojomon_id]);
+  }, [sdk, address]);
 
   return {
     entityId,
     dojomonSubscribeData,
+    attackEventSubscribeData,
+    setAttackEventSubscribeData,
   };
 }

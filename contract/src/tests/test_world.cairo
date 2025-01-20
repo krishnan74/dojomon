@@ -176,58 +176,61 @@ mod tests {
 
         println!("");
 
-        //let initial_player: PlayerStats = world.read_model(caller);
+        let initial_player: PlayerStats = world.read_model(caller);
 
-        //let player_league: felt252 = League::Bronze.into();
+        let player_league: felt252 = League::Bronze.into();
 
 
 
-        // assert(
-        //     initial_player.gold == 100 && 
-        //     initial_player.level == 1 &&
-        //     initial_player.exp == 0 &&
-        //     initial_player.food == 100 &&
-        //     initial_player.trophies == 0 &&
-        //     initial_player.league.into() == player_league,
-        //     'wrong initial stats'
-        // );
+        assert(
+            initial_player.gold == 100 && 
+            initial_player.level == 1 &&
+            initial_player.exp == 0 &&
+            initial_player.food == 100 &&
+            initial_player.trophies == 0 &&
+            initial_player.league.into() == player_league,
+            'wrong initial stats'
+        );
+    }
 
-        // let attacker_dojomon_id : u32 = actions_system.createDojomon(
-        //     player1_address,
-        //     'Charmander',
-        //     100,
-        //     40,
-        //     30,
-        //     40,
-        //     0,
-        //     DojomonType::Fire(()),
-        //     Position{
-        //         x: 0,
-        //         y: 0,
-        //     },
-        //     false,
-        //     false,
-        // );
+    #[test]    
+    fn test_attack(){
+        let attacker_dojomon_id : u32 = actions_system.createDojomon(
+            player1_address,
+            'Charmander',
+            100,
+            40,
+            30,
+            40,
+            0,
+            DojomonType::Fire(()),
+            Position{
+                x: 0,
+                y: 0,
+            },
+            false,
+            false,
+        );
 
-        // let defender_dojomon_id : u32 = actions_system.createDojomon(
-        //     player2_address,
-        //     'Squirtle',
-        //     110,
-        //     30,
-        //     35,
-        //     35,
-        //     0,
-        //     DojomonType::Water(()),
-        //     Position{
-        //         x: 0,
-        //         y: 0,
-        //     },
-        //     false,
-        //     false
-        // );
+        let defender_dojomon_id : u32 = actions_system.createDojomon(
+            player2_address,
+            'Squirtle',
+            110,
+            30,
+            35,
+            35,
+            0,
+            DojomonType::Water(()),
+            Position{
+                x: 0,
+                y: 0,
+            },
+            false,
+            false
+        );
 
-        //let attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
-        //let defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
+        let attacker_dojomon: Dojomon = world.read_model(attacker_dojomon_id);
+        let defender_dojomon: Dojomon = world.read_model(defender_dojomon_id);
 
         println!("Attacker Dojomon spawned");
         //print_dojomon_stats(attacker_dojomon);
@@ -292,8 +295,6 @@ mod tests {
         println!(" Player 2 Stats ");
 
         print_player_stats(world.read_model(player2_address));
-        
-
     }
 
     #[test]    
@@ -337,7 +338,7 @@ mod tests {
 
     }
 
-    //#[test]
+    #[test]
     fn test_friend_system (){
 
         //let caller = starknet::contract_address_const::<0x0>();
@@ -371,7 +372,7 @@ mod tests {
 
     }
 
-    // #[test]
+    #[test]
     fn test_buy_dojoball(){
         let ndef = namespace_def();
         let mut world = spawn_test_world([ndef].span());
@@ -401,6 +402,7 @@ mod tests {
 
         let player_stats: PlayerStats = world.read_model(player.address);
 
+
         let initial_gold: u32 = player_stats.gold;
 
         shop_system.buyDojoBall(
@@ -409,6 +411,8 @@ mod tests {
         );
 
         let player_stats: PlayerStats = world.read_model(player_address);
+
+
 
         assert(
             player_stats.gold == initial_gold - DOJOBALL_PRICE,
@@ -423,7 +427,113 @@ mod tests {
         );
     }
 
-    //#[test]
+    #[test]
+    fn test_harvest_food(){
+        let ndef = namespace_def();
+        let mut world = spawn_test_world([ndef].span());
+        world.sync_perms_and_inits(contract_defs());
+
+        let (contract_address, _) = world.dns(@"actions").unwrap();
+        let actions_system = IActionsDispatcher { contract_address };
+
+        let player = PlayerStats {
+            address: starknet::contract_address_const::<0x0>(),
+            name: 'Player',
+            gold: 100,
+            level: 1,
+            exp: 0,
+            food: 100,
+            trophies: 0,
+            league: League::Bronze(()),
+        };
+
+        world.write_model(@player);
+
+        let player_stats: PlayerStats = world.read_model(player.address);
+
+        let initial_food: u32 = player_stats.food;
+
+        actions_system.harvestFood(
+            10
+        );
+
+        let new_player_stats: PlayerStats = world.read_model(player.address);
+
+        assert(
+            new_player_stats.food == initial_food + 10,
+            'wrong food after harvesting'
+        );
+    }
+
+    #[test]
+    fn test_feed_dojomon(){
+        let ndef = namespace_def();
+        let mut world = spawn_test_world([ndef].span());
+        world.sync_perms_and_inits(contract_defs());
+
+        let (contract_address, _) = world.dns(@"actions").unwrap();
+        let actions_system = IActionsDispatcher { contract_address };
+
+        let player = PlayerStats {
+            address: starknet::contract_address_const::<0x0>(),
+            name: 'Player',
+            gold: 100,
+            level: 1,
+            exp: 0,
+            food: 100,
+            trophies: 0,
+            league: League::Bronze(()),
+        };
+
+        world.write_model(@player);
+
+        let player_stats: PlayerStats = world.read_model(player.address);
+
+        let initial_food: u32 = player_stats.food;
+
+        let dojomon_id : u32 = actions_system.createDojomon(
+            player.address,
+            'Charmander',
+            50,
+            20,
+            30,
+            20,
+            0,
+            DojomonType::Fire(()),
+            Position{
+                x: 0,
+                y: 0,
+            },
+            false,
+            false,
+            004
+        );
+
+        let dojomon: Dojomon = world.read_model(dojomon_id);
+
+        let initial_health: u32 = dojomon.health;
+
+        actions_system.feedDojomon(
+            dojomon_id,
+            10
+        );
+
+        let new_dojomon: Dojomon = world.read_model(dojomon_id);
+
+        assert(
+            new_dojomon.health == initial_health + 50,
+            'wrong health after feeding'
+        );
+
+        let new_player_stats: PlayerStats = world.read_model(player.address);
+
+        assert(
+            new_player_stats.food == initial_food - 10,
+            'wrong food after feeding'
+        );
+    }
+
+    #[test]
     fn test_random_between_0_2() {
        // starknet::testing::set_contract_address(111.try_into().unwrap());
         let mut randomizer = RandomImpl::new('world');
@@ -440,5 +550,79 @@ mod tests {
         };
     }
 
+    #[test]
+    fn test_create_lobby() {
+        let ndef = namespace_def();
+        let mut world = spawn_test_world([ndef].span());
+        world.sync_perms_and_inits(contract_defs());
+
+        let (contract_address, _) = world.dns(@"lobby").unwrap();
+        let lobby_system = ILobbyDispatcher { contract_address };
+
+
+        let lobby_code: u32 = lobby_system.createLobby(
+            LobbyType::Public(()),
+        );
+
+        let lobby: Lobby = world.read_model(lobby_code);
+
+        assert(
+            lobby.host_player.address == "" &&
+            lobby.guest_player.address == "" &&
+            lobby.is_vacant == true &&
+            lobby.lobby_type == LobbyType::Public(())
+            ,
+            'wrong lobby'
+        );
+    }
+
+    #[test]
+    fn test_join_lobby() {
+        let ndef = namespace_def();
+        let mut world = spawn_test_world([ndef].span());
+        world.sync_perms_and_inits(contract_defs());
+
+        let (contract_address, _) = world.dns(@"lobby").unwrap();
+        let lobby_system = ILobbyDispatcher { contract_address };
+
+        let lobby_code: u32 = lobby_system.createLobby(
+            LobbyType::Public(()),
+        );
+
+        let player1_address: felt252 = '0x0';
+        let player2_address: felt252 = '0x1';
+
+        lobby_system.joinLobby(
+            lobby_code,
+            player1_address
+        );
+
+        let lobby: Lobby = world.read_model(lobby_code);
+
+        assert(
+            lobby.host_player.address == player1_address &&
+            lobby.guest_player.address == "" &&
+            lobby.is_vacant == false &&
+            lobby.lobby_type == LobbyType::Public(())
+            ,
+            'wrong lobby'
+        );
+
+        lobby_system.joinLobby(
+            lobby_code,
+            player2_address
+        );
+
+        let lobby: Lobby = world.read_model(lobby_code);
+
+        assert(
+            lobby.host_player.address == player1_address &&
+            lobby.guest_player.address == player2_address &&
+            lobby.is_vacant == false &&
+            lobby.lobby_type == LobbyType::Public(())
+            ,
+            'wrong lobby'
+        );
+    }
     
 }

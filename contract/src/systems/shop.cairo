@@ -1,5 +1,5 @@
 use dojomon::models::{
-    PlayerStats,DojoBallType, Counter
+    PlayerStats,DojoBallType, Counter, Inventory
 
 };
 use starknet::{ContractAddress, get_caller_address};
@@ -15,7 +15,7 @@ trait IShop<T> {
 pub mod shop {
     
     use super::{
-            IShop, PlayerStats, DojoBallType, Counter
+            IShop, PlayerStats, DojoBallType, Counter, Inventory
         };
         use starknet::{ContractAddress, get_caller_address};
         use dojo::model::{ModelStorage, ModelValueStorage};
@@ -56,8 +56,17 @@ pub mod shop {
             player_stats.gold -= gold_expense * quantity;
             world.write_model(@player_stats);
 
+            // Add dojoball to player inventory
+            let mut inventory: Inventory = world.read_model(player);
+            match dojoball_type {
+                DojoBallType::Dojoball => inventory.dojoballs += quantity,
+                DojoBallType::Greatball => inventory.greatballs += quantity,
+                DojoBallType::Ultraball => inventory.ultraballs += quantity,
+                DojoBallType::Masterball => inventory.masterballs += quantity,
+            }
 
-            
+            world.write_model(@inventory);
+
             }
 
         }

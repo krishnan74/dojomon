@@ -1,9 +1,11 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { asGridCoord, withGrid } from './lib/utils';
 import { DirectionInput } from './classes/DirectionInput';
 import { Person } from './classes/Person';
 import { GameObject } from './classes/GameObject';
 import { OverworldMap } from './classes/Overworldmap';
+
 import Profile from "../assets/game-ui/pfp.jpg";
 import Trophy from "../assets/game-ui/trophy.png";
 import Gold from "../assets/game-ui/gold.png";
@@ -54,17 +56,19 @@ const NewGameCanvas = () => {
       isPlayerControlled: true,
     });
     const npc1 = new GameObject({
+
       x: withGrid(38),
       y: withGrid(18),
       src: "../assets/characters/npc1.png"
     });
 
+
     const demoMapConfig = {
       walls: {},
       gameObjects: {
         hero,
-        npc1
-      }
+        npc1,
+      },
     };
 
     const overworldMap = new OverworldMap(demoMapConfig);
@@ -121,6 +125,7 @@ const NewGameCanvas = () => {
 
       ctx.drawImage(
         backgroundImage,
+
         -cameraX,
         -cameraY,
       );
@@ -131,6 +136,18 @@ const NewGameCanvas = () => {
 
       renderedSprites.forEach((sprite) => {
         sprite.sprite.draw({ ctx, cameraX, cameraY });
+
+        -cameraX - backgroundImage.x, // Offset by camera position
+        -cameraY - backgroundImage.y // Offset by camera position
+      );
+
+      block.sprite.draw({ ctx, cameraX, cameraY });
+      // Render game objects (hero and NPCs)
+      hero.sprite.draw({
+        ctx,
+        cameraX,
+        cameraY,
+
       });
 
       ctx.drawImage(
@@ -174,13 +191,20 @@ const NewGameCanvas = () => {
   }
 
   return (
-    <div className='w-full h-screen flex justify-center items-center'>
-      <div className='absolute w-[1200px] h-[650px]'>
-          {/* Top Left */}
-          <div className="absolute top-0 left-0 p-3 m-3 h-[70px] w-1/4 flex items-center bg-white border-2 border-black">
+
+    <div className="w-full h-screen flex justify-center items-center">
+      <div className="absolute w-[1200px] h-[650px]">
+        {/* Top Left */}
+        <div className="absolute top-0 left-0 p-3 m-3 h-[70px] w-1/4 flex items-center bg-white border-2 border-black">
+
           {/* Profile Image */}
           <div className="flex-shrink-0">
-            <img src={Profile} alt="Profile" width={50} className="rounded-md" />
+            <img
+              src={Profile}
+              alt="Profile"
+              width={50}
+              className="rounded-md"
+            />
           </div>
 
           {/* Info Section */}
@@ -189,7 +213,7 @@ const NewGameCanvas = () => {
             <div className="relative h-2 bg-slate-300  overflow-hidden mb-2">
               <div
                 className="absolute h-full bg-green-500"
-                style={{ width: '70%' }}
+                style={{ width: "70%" }}
               ></div>
             </div>
 
@@ -212,10 +236,16 @@ const NewGameCanvas = () => {
         {/* Top Right */}
         <div className="absolute top-0 right-0 p-3 m-3 h-[70px] flex items-center">
           <div>
-            <div className=""
-            //   onClick={() => setIsPokemonTabOpened(!isPokemonTabOpened)}
+            <div
+              className=""
+              //   onClick={() => setIsPokemonTabOpened(!isPokemonTabOpened)}
             >
-              <img src={PokemonPfp} width={70} className="rounded-full border-2 border-black" alt="" />
+              <img
+                src={PokemonPfp}
+                width={70}
+                className="rounded-full border-2 border-black"
+                alt=""
+              />
             </div>
             <div></div>
           </div>
@@ -223,11 +253,18 @@ const NewGameCanvas = () => {
 
         <div className="absolute bottom-0 right-0 p-3 m-3 h-[70px] flex items-center">
           <div>
-            <img src={BattleLogo} alt="" width={70} className="bg-blue-500 border-2 border-black" />
+            <img
+              src={BattleLogo}
+              alt=""
+              width={70}
+              className="bg-blue-500 border-2 border-black"
+            />
           </div>
           <div className="bg-white p-2 ml-2">
+
             <button>
               SHOP</button>
+
           </div>
          
         </div>
@@ -254,6 +291,7 @@ const NewGameCanvas = () => {
             </div>
           </div>
         )}
+
 
       </div>
       <canvas ref={canvasRef} />

@@ -6,6 +6,7 @@ import { DojoContext } from "@/dojo-sdk-provider";
 import { useParams } from "react-router-dom";
 import { useLobbyData } from "@/hooks/useLobbyData";
 import { Button } from "@/components/ui/button";
+import { Howl } from "howler";
 import { addAddressPadding } from "starknet";
 
 const SelectDojomon = () => {
@@ -13,36 +14,60 @@ const SelectDojomon = () => {
   const { account, address } = useAccount(); // Get user account details
   const { lobbyCode } = useParams<{ lobbyCode: string }>(); // Extract lobby code from URL params
 
-  const { lobbySubscribeData } = useLobbyData(account?.address, lobbyCode); // Fetch lobby data
+  const { lobbySubscribeData, lobbyQueryData } = useLobbyData(
+    account?.address,
+    lobbyCode
+  ); // Fetch lobby data
   const { dojomonQueryData } = useDojomonData(account?.address, undefined); // Fetch user's Dojomon data
 
   // States for readiness
   const [playerReady, setPlayerReady] = useState(false);
   const [opponentReady, setOpponentReady] = useState(false);
 
+  const selectSound = new Howl({
+    src: ["../assets/audio/GUI sel decision.ogg"],
+    volume: 0.7,
+  });
+
   // Update readiness states based on lobby subscription data
+
   useEffect(() => {
-    if (lobbySubscribeData && account) {
-      if (lobbySubscribeData.host_player.address === address) {
-        setPlayerReady(lobbySubscribeData.host_ready);
-        setOpponentReady(lobbySubscribeData.guest_ready);
+    const updateLobbyState = () => {
+      const lobby_data =
+        lobbySubscribeData.lobby_code !== 0
+          ? lobbySubscribeData
+          : lobbyQueryData;
+
+      if (lobby_data) {
+        const isHost =
+          lobby_data.host_player.address === addAddressPadding(address!);
+
+        setPlayerReady(
+          isHost
+            ? lobbySubscribeData.host_ready
+            : lobbySubscribeData.guest_ready
+        );
+
+        setOpponentReady(
+          isHost
+            ? lobbySubscribeData.guest_ready
+            : lobbySubscribeData.host_ready
+        );
+
         if (lobbySubscribeData.host_ready && lobbySubscribeData.guest_ready) {
-          // Both players are ready, navigate to battle page
-          window.location.href = `/battle/${lobbyCode}?dojomon_id=${lobbySubscribeData.host_dojomon.dojomon_id}`;
-        }
-      } else {
-        setPlayerReady(lobbySubscribeData.guest_ready);
-        setOpponentReady(lobbySubscribeData.host_ready);
-        if (lobbySubscribeData.host_ready && lobbySubscribeData.guest_ready) {
-          // Both players are ready, navigate to battle page
-          window.location.href = `/battle/${lobbyCode}?dojomon_id=${lobbySubscribeData.guest_dojomon.dojomon_id}`;
+          isHost
+            ? (window.location.href = `/battle/${lobbyCode}?my_dojomon_id=${lobbySubscribeData.host_dojomon.dojomon_id}&opponent_dojomon_id=${lobbySubscribeData.guest_dojomon.dojomon_id}`)
+            : (window.location.href = `/battle/${lobbyCode}?my_dojomon_id=${lobbySubscribeData.guest_dojomon.dojomon_id}&opponent_dojomon_id=${lobbySubscribeData.host_dojomon.dojomon_id}`);
         }
       }
-    }
-  }, [lobbySubscribeData, account]);
+    };
+
+    if (address) updateLobbyState();
+  }, [lobbyQueryData, lobbySubscribeData, address]);
 
   // Handler for setting player readiness
   const handleReadyClick = async () => {
+    selectSound.play();
     await client.lobby.readyForBattle(account!, lobbyCode!);
   };
 

@@ -12,13 +12,13 @@ import { copyToClipboard, shortenAddress } from "../lib/utils";
 import { MetaMaskAvatar } from "react-metamask-avatar";
 import { ConnectButton } from "./wallet/ConnectButton";
 import { Outlet } from "react-router-dom";
+import { useControllerUsername } from "@/hooks";
 
 const Navbar = () => {
-  const { account, address } = useAccount();
   const [showDetails, setShowDetails] = useState(false);
 
   return (
-    <div className="flex items-center px-10 py-8 justify-between z-20 ">
+    <div className="flex items-center px-10 py-8 justify-between z-20 w-full">
       <a className="" href={"/"}>
         <p className="text-2xl font-semibold text-white">
           <span className="text-[#ff3f3f] mr-1">DOJO</span>
@@ -55,40 +55,7 @@ const Navbar = () => {
             </SelectItem>
           </SelectContent>
         </Select> */}
-        <div className="relative">
-          {address ? (
-            <div>
-              <span
-                className="cursor-pointer px-4 py-2 text-black bg-gray-100 rounded-lg"
-                onClick={() => setShowDetails(!showDetails)}
-              >
-                {shortenAddress(address)}
-              </span>
-              {showDetails && (
-                <div className="absolute right-0 mt-2 w-64 p-4 bg-white border rounded-lg shadow-lg">
-                  <div className="flex items-center mb-2">
-                    <MetaMaskAvatar address={address} size={24} />
-                    <div className="ml-4">
-                      <p className="text-sm font-semibold">
-                        {" "}
-                        {shortenAddress(address)}
-                      </p>
-                      <p className="text-sm text-gray-500">0 ETH</p>
-                    </div>
-                  </div>
-                  <Button
-                    onClick={() => copyToClipboard(address)}
-                    className="w-full text-sm"
-                  >
-                    Copy Address
-                  </Button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <ConnectButton />
-          )}
-        </div>
+        <ConnectButton />
       </div>
     </div>
   );

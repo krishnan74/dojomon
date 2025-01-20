@@ -70,6 +70,6 @@ pub struct PlayerAttacked {
 pub struct BattleEnded {
     #[key]
     lobby_code: u32,
-    host_player: ContractAddress,
-    guest_player: ContractAddress,
+    won_dojomon_id: u32,
+    lost_dojomon_id: u32,
 }

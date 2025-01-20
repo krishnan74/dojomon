@@ -29,44 +29,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { felt252ToString } from "@/lib/utils";
+import { usePlayerData } from "@/hooks";
+import { useAccount } from "@starknet-react/core";
+import { useLobbyMatchMakingData } from "@/hooks/useLobbyMatchMakingData";
+import { useLeaderBoardData } from "@/hooks/useLeaderBoardData";
 
 const Home = () => {
   const { sdk } = useContext(DojoContext)!;
+  const { address } = useAccount();
   const state = useDojoStore((state) => state);
-  const [leaderboardData, setLeaderboardData] = useState<PlayerStats[]>([]);
 
-  useEffect(() => {
-    const fetchEntities = async () => {
-      try {
-        await sdk.getEntities({
-          query: new QueryBuilder<SchemaType>()
-            .namespace("dojomon", (n) =>
-              n.entity("PlayerStats", (e) => {
-                e.gte("trophies", 0);
-              })
-            )
-            .build(),
-          callback: (resp) => {
-            if (resp.error) {
-              console.error("resp.error.message:", resp.error.message);
-              return;
-            }
-            if (resp.data) {
-              state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
+  const { playerQueryData } = usePlayerData(address);
+  const { lobby_code } = useLobbyMatchMakingData(address);
+  const { leaderboardData } = useLeaderBoardData(address);
 
-              console.log(resp.data);
-              // @ts-expect-error
-              setLeaderboardData(resp.data);
-            }
-          },
-        });
-      } catch (error) {
-        console.error("Error querying entities:", error);
-      }
-    };
-
-    fetchEntities();
-  }, [sdk]);
   return (
     <div className="min-h-screen flex flex-col relative bg-[#080C1D]">
       <div
@@ -116,7 +92,9 @@ const Home = () => {
           </p> */}
           <button
             onClick={() => {
-              window.location.href = "/game";
+              playerQueryData != null
+                ? (window.location.href = "/game")
+                : (window.location.href = "/createPlayer");
             }}
             className="w-fit  bg-[#ff5656] hover:bg-[#ff4747] text-black px-8 py-3 rounded-md font-semibold text-lg shadow-md hover:shadow-lg transition "
           >

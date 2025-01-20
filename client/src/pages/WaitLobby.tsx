@@ -1,12 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useAccount } from "@starknet-react/core";
+import { WalletAccount } from "@/wallet-account";
 import { DojoContext } from "@/dojo-sdk-provider";
 import { useDojoStore, usePlayerData } from "@/hooks";
 import { QueryBuilder, ParsedEntity } from "@dojoengine/sdk";
 import { DojomonType, LobbyType, PlayerStats } from "@/typescript/models.gen";
 import { felt252ToString } from "@/lib/utils";
 import { useLobbyData } from "@/hooks/useLobbyData";
+import { Howler } from "howler";
 import { BigNumberish } from "starknet";
 
 function useQuery() {
@@ -36,6 +38,11 @@ const WaitLobby = () => {
 
   const { lobbySubscribeData } = useLobbyData(address, lobbyCode);
 
+  const matchfoundSound = new Howl({
+    src: ["../assets/audio/Vs flash.ogg"],
+    volume: 0.7,
+  });
+
   useEffect(() => {
     if (lobbySubscribeData) {
       if (lobbySubscribeData.host_player.address === address) {
@@ -48,7 +55,8 @@ const WaitLobby = () => {
 
       if (lobbySubscribeData.guest_player.address !== "") {
         setTimeout(() => {
-          window.location.href = `/selectDojomon/${lobbyCode}`;
+          matchfoundSound.play();
+          window.location.href = `/selectYourDojomon/${lobbyCode}`;
         }, 5000);
       }
     }
@@ -56,6 +64,8 @@ const WaitLobby = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen  bg-gradient-to-br from-gray-800 to-gray-900 ">
+      <WalletAccount />
+
       <div className="p-5 border-black border ">
         <button
           className="border-black border text-black px-3 py-1"
