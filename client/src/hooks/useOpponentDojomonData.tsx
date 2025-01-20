@@ -27,22 +27,8 @@ export function useOpponentDojomonData(
   const [opponentDojomonSubscribeData, setDojomonSubscribeData] =
     useState<Dojomon | null>(null);
 
-  const [opponentDojomonQueryData, setDojomonQueryData] = useState<Dojomon>({
-    dojomon_id: 0,
-    player: "",
-    name: "",
-    health: 0,
-    attack: 0,
-    defense: 0,
-    speed: 0,
-    level: 0,
-    exp: 0,
-    evolution: 0,
-    dojomon_type: new CairoOption<DojomonType>(CairoOptionVariant.None),
-    position: { x: 0, y: 0 },
-    is_free: true,
-    is_being_caught: false,
-  });
+  const [opponentDojomonQueryData, setDojomonQueryData] =
+    useState<Dojomon | null>(null);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
