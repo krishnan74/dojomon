@@ -16,6 +16,17 @@ pub struct PlayerStats{
 
 #[derive(Copy, Drop, Serde, Debug)]
 #[dojo::model]
+pub struct Inventory{
+    #[key]
+    pub player: ContractAddress,
+    pub dojoballs: u32,
+    pub greatballs: u32,
+    pub ultraballs: u32,
+    pub masterballs: u32,
+}
+
+#[derive(Copy, Drop, Serde, Debug)]
+#[dojo::model]
 pub struct Lobby{
     #[key]
     pub lobby_code: u32,
@@ -72,6 +83,7 @@ pub struct Dojomon{
     pub position: Position,
     pub is_free: bool,
     pub is_being_caught: bool,
+    pub image_id: u32,
 }
 
 #[derive(Copy, Drop, Serde, Debug)]

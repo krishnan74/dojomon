@@ -1,21 +1,22 @@
-use dojomon::models::{PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, DojoBall, Position, League, Lobby, Move, MoveEffect};
+use dojomon::models::{PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, Position, League, Lobby, Move, MoveEffect};
 use dojomon::events::{PlayerSpawned, DojomonCreated, DojomonCaptured};
 use starknet::{ContractAddress, get_caller_address, contract_address_const};
+use dojomon::utils::random::{Random, RandomImpl, RandomTrait};
+
 
 // Define the interface
 #[starknet::interface]
 trait IActions<T> {
     fn spawnPlayer(ref self: T, player_address_felt252: felt252, name: felt252, starting_dojo_mon: DojomonType) -> u32;
-    fn createDojomon(ref self: T, player_address_felt252: felt252, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, evolution: u32, dojomon_type: DojomonType, position: Position, is_free: bool, is_being_caught: bool) -> u32;
-    fn buyDojoBall( ref self: T, dojoball_type: DojoBallType, quantity: u32, dojomon_id: u32, has_dojomon: bool);
+    fn createDojomon(ref self: T, player_address_felt252: felt252, name: felt252, health: u32, attack: u32, defense: u32, speed: u32, evolution: u32, dojomon_type: DojomonType, position: Position, is_free: bool, is_being_caught: bool, image_id: u32) -> u32;
     fn feedDojomon(ref self: T, dojomon_id: u32, quantity: u32);
-    fn catchDojomon(ref self: T, dojomon_id: u32);
+    fn catchDojomon(ref self: T, dojomon_id: u32, dojoball_type: DojoBallType);
 }
 
 // Dojo contract
 #[dojo::contract]
 pub mod actions {
-    use super::{IActions, PlayerStats, Counter, Dojomon,DojoBall, DojoBallType, DojomonType, Position, League, Lobby, PlayerSpawned, DojomonCreated, DojomonCaptured, Move, MoveEffect, ContractAddress, get_caller_address, contract_address_const};
+    use super::{IActions, PlayerStats, Counter, Dojomon, DojoBallType, DojomonType, Position, League, Lobby, PlayerSpawned, DojomonCreated, DojomonCaptured, Move, MoveEffect, ContractAddress, Random, RandomImpl, RandomTrait, get_caller_address, contract_address_const};
     use dojo::model::{ModelStorage, ModelValueStorage};
     
     use dojo::event::EventStorage;
@@ -84,7 +85,7 @@ pub mod actions {
             //creating starting dojomon based on the input
             let created_dojomon_id = match starting_dojo_mon {
                 DojomonType::Fire => {
-                    let dojomon_id = self.createDojomon( player_address_felt252, 'Charmander', charmander.health, charmander.attack, charmander.defense, charmander.speed, 0, DojomonType::Fire, Position { x: 0, y: 0 }, false, false);
+                    let dojomon_id = self.createDojomon( player_address_felt252, 'Charmander', charmander.health, charmander.attack, charmander.defense, charmander.speed, 0, DojomonType::Fire, Position { x: 0, y: 0 }, false, false, 004);
                     let move: Move = Move {
                         id: world.dispatcher.uuid(),
                         dojomon_id,
@@ -102,7 +103,7 @@ pub mod actions {
                 },
                 
                 DojomonType::Grass =>{
-                    let dojomon_id = self.createDojomon( player_address_felt252, 'Bulbasaur', bulbasaur.health, bulbasaur.attack, bulbasaur.defense, bulbasaur.speed, 0, DojomonType::Grass, Position { x: 0, y: 0 }, false, false);
+                    let dojomon_id = self.createDojomon( player_address_felt252, 'Bulbasaur', bulbasaur.health, bulbasaur.attack, bulbasaur.defense, bulbasaur.speed, 0, DojomonType::Grass, Position { x: 0, y: 0 }, false, false, 001);
                     let move: Move = Move {
                         id: world.dispatcher.uuid(),
                         dojomon_id,
@@ -120,7 +121,7 @@ pub mod actions {
                 },
 
                 DojomonType::Water =>{
-                    let dojomon_id = self.createDojomon( player_address_felt252, 'Squirtle', squirtle.health, squirtle.attack, squirtle.defense, squirtle.speed, 0, DojomonType::Water, Position { x: 0, y: 0 }, false, false);
+                    let dojomon_id = self.createDojomon( player_address_felt252, 'Squirtle', squirtle.health, squirtle.attack, squirtle.defense, squirtle.speed, 0, DojomonType::Water, Position { x: 0, y: 0 }, false, false, 007);
                     let move: Move = Move {
                         id: world.dispatcher.uuid(),
                         dojomon_id,
@@ -155,75 +156,13 @@ pub mod actions {
             //writing the player stats
             world.write_model(@start_stats);
 
-            
-            let dojoball_id = world.dispatcher.uuid();
-
-            let dojoball = DojoBall {
-                dojoball_id,
-                player: player_address,
-                dojomon_id: created_dojomon_id,
-                position: Position { x: 0, y: 0 },
-                dojoball_type: DojoBallType::Dojoball,
-                has_dojomon: true,
-            };
-
-            world.write_model(@dojoball);
-
             // Emit event for player creation
             world.emit_event(@PlayerSpawned {player: player_address,stats: start_stats});
 
             created_dojomon_id
         }
 
-        fn buyDojoBall( ref self: ContractState,  dojoball_type: DojoBallType, quantity: u32, dojomon_id: u32, has_dojomon: bool) { 
-            let mut world = self.world_default();
-            let player = get_caller_address();
-
-            let mut counter : Counter = world.read_model(COUNTER_ID);
-            
-            let mut dojoball_count = counter.dojoball_count;
-
-            //incrementing the counter
-            counter.dojoball_count += quantity;
-            world.write_model(@counter);
-
-            
-
-            //mapping dojoball type to gold expense
-            let gold_expense = match dojoball_type {
-                DojoBallType::Dojoball => DOJOBALL_PRICE,
-                DojoBallType::Greatball => GREATBALL_PRICE,
-                DojoBallType::Ultraball => ULTRABALL_PRICE,
-                DojoBallType::Masterball => MASTERBALL_PRICE,
-            };
-
-            // Deduct gold from player
-            let mut player_stats: PlayerStats = world.read_model(player);
-            player_stats.gold -= gold_expense * quantity;
-            world.write_model(@player_stats);
-
-
-            //creating new dojo_balls
-            for _ in 0..quantity{
-
-                dojoball_count+=1;
-
-
-                let dojoball_id = world.dispatcher.uuid();
-
-                let dojoball = DojoBall {
-                    dojoball_id,
-                    player,
-                    dojomon_id,
-                    position: Position { x: 0, y: 0 },
-                    dojoball_type,
-                    has_dojomon,
-                };
-
-                world.write_model(@dojoball);
-            }
-
-        }
+        
         
         fn feedDojomon(ref self: ContractState, dojomon_id: u32, quantity: u32) {
             let mut world = self.world_default();
@@ -257,7 +196,8 @@ pub mod actions {
             dojomon_type: DojomonType,
             position: Position,
             is_free: bool,
-            is_being_caught: bool
+            is_being_caught: bool,
+            image_id: u32
         ) -> u32 {
             let mut world = self.world_default();
             
@@ -289,7 +229,8 @@ pub mod actions {
                 dojomon_type,
                 position,
                 is_free,
-                is_being_caught
+                is_being_caught,
+                image_id,
             };
 
             world.write_model(@dojomon);
@@ -301,30 +242,43 @@ pub mod actions {
         }
 
         /// Captures an unowned Dojomon and assigns it to the calling player.
-        fn catchDojomon(ref self: ContractState, dojomon_id: u32) {
+        fn catchDojomon(ref self: ContractState, dojomon_id: u32, dojoball_type: DojoBallType) {
             let mut world = self.world_default();
             let player = get_caller_address();
 
-            // Check if the Dojomon exists
-            //let mut dojomon = Dojomon::get(dojomon_id).expect("Dojomon does not exist!");
-
             let mut dojomon: Dojomon = world.read_model(dojomon_id);
 
-            // Ensure the Dojomon is unowned
-            // if dojomon.player != ContractAddress::default() {
-            //     panic!("Dojomon is already owned!");
-            // }
+            let mut randomizer = RandomImpl::new('world');
 
-            // Assign the Dojomon to the player
-            dojomon.player = player;
+            // Set Dojomon as being caught
+            dojomon.is_being_caught = true;
             world.write_model(@dojomon);
 
-            // Add the Dojomon to the player's list
-            let mut player_stats: PlayerStats = world.read_model(player);
-            world.write_model(@player_stats);
+            // Calculate catch rate based on DojoBall type and Dojomon's stats
+            let catch_rate = self.calculate_catch_rate(dojomon, dojoball_type);
 
-            // Emit event for Dojomon capture
-            world.emit_event(@DojomonCaptured{ dojomon_id, player });
+            // Simulate a random chance to decide whether the Dojomon is caught
+            let success = randomizer.between::<u32>(1, 100) <= catch_rate;
+
+            // If caught, assign the Dojomon to the player and update the player's stats
+            if success {
+                dojomon.player = player;
+                dojomon.is_free = false;  // The Dojomon is no longer free
+                world.write_model(@dojomon);
+
+                println!("Dojomon was caught");
+
+                // Emit event for Dojomon capture
+                world.emit_event(@DojomonCaptured { dojomon_id, player });
+            } else {
+                // If not caught, revert the state of the Dojomon
+                dojomon.is_being_caught = false;
+                world.write_model(@dojomon);
+
+                println!("Dojomon escaped");
+                // // Emit event for failed capture attempt
+                // world.emit_event(@DojomonCaptureFailed { dojomon_id, player });
+            }
         }
 
         
@@ -339,6 +293,32 @@ pub mod actions {
             self.world(@"dojomon")
         }
 
+        fn calculate_catch_rate(ref self: ContractState, dojomon: Dojomon, dojoball_type: DojoBallType) -> u32 {
+            let base_rate = match dojoball_type {
+                DojoBallType::Dojoball => 30,    // Low chance (30%)
+                DojoBallType::Greatball => 50,    // Medium chance (50%)
+                DojoBallType::Ultraball => 70,   // High chance (70%)
+                DojoBallType::Masterball => 100, // Always catches (100%)
+            };
+
+            // Factors affecting the catch rate
+            let health_factor = dojomon.health / 2;  // Lower health makes it easier to catch
+            let level_factor = 50 - dojomon.level;  // Higher level makes it harder to catch
+            let speed_factor = dojomon.speed / 5;  // Higher speed reduces catch chance (we divide by 5 for reasonable scaling)
+            let defense_factor = dojomon.defense / 5; // Higher defense also reduces catch chance (dividing by 5)
+
+            // Simple formula to adjust catch rate
+            let catch_rate = base_rate + level_factor - health_factor - speed_factor - defense_factor;
+
+            // Ensure the catch rate is within a valid range [0, 100]
+            if catch_rate > 100 {
+                return 100;
+            } else if catch_rate < 0 {
+                return 0;
+            }
+
+            return catch_rate;
+        }
     }
     
     // impl DojoBallTypeIntoFelt252 of Into<DojoBallType, felt252> {

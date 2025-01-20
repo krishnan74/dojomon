@@ -3,6 +3,7 @@ mod systems {
     mod friendSystem;
     mod battle;
     mod lobby;
+    mod shop;
 }
 
 mod models;

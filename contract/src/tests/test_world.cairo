@@ -13,6 +13,7 @@ mod tests {
     use dojomon::systems::friendSystem::{friendSystem, IFriendSystemDispatcher, IFriendSystemDispatcherTrait};
     use dojomon::systems::battle::{battle, IBattleDispatcher, IBattleDispatcherTrait};
     use dojomon::systems::lobby::{lobby, ILobbyDispatcher, ILobbyDispatcherTrait};
+    use dojomon::systems::shop::{shop, IShopDispatcher, IShopDispatcherTrait};
     use dojomon::events::{
         PlayerSpawned, e_PlayerSpawned,
         DojomonCreated, e_DojomonCreated,
@@ -100,6 +101,7 @@ mod tests {
         println!("Dojomon Speed: {}", dojomon.speed);
         println!("Dojomon Type: {:?}", dojomon.dojomon_type);
         println!("Dojomon Position: ({}, {})", dojomon.position.x, dojomon.position.y);
+        println!("Dojomon Image: {}", dojomon.image_id);
     }
 
     fn print_player_stats( 
@@ -294,6 +296,47 @@ mod tests {
 
     }
 
+    #[test]    
+    fn test_catch_dojomon () {
+        let ndef = namespace_def();
+        let mut world = spawn_test_world([ndef].span());
+        world.sync_perms_and_inits(contract_defs());
+
+        let (contract_address, _) = world.dns(@"actions").unwrap();
+        let actions_system = IActionsDispatcher { contract_address };
+
+        let player_address: felt252 = '0x0';
+        
+        let dojomon_id : u32 = actions_system.createDojomon(
+            player_address,
+            'Charmander',
+            50,
+            20,
+            30,
+            20,
+            0,
+            DojomonType::Fire(()),
+            Position{
+                x: 0,
+                y: 0,
+            },
+            false,
+            false,
+            004
+        );
+
+        actions_system.catchDojomon(
+            dojomon_id,
+            DojoBallType::Dojoball(())
+        );
+
+        let dojomon: Dojomon = world.read_model(dojomon_id);
+
+        println!("Dojomon Image: {}", dojomon.image_id);
+
+
+    }
+
     //#[test]
     fn test_friend_system (){
 
@@ -326,6 +369,58 @@ mod tests {
             'wrong friend request'
         );
 
+    }
+
+    // #[test]
+    fn test_buy_dojoball(){
+        let ndef = namespace_def();
+        let mut world = spawn_test_world([ndef].span());
+        world.sync_perms_and_inits(contract_defs());
+
+        let (contract_address, _) = world.dns(@"shop").unwrap();
+        let shop_system = IShopDispatcher { contract_address };
+
+
+        
+            const DOJOBALL_PRICE : u32 = 50;
+            const GREATBALL_PRICE : u32 = 100;
+            const ULTRABALL_PRICE : u32 = 200;
+            const MASTERBALL_PRICE : u32 = 300;
+
+
+        let player = PlayerStats {
+            address: starknet::contract_address_const::<0x0>(),
+            name: 'Player',
+            gold: 100,
+            level: 1,
+            exp: 0,
+            food: 100,
+            trophies: 0,
+            league: League::Bronze(()),
+        };
+
+        let player_stats: PlayerStats = world.read_model(player.address);
+
+        let initial_gold: u32 = player_stats.gold;
+
+        shop_system.buyDojoBall(
+            DojoBallType::Dojoball(()),
+            1
+        );
+
+        let player_stats: PlayerStats = world.read_model(player_address);
+
+        assert(
+            player_stats.gold == initial_gold - DOJOBALL_PRICE,
+            'wrong gold after buying dojoball'
+        );
+
+        let counter: Counter = world.read_model(COUNTER_ID);
+
+        assert(
+            counter.dojoball_count == 1,
+            'wrong dojoball count'
+        );
     }
 
     //#[test]
