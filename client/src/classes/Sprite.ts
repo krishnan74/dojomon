@@ -1,6 +1,7 @@
 import { GameObject } from "./GameObject";
 import { Person } from "./Person";
 import { withGrid } from "../lib/utils";
+import { al } from "node_modules/@starknet-react/core/dist/index-BGDcP25e";
 
 export class Sprite {
   image: HTMLImageElement;
@@ -111,6 +112,17 @@ export class Sprite {
   
     // Update animation frame
     this.updateAnimationProgress();
+  }
+
+  drawCrop({ ctx, cameraX, cameraY }: { ctx: CanvasRenderingContext2D; cameraX: number; cameraY: number; }): void {
+    
+    const x = this.gameObject.x - cameraX; // Adjust for camera
+    const y = this.gameObject.y - cameraY; // Adjust for camera
+    ctx.drawImage(
+      this.image,                  // Source size
+      x, y,                    // Destination position on canvas
+    60, 60               // Destination size
+    );
   }
   
 }

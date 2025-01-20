@@ -2,9 +2,8 @@ import { asGridCoord, nextPosition } from "@/lib/utils"; // Assuming nextPositio
 import { GameObject } from "./GameObject";
 
 interface OverworldMapConfig {
- 
   walls: Record<string, boolean>;
-gameObjects: Record<string, GameObject>;
+  gameObjects: Record<string, GameObject>;
 }
 
 class OverworldMap {
@@ -12,18 +11,13 @@ class OverworldMap {
   gameObjects: Record<string, GameObject>;
 
   constructor(config: OverworldMapConfig) {
-    this.walls = {
-            [asGridCoord(79, 37)]: true,
-            [asGridCoord(55, 28)]: true,
-            [asGridCoord(56, 26)]: true,
-            [asGridCoord(56, 25)]: true,
-          }
+    this.walls = config.walls || {};
     this.gameObjects = config.gameObjects;
   }
 
   isSpaceTaken(currentX: number, currentY: number, direction: string): boolean {
+    // Use nextPosition to calculate the new target position
     const { x, y } = nextPosition(currentX, currentY, direction);
-    console.log("x",x,"y",y)
     return this.walls[`${x},${y}`] || false;
   }
 
@@ -41,7 +35,11 @@ class OverworldMap {
     this.addWall(x, y);
   }
 
- 
+  isPlayerAtFarm(x: number, y: number, farmCoords: { x: number; y: number }): boolean {
+    return x === farmCoords.x && y === farmCoords.y;
+  }
+
+  
 }
 
 export { OverworldMap };
