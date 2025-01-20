@@ -57,6 +57,7 @@ export interface Dojomon {
   player: string;
   name: string;
   health: BigNumberish;
+  max_health: BigNumberish;
   attack: BigNumberish;
   defense: BigNumberish;
   speed: BigNumberish;
@@ -74,6 +75,7 @@ export interface DojomonStruct {
   player: string;
   name: string;
   health: BigNumberish;
+  max_health: BigNumberish;
   attack: BigNumberish;
   defense: BigNumberish;
   speed: BigNumberish;
@@ -182,6 +184,17 @@ export interface PlayerAttacked {
   lobby: Lobby;
 }
 
+export interface PlayerSpawned {
+  player: string;
+  stats: PlayerStats;
+}
+
+export interface BattleEnded {
+  lobby_code: BigNumberish;
+  won_dojomon_id: BigNumberish;
+  lost_dojomon_id: BigNumberish;
+}
+
 export interface SchemaType extends ISchemaType {
   dojomon: {
     PlayerStats: WithFieldOrder<PlayerStats>;
@@ -263,6 +276,7 @@ export const schema: SchemaType = {
         player: "",
         name: "",
         health: 0,
+        max_health: 0,
         attack: 0,
         defense: 0,
         speed: 0,
@@ -276,6 +290,7 @@ export const schema: SchemaType = {
         player: "",
         name: "",
         health: 0,
+        max_health: 0,
         attack: 0,
         defense: 0,
         speed: 0,
@@ -312,6 +327,7 @@ export const schema: SchemaType = {
         "player",
         "name",
         "health",
+        "max_health",
         "attack",
         "defense",
         "speed",
@@ -327,6 +343,7 @@ export const schema: SchemaType = {
       player: "",
       name: "",
       health: 0,
+      max_health: 0,
       attack: 0,
       defense: 0,
       speed: 0,

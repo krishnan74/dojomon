@@ -2,19 +2,28 @@ import Navbar from "@/components/Navbar";
 import { useControllerUsername, usePlayerData } from "@/hooks";
 import { DojomonType } from "@/typescript/models.gen";
 import { useAccount } from "@starknet-react/core";
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { dojomonData } from "@/lib/utils";
 import { DojoContext } from "@/dojo-sdk-provider";
+import { usePlayerSpawnedData } from "@/hooks/events/usePlayerSpawnedData";
 
-const SpawnPlayer = () => {
+const CreatePlayer = () => {
   const { account, address } = useAccount();
   const { username } = useControllerUsername();
   const { client } = useContext(DojoContext);
 
+  const { playerSpawnedSubscribeData } = usePlayerSpawnedData(address);
+
+  useEffect(() => {
+    if (playerSpawnedSubscribeData) {
+      window.location.href = "/game";
+    }
+  }, [playerSpawnedSubscribeData]);
+
   const handleClick = async (dojomon_type: string) => {
     await client.actions.spawnPlayer(
       account!,
-      username,
+      username || "Player1",
       dojomon_type === "Fire"
         ? DojomonType.Fire
         : dojomon_type === "Water"
@@ -91,4 +100,4 @@ const SpawnPlayer = () => {
   );
 };
 
-export default SpawnPlayer;
+export default CreatePlayer;

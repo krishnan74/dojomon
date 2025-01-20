@@ -2,16 +2,16 @@ import React, { useContext, useState, useEffect, useRef } from "react";
 import { useAccount } from "@starknet-react/core";
 import { useParams, useLocation } from "react-router-dom";
 import { DojoContext } from "@/dojo-sdk-provider";
-import { useLobbyData } from "@/hooks/useLobbyData";
 import { useMyDojomonData } from "@/hooks/useMyDojomonData";
 import { useOpponentDojomonData } from "@/hooks/useOpponentDojomonData";
 import { useMovesData } from "@/hooks/useMovesData";
 import { felt252ToString } from "@/lib/utils";
 import MoveCard from "@/components/MoveCard";
 import { Monster } from "@/interfaces";
-import { usePlayerAttackedData } from "@/hooks/usePlayerAttackedData";
+import { usePlayerAttackedData } from "@/hooks/events/usePlayerAttackedData";
 import { Howl } from "howler";
 import { useSpring, animated } from "react-spring";
+import { useBattleEndedData } from "@/hooks/events/useBattleEndedData";
 
 // Custom hook to parse query params
 function useQuery() {
@@ -51,11 +51,6 @@ const Battle = () => {
   const selected_dojomon_id = query.get("my_dojomon_id");
   const opponent_dojomon_id = query.get("opponent_dojomon_id");
 
-  const { lobbySubscribeData, lobbyQueryData } = useLobbyData(
-    address,
-    lobbyCode
-  );
-
   const [attacked, setAttacked] = useState(false);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [gameOver, setGameOver] = useState<string | null>(null);
@@ -69,11 +64,7 @@ const Battle = () => {
     useOpponentDojomonData(address, opponent_dojomon_id);
 
   const { movesQueryData } = useMovesData(selected_dojomon_id || "");
-  const { attackEventSubscribeData, setAttackEventSubscribeData } =
-    usePlayerAttackedData(address, lobbyCode);
-
-  const myDojomonMaxHealth = myDojomonQueryData?.health;
-  const opponentDojomonMaxHealth = opponentDojomonQueryData?.health;
+  const { battleEndedSubscribeData } = useBattleEndedData(address, lobbyCode);
 
   const battleZoneImage = "../assets/game-assets/battleBackground.png";
 
@@ -97,15 +88,13 @@ const Battle = () => {
 
   // Handle game over logic
   useEffect(() => {
-    if (myDojomonSubscribeData?.health === 0) {
-      setGameOver("You Lost!");
-      defeatSound.play();
-    }
-    if (opponentDojomonSubscribeData?.health === 0) {
+    if (battleEndedSubscribeData?.won_dojomon_id === selected_dojomon_id) {
       setGameOver("You Won!");
-      victorySound.play();
+      defeatSound.play();
+    } else {
+      setGameOver("You Lost!");
     }
-  }, [myDojomonQueryData, opponentDojomonQueryData]);
+  }, [battleEndedSubscribeData]);
 
   // Handle battle messages
   useEffect(() => {
@@ -129,9 +118,9 @@ const Battle = () => {
         <h1 className="text-4xl font-bold mb-6 animate-bounce">{gameOver}</h1>
         <button
           className="px-6 py-3 bg-green-500 text-black rounded-lg font-bold hover:bg-green-400"
-          onClick={() => window.location.reload()} // Or navigate back to main menu
+          onClick={() => "/game"} // Or navigate back to main menu
         >
-          Back to Main Menu
+          Back to Town
         </button>
       </div>
     );
@@ -147,9 +136,9 @@ const Battle = () => {
         <p>Level: {myDojomonQueryData?.level.toString()}</p>
         <HealthBar
           currentHealth={Number(
-            myDojomonSubscribeData?.health ?? myDojomonMaxHealth
+            myDojomonSubscribeData?.health ?? myDojomonSubscribeData?.max_health
           )}
-          maxHealth={Number(myDojomonMaxHealth)}
+          maxHealth={Number(myDojomonSubscribeData?.max_health)}
         />
       </div>
 
@@ -161,9 +150,10 @@ const Battle = () => {
         <p>Level: {opponentDojomonQueryData?.level.toString()}</p>
         <HealthBar
           currentHealth={Number(
-            opponentDojomonSubscribeData?.health ?? opponentDojomonMaxHealth
+            opponentDojomonSubscribeData?.health ??
+              opponentDojomonSubscribeData?.max_health
           )}
-          maxHealth={Number(opponentDojomonMaxHealth)}
+          maxHealth={Number(opponentDojomonSubscribeData?.max_health)}
         />
       </div>
 

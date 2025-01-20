@@ -94,7 +94,7 @@ const Home = () => {
             onClick={() => {
               playerQueryData != null
                 ? (window.location.href = "/game")
-                : (window.location.href = "/spawnPlayer");
+                : (window.location.href = "/createPlayer");
             }}
             className="w-fit  bg-[#ff5656] hover:bg-[#ff4747] text-black px-8 py-3 rounded-md font-semibold text-lg shadow-md hover:shadow-lg transition "
           >

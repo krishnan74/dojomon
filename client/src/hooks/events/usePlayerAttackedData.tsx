@@ -1,16 +1,16 @@
-import { DojoContext } from "../dojo-sdk-provider";
+import { DojoContext } from "../../dojo-sdk-provider";
 import {
   Dojomon,
   DojomonType,
   PlayerAttacked,
   PlayerSelectedDojomon,
   SchemaType,
-} from "../typescript/models.gen";
+} from "../../typescript/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { addAddressPadding, CairoOption, CairoOptionVariant } from "starknet";
-import { useDojoStore } from "./useDojoStore";
+import { useDojoStore } from "../useDojoStore";
 
 export function usePlayerAttackedData(
   address: string | undefined,
@@ -30,6 +30,7 @@ export function usePlayerAttackedData(
     player: "",
     name: "",
     health: 0,
+    max_health: 0,
     attack: 0,
     defense: 0,
     speed: 0,

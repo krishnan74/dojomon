@@ -1,5 +1,6 @@
 import { BigNumberish, CairoCustomEnum } from "starknet";
 import * as models from "./models.gen";
+import { effect } from "@chakra-ui/react";
 
 const dojomonTypeToString = {
   0: "Fire",
@@ -27,6 +28,15 @@ const dojoballTypeToString = {
   1: "Greatball",
   2: "Ultraball",
   3: "Masterball",
+};
+
+const moveEffectToString = {
+  0: "Burn",
+  1: "Paralyze",
+  2: "Confuse",
+  3: "LowerSpecialDefense",
+  4: "Flinch",
+  5: "Freeze",
 };
 
 export const build_actions_spawn_calldata = (
@@ -85,6 +95,41 @@ export const build_actions_feedDojomon_calldata = (
     contractName: "actions",
     entrypoint: "feedDojomon",
     calldata: [dojomon_id, quantity],
+  };
+};
+
+export const build_actions_addGold_calldata = (
+  address: string,
+  quantity: BigNumberish
+) => {
+  return {
+    contractName: "actions",
+    entrypoint: "addGold",
+    calldata: [address, quantity],
+  };
+};
+
+export const build_actions_addMove_calldata = (
+  dojomon_id: BigNumberish,
+  name: string,
+  description: string,
+  power: BigNumberish,
+  accuracy: BigNumberish,
+  move_type: models.DojomonType,
+  effect: models.MoveEffect
+) => {
+  return {
+    contractName: "actions",
+    entrypoint: "addMove",
+    calldata: [
+      dojomon_id,
+      name,
+      description,
+      power,
+      accuracy,
+      new CairoCustomEnum({ [dojomonTypeToString[move_type]]: "()" }),
+      new CairoCustomEnum({ [moveEffectToString[effect]]: "()" }),
+    ],
   };
 };
 
