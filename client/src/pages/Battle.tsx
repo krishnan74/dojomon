@@ -5,7 +5,7 @@ import { DojoContext } from "@/dojo-sdk-provider";
 import { useMyDojomonData } from "@/hooks/useMyDojomonData";
 import { useOpponentDojomonData } from "@/hooks/useOpponentDojomonData";
 import { useMovesData } from "@/hooks/useMovesData";
-import { felt252ToString } from "@/lib/utils";
+import { felt252ToString, formatWithLeadingZeros } from "@/lib/utils";
 import MoveCard from "@/components/MoveCard";
 import { Monster } from "@/interfaces";
 import { usePlayerAttackedData } from "@/hooks/events/usePlayerAttackedData";
@@ -26,6 +26,8 @@ const HealthBar = ({
   currentHealth: number;
   maxHealth: number;
 }) => {
+  console.log("currentHealth", currentHealth);
+  console.log("maxHealth", maxHealth);
   const healthPercentage = (currentHealth / maxHealth) * 100;
 
   const animatedWidth = useSpring({
@@ -56,6 +58,11 @@ const Battle = () => {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [gameOver, setGameOver] = useState<string | null>(null);
   const [battleMessage, setBattleMessage] = useState<string | null>(null);
+
+  const { attackEventSubscribeData } = usePlayerAttackedData(
+    address,
+    lobbyCode
+  );
 
   const { myDojomonQueryData, myDojomonSubscribeData } = useMyDojomonData(
     address,
@@ -91,6 +98,14 @@ const Battle = () => {
     }
   }, [myDojomonQueryData, opponentDojomonQueryData, movesQueryData]);
 
+  useEffect(() => {
+    if (attackEventSubscribeData) {
+      setAttacked(true);
+      setBattleMessage(felt252ToString(attackEventSubscribeData.move.name));
+      setTimeout(() => setBattleMessage(null), 1500);
+    }
+  }, [attackEventSubscribeData]);
+
   // Handle game over logic
   useEffect(() => {
     if (battleEndedSubscribeData?.won_dojomon_id === selected_dojomon_id) {
@@ -102,14 +117,6 @@ const Battle = () => {
       setGameOver("You Lost!");
     }
   }, [battleEndedSubscribeData]);
-
-  // Handle battle messages
-  useEffect(() => {
-    if (attacked) {
-      setBattleMessage("Your Dojomon used Fireball!");
-      setTimeout(() => setBattleMessage(null), 1500);
-    }
-  }, [attacked]);
 
   if (!isDataLoaded) {
     return (
@@ -143,9 +150,11 @@ const Battle = () => {
         <p>Level: {myDojomonQueryData?.level.toString()}</p>
         <HealthBar
           currentHealth={Number(
-            myDojomonSubscribeData?.health ?? myDojomonSubscribeData?.max_health
+            myDojomonSubscribeData?.health ?? myDojomonQueryData?.health
           )}
-          maxHealth={Number(myDojomonSubscribeData?.max_health)}
+          maxHealth={Number(
+            myDojomonSubscribeData?.max_health ?? myDojomonQueryData?.max_health
+          )}
         />
       </div>
 
@@ -158,11 +167,21 @@ const Battle = () => {
         <HealthBar
           currentHealth={Number(
             opponentDojomonSubscribeData?.health ??
-              opponentDojomonSubscribeData?.max_health
+              opponentDojomonQueryData?.health
           )}
-          maxHealth={Number(opponentDojomonSubscribeData?.max_health)}
+          maxHealth={Number(
+            opponentDojomonSubscribeData?.max_health ??
+              opponentDojomonQueryData?.max_health
+          )}
         />
       </div>
+
+      <img
+        src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${formatWithLeadingZeros(
+          myDojomonQueryData?.image_id ?? 0
+        )}.png`}
+        alt=""
+      />
 
       {/* Moves */}
       <div className="absolute w-full h-[150px] bottom-0 bg-white flex border-t-4 border-black z-10">
@@ -183,16 +202,6 @@ const Battle = () => {
           />
         ))}
       </div>
-
-      {/* Battle Canvas */}
-      <canvas
-        style={{
-          width: "1200px",
-          height: "650px",
-          zIndex: 0,
-          backgroundImage: `url(${battleZoneImage})`,
-        }}
-      />
 
       {/* Battle Messages */}
       {battleMessage && (

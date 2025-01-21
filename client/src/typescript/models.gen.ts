@@ -68,6 +68,7 @@ export interface Dojomon {
   position: Position;
   is_free: boolean;
   is_being_caught: boolean;
+  image_id: BigNumberish;
 }
 
 export interface DojomonStruct {
@@ -182,6 +183,16 @@ export interface PlayerAttacked {
   defender_dojomon: Dojomon;
   move: Move;
   lobby: Lobby;
+}
+
+export interface PlayerJoined {
+  lobby_code: BigNumberish;
+  player: string;
+}
+
+export interface LobbyCreated {
+  player: string;
+  lobby_code: BigNumberish;
 }
 
 export interface PlayerSpawned {
@@ -338,6 +349,7 @@ export const schema: SchemaType = {
         "position",
         "is_free",
         "is_being_caught",
+        "image_id",
       ],
       dojomon_id: 0,
       player: "",
@@ -354,6 +366,7 @@ export const schema: SchemaType = {
       position: { x: 0, y: 0 },
       is_free: true,
       is_being_caught: false,
+      image_id: 0,
     },
 
     DojoBall: {
