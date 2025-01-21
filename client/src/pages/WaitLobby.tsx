@@ -9,7 +9,7 @@ import { DojomonType, LobbyType, PlayerStats } from "@/typescript/models.gen";
 import { felt252ToString } from "@/lib/utils";
 import { useLobbyData } from "@/hooks/useLobbyData";
 import { Howler } from "howler";
-import { BigNumberish } from "starknet";
+import { addAddressPadding, BigNumberish } from "starknet";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -36,7 +36,10 @@ const WaitLobby = () => {
 
   const [userName, setUserName] = useState<string>("");
 
-  const { lobbySubscribeData } = useLobbyData(address, lobbyCode);
+  const { lobbyQueryData, lobbySubscribeData } = useLobbyData(
+    address,
+    lobbyCode
+  );
 
   const matchfoundSound = new Howl({
     src: ["../assets/audio/Vs flash.ogg"],
@@ -44,23 +47,41 @@ const WaitLobby = () => {
   });
 
   useEffect(() => {
-    if (lobbySubscribeData) {
-      if (lobbySubscribeData.host_player.address === address) {
-        setPlayer1(lobbySubscribeData.host_player);
-        setPlayer2(lobbySubscribeData.guest_player);
-      } else {
-        setPlayer1(lobbySubscribeData.guest_player);
-        setPlayer2(lobbySubscribeData.host_player);
+    const updateLobbyState = () => {
+      const lobby_data =
+        lobbySubscribeData.lobby_code !== 0
+          ? lobbySubscribeData
+          : lobbyQueryData;
+
+      if (lobby_data) {
+        const isHost =
+          lobby_data.host_player.address === addAddressPadding(address!);
+
+        setPlayer1(
+          isHost
+            ? lobbySubscribeData.host_player
+            : lobbySubscribeData.guest_player
+        );
+
+        setPlayer2(
+          isHost
+            ? lobbySubscribeData.guest_player
+            : lobbySubscribeData.host_player
+        );
       }
 
-      if (lobbySubscribeData.guest_player.address !== "") {
-        setTimeout(() => {
-          matchfoundSound.play();
-          window.location.href = `/selectYourDojomon/${lobbyCode}`;
-        }, 5000);
-      }
-    }
+      if (address) updateLobbyState();
+    };
   }, [lobbySubscribeData, address]);
+
+  useEffect(() => {
+    if (lobbySubscribeData.guest_player.address !== "") {
+      setTimeout(() => {
+        matchfoundSound.play();
+        window.location.href = `/selectYourDojomon/${lobbyCode}`;
+      }, 5000);
+    }
+  }, [lobbySubscribeData.guest_player.address]);
 
   return (
     <div className="flex items-center justify-center min-h-screen  bg-gradient-to-br from-gray-800 to-gray-900 ">

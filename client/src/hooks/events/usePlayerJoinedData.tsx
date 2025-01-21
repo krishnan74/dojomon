@@ -5,6 +5,7 @@ import {
   DojomonType,
   LobbyCreated,
   PlayerAttacked,
+  PlayerJoined,
   PlayerSelectedDojomon,
   SchemaType,
 } from "../../typescript/models.gen";
@@ -14,7 +15,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { addAddressPadding, CairoOption, CairoOptionVariant } from "starknet";
 import { useDojoStore } from "../useDojoStore";
 
-export function useLobbyCreatedData(address: string | undefined) {
+export function usePlayerJoinedData(address: string | undefined) {
   const { sdk } = useContext(DojoContext)!;
   const state = useDojoStore((state) => state);
   const entityId = useMemo(() => {
@@ -24,8 +25,8 @@ export function useLobbyCreatedData(address: string | undefined) {
     return BigInt(0);
   }, [address]);
 
-  const [lobbyCreatedEventData, setLobbyCreatedEventData] =
-    useState<LobbyCreated | null>(null);
+  const [playerJoinedEventData, setPlayerJoinedEventData] =
+    useState<PlayerJoined | null>(null);
 
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
@@ -34,7 +35,7 @@ export function useLobbyCreatedData(address: string | undefined) {
       const subscription = await sdk.subscribeEventQuery({
         query: {
           event_messages_historical: {
-            LobbyCreated: {
+            PlayerJoined: {
               $: {
                 where: {
                   player: { $is: addAddressPadding(address) },
@@ -54,7 +55,7 @@ export function useLobbyCreatedData(address: string | undefined) {
 
             console.log(data);
             //@ts-expect-error
-            setLobbyCreatedEventData(data[0].models.dojomon.LobbyCreated);
+            setPlayerJoinedEventData(data[0].models.dojomon.PlayerJoined);
           }
         },
       });
@@ -75,6 +76,6 @@ export function useLobbyCreatedData(address: string | undefined) {
 
   return {
     entityId,
-    lobbyCreatedEventData,
+    playerJoinedEventData,
   };
 }

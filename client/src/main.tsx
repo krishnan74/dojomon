@@ -23,6 +23,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import SpawnPlayer from "./pages/CreatePlayer.tsx";
 import CreatePlayer from "./pages/CreatePlayer.tsx";
 import App from "./App.tsx";
+import TempBattleCanvas from "./TempBattleCanvas.tsx";
 
 
 async function main() {
@@ -62,6 +63,7 @@ async function main() {
                 element={<SelectDojomon />}
               />
               <Route path="/test" element={<App />} />
+              <Route path="/test-battle" element={<TempBattleCanvas />} />
               <Route path="*" element={<NoPage />} />
             </Routes>
           </BrowserRouter>

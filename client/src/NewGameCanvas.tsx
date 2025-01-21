@@ -17,6 +17,9 @@ import { useAccount } from "@starknet-react/core";
 import { LobbyType, PlayerStats } from "./typescript/models.gen";
 import { DojoContext } from "./dojo-sdk-provider";
 import { useLobbyMatchMakingData } from "./hooks/useLobbyMatchMakingData";
+import { useLobbyCreatedData } from "./hooks/events/useLobbyCreatedData";
+import { useNavigate } from "react-router-dom";
+import { usePlayerJoinedData } from "./hooks/events/usePlayerJoinedData";
 
 const NewGameCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -33,7 +36,19 @@ const NewGameCanvas = () => {
 
   const { playerQueryData, playerSubscribeData } = usePlayerData(address!);
 
-  const { lobby_code } = useLobbyMatchMakingData(address!);
+  const [isLoading, setIsLoading] = useState(false); // Add a loading state
+  const [clickedBattle, setClickedBattle] = useState(false);
+
+  const { lobby_code } = useLobbyMatchMakingData(
+    address!,
+    clickedBattle,
+    playerQueryData?.league,
+    playerQueryData?.level
+  );
+
+  const { lobbyCreatedEventData } = useLobbyCreatedData(address!);
+  const { playerJoinedEventData } = usePlayerJoinedData(address!);
+  const navigate = useNavigate(); // Using React Router's navigate for redirection
 
   const [isPokemonNearBy, setIsPokemonNearBy] = useState<boolean>(false);
 
@@ -206,14 +221,20 @@ const NewGameCanvas = () => {
   }, []);
 
   const handleStartBattle = async () => {
-    if (lobby_code) {
-      await client.lobby.joinLobby(account!, lobby_code);
-      setTimeout(() => {
-        window.location.href = `/lobby/${lobby_code}`;
-      }, 4000);
-    } else {
+    if (isLoading) return; // Prevent further execution if already loading
+    setIsLoading(true); // Set loading flag to true when starting battle
+
+    if (!lobby_code || lobby_code === "No Lobbies Found") {
+      console.log("Creating lobby...");
       await client.lobby.createLobby(account!, LobbyType.Public);
+      setClickedBattle(false);
+    } else {
+      console.log("Joining lobby...");
+      await client.lobby.joinLobby(account!, lobby_code!);
+      setClickedBattle(false);
     }
+
+    setIsLoading(false); // Reset loading flag after operation
   };
 
   const handleStartFarming = () => {
@@ -241,6 +262,27 @@ const NewGameCanvas = () => {
       setIsPopupVisible(true);
     }
   }, [farmState.isHarvestReady]);
+
+  useEffect(() => {
+    if (clickedBattle && lobby_code != null) {
+      handleStartBattle();
+    }
+
+    // Navigate to the created lobby if lobbyCreatedEventData is present
+    if (lobbyCreatedEventData && lobbyCreatedEventData?.player === address) {
+      navigate(`/lobby/${lobbyCreatedEventData.lobby_code}`);
+    }
+
+    if (playerJoinedEventData && playerJoinedEventData?.player === address) {
+      navigate(`/selectYourDojomon/${playerJoinedEventData.lobby_code}`);
+    }
+  }, [
+    lobby_code,
+    lobbyCreatedEventData,
+    playerJoinedEventData,
+    clickedBattle,
+    navigate,
+  ]);
 
   return (
     <div className="w-full h-screen flex justify-center items-center">
@@ -338,7 +380,16 @@ const NewGameCanvas = () => {
         </div>
 
         <div className="absolute bottom-0 right-0 p-3 m-3 h-[70px] flex items-center">
-          <button onClick={handleStartBattle}>
+          <button
+            className="bg-white text-black"
+            onClick={() => {
+              if (!isLoading) {
+                // Prevent clicking while loading
+                setClickedBattle(true);
+              }
+            }}
+            disabled={isLoading} // Disable the button while loading
+          >
             <img
               src={BattleLogo}
               alt=""

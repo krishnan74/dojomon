@@ -5,7 +5,7 @@ import { DojoContext } from "@/dojo-sdk-provider";
 import { useMyDojomonData } from "@/hooks/useMyDojomonData";
 import { useOpponentDojomonData } from "@/hooks/useOpponentDojomonData";
 import { useMovesData } from "@/hooks/useMovesData";
-import { felt252ToString } from "@/lib/utils";
+import { felt252ToString, formatWithLeadingZeros } from "@/lib/utils";
 import MoveCard from "@/components/MoveCard";
 import { Monster } from "@/interfaces";
 import { usePlayerAttackedData } from "@/hooks/events/usePlayerAttackedData";
@@ -26,6 +26,8 @@ const HealthBar = ({
   currentHealth: number;
   maxHealth: number;
 }) => {
+  console.log("currentHealth", currentHealth);
+  console.log("maxHealth", maxHealth);
   const healthPercentage = (currentHealth / maxHealth) * 100;
 
   const animatedWidth = useSpring({
@@ -57,6 +59,11 @@ const Battle = () => {
   const [gameOver, setGameOver] = useState<string | null>(null);
   const [battleMessage, setBattleMessage] = useState<string | null>(null);
 
+  const { attackEventSubscribeData } = usePlayerAttackedData(
+    address,
+    lobbyCode
+  );
+
   const { myDojomonQueryData, myDojomonSubscribeData } = useMyDojomonData(
     address,
     selected_dojomon_id
@@ -70,7 +77,10 @@ const Battle = () => {
 
   const { battleEndedSubscribeData } = useBattleEndedData(address, lobbyCode);
 
-  const battleZoneImage = "../assets/game-assets/battleBackground.png";
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const myDojomonImage = "../assets/dojomons/back/"
+  const opponentDojomonImage = "../assets/dojomons/front/"
 
   // Sound effects
   const moveSound = new Howl({
@@ -91,6 +101,147 @@ const Battle = () => {
     }
   }, [myDojomonQueryData, opponentDojomonQueryData, movesQueryData]);
 
+  useEffect(() => {
+    if (attackEventSubscribeData) {
+      setAttacked(true);
+      setBattleMessage(felt252ToString(attackEventSubscribeData.move.name));
+      setTimeout(() => setBattleMessage(null), 1500);
+    }
+  }, [attackEventSubscribeData]);
+
+
+  useEffect(() => {
+      const canvas = canvasRef.current;
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) return;
+
+      const viewportSize = {
+        width: 1200,
+        height: 600,
+      };
+  
+      canvas.width = viewportSize.width;
+      canvas.height = viewportSize.height;
+  
+      const battleZoneImage = new Image();
+      battleZoneImage.src = "../assets/game-assets/battleBackground1.png";
+  
+      const myPetImage = new Image();
+      myPetImage.src = `${myDojomonImage}${formatWithLeadingZeros(myDojomonQueryData?.image_id)}.png`;
+  
+      const enemyImage = new Image();
+      enemyImage.src = `${opponentDojomonImage}${formatWithLeadingZeros(opponentDojomonQueryData?.image_id)}.png`;
+
+      // console.log("myPetImage", enemyImage);
+  
+      const myDojomon = new Monster({
+        position: {
+          x: canvas.width / 3.6,
+          y: canvas.height / 2 -10,
+        },
+        image: myPetImage,
+        frames: { max: 1 },
+        sprites: {
+          up: myPetImage,
+          left: myPetImage,
+          right: myPetImage,
+          down: myPetImage
+        },
+        animate: true
+      });
+  
+      const enemyDojomon = new Monster({
+        position: {
+          x: canvas.width / 1.3,
+        y: canvas.height / 10,
+        },
+        image: enemyImage,
+        frames: { max: 1 },
+        sprites: {
+          up: enemyImage,
+          left: enemyImage,
+          right: enemyImage,
+          down: enemyImage
+        },
+        animate: true,
+        isEnemy: true
+      });
+  
+      const renderedSpritesBattle = [myDojomon, enemyDojomon];
+
+
+  
+      const updateBattle = () => {
+        if(formatWithLeadingZeros(myDojomonQueryData?.health)<=0){        
+          myDojomon.faint();
+          return;
+        }
+        if(formatWithLeadingZeros(opponentDojomonQueryData?.health)<=0){
+          enemyDojomon.faint();
+          return;
+        }
+
+        if (attackEventSubscribeData) {
+          setAttacked(true);
+
+          
+          // setBattleMessage(felt252ToString(attackEventSubscribeData.move.name));
+          // setTimeout(() => setBattleMessage(null), 1500);
+
+          // IF enemy move
+          enemyDojomon.attack({
+            // attack:attackEventSubscribeData.move,
+            attack:{
+              name: "Fireball",
+              damage: 40,
+              type: "normal"
+            },
+            recipient: myDojomon,
+            // @ts-expect-error
+            renderedSpritesBattle: renderedSpritesBattle
+          });
+
+          // IF player move
+           myDojomon.attack({
+            // attack:attackEventSubscribeData.move,
+            attack:{
+              name: "Fireball",
+              damage: 40,
+              type: "normal"
+            },
+            recipient: enemyDojomon,
+            // @ts-expect-error
+            renderedSpritesBattle: renderedSpritesBattle
+           });
+        }
+  
+      };
+  
+      const renderBattle = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(
+          battleZoneImage,
+        0,0
+        );
+        renderedSpritesBattle.forEach((sprite) => {
+          sprite.draw(ctx);
+        });
+      };
+  
+      const gameBattleLoop = () => {
+        updateBattle();
+        renderBattle();
+        requestAnimationFrame(gameBattleLoop);
+      };
+
+  
+        battleZoneImage.onload = () => {
+            gameBattleLoop();
+      };
+  
+  
+    }, [myDojomonQueryData, opponentDojomonQueryData,movesQueryData,isDataLoaded,attackEventSubscribeData]);
+
   // Handle game over logic
   useEffect(() => {
     if (battleEndedSubscribeData?.won_dojomon_id === selected_dojomon_id) {
@@ -102,14 +253,6 @@ const Battle = () => {
       setGameOver("You Lost!");
     }
   }, [battleEndedSubscribeData]);
-
-  // Handle battle messages
-  useEffect(() => {
-    if (attacked) {
-      setBattleMessage("Your Dojomon used Fireball!");
-      setTimeout(() => setBattleMessage(null), 1500);
-    }
-  }, [attacked]);
 
   if (!isDataLoaded) {
     return (
@@ -133,8 +276,11 @@ const Battle = () => {
     );
   }
 
+  // console.log(myDojomonQueryData)
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 transition-all duration-500">
+      <canvas ref={canvasRef} className="z-10"/>
       {/* Player Stats */}
       <div className="absolute bg-white h-[120px] w-[20%] border-4 border-black top-12 left-12 p-3 z-10">
         <h1 className="font-bold">
@@ -143,9 +289,11 @@ const Battle = () => {
         <p>Level: {myDojomonQueryData?.level.toString()}</p>
         <HealthBar
           currentHealth={Number(
-            myDojomonSubscribeData?.health ?? myDojomonSubscribeData?.max_health
+            myDojomonSubscribeData?.health ?? myDojomonQueryData?.health
           )}
-          maxHealth={Number(myDojomonSubscribeData?.max_health)}
+          maxHealth={Number(
+            myDojomonSubscribeData?.max_health ?? myDojomonQueryData?.max_health
+          )}
         />
       </div>
 
@@ -158,11 +306,22 @@ const Battle = () => {
         <HealthBar
           currentHealth={Number(
             opponentDojomonSubscribeData?.health ??
-              opponentDojomonSubscribeData?.max_health
+              opponentDojomonQueryData?.health
           )}
-          maxHealth={Number(opponentDojomonSubscribeData?.max_health)}
+          maxHealth={Number(
+            opponentDojomonSubscribeData?.max_health ??
+              opponentDojomonQueryData?.max_health
+          )}
         />
       </div>
+
+      {/* <img
+        src={`https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${formatWithLeadingZeros(
+          myDojomonQueryData?.image_id ?? 0
+        )}.png`}
+        alt=""
+      /> */}
+      
 
       {/* Moves */}
       <div className="absolute w-full h-[150px] bottom-0 bg-white flex border-t-4 border-black z-10">
@@ -184,22 +343,13 @@ const Battle = () => {
         ))}
       </div>
 
-      {/* Battle Canvas */}
-      <canvas
-        style={{
-          width: "1200px",
-          height: "650px",
-          zIndex: 0,
-          backgroundImage: `url(${battleZoneImage})`,
-        }}
-      />
-
       {/* Battle Messages */}
       {battleMessage && (
         <div className="absolute top-[50%] left-[50%] transform -translate-x-[50%] -translate-y-[50%] bg-black bg-opacity-70 text-white px-6 py-4 rounded-lg text-xl animate-pulse z-20">
           {battleMessage}
         </div>
       )}
+
     </div>
   );
 };

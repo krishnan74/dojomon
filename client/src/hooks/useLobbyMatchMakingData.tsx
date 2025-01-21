@@ -11,13 +11,19 @@ import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
 import {
   addAddressPadding,
+  BigNumberish,
   CairoCustomEnum,
   CairoOption,
   CairoOptionVariant,
 } from "starknet";
 import { useDojoStore } from "./useDojoStore";
 
-export function useLobbyMatchMakingData(address: string | undefined) {
+export function useLobbyMatchMakingData(
+  address: string | undefined,
+  clickedBattle: boolean,
+  find_lobby_league: CairoOption<League> | undefined,
+  find_lobby_level: BigNumberish | undefined
+) {
   const { sdk } = useContext(DojoContext)!;
   const state = useDojoStore((state) => state);
   const entityId = useMemo(() => {
@@ -27,36 +33,38 @@ export function useLobbyMatchMakingData(address: string | undefined) {
     return BigInt(0);
   }, [address]);
 
-  const [playerData, setPlayerData] = useState<PlayerStats | null>(null);
+  // const [playerData, setPlayerData] = useState<PlayerStats | null>(null);
 
   const [lobby_code, setLobbyCode] = useState<string | null>(null);
 
-  const fetchPlayerData = async (address: string) => {
-    try {
-      await sdk.getEntities({
-        query: new QueryBuilder<SchemaType>()
-          .namespace("dojomon", (n) =>
-            n.entity("PlayerStats", (e) =>
-              e.eq("address", addAddressPadding(address))
-            )
-          )
-          .build(),
-        callback: (resp) => {
-          if (resp.error) {
-            console.error("resp.error.message:", resp.error.message);
-            return;
-          }
-          if (resp.data) {
-            state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
-            // @ts-expect-error
-            setPlayerData(resp.data[0].models.dojomon.PlayerStats);
-          }
-        },
-      });
-    } catch (error) {
-      console.error("Error querying entities:", error);
-    }
-  };
+  const [availableLobbies, setAvailableLobbies] = useState(null);
+
+  // const fetchPlayerData = async (address: string) => {
+  //   try {
+  //     await sdk.getEntities({
+  //       query: new QueryBuilder<SchemaType>()
+  //         .namespace("dojomon", (n) =>
+  //           n.entity("PlayerStats", (e) =>
+  //             e.eq("address", addAddressPadding(address))
+  //           )
+  //         )
+  //         .build(),
+  //       callback: (resp) => {
+  //         if (resp.error) {
+  //           console.error("resp.error.message:", resp.error.message);
+  //           return;
+  //         }
+  //         if (resp.data) {
+  //           state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
+  //           // @ts-expect-error
+  //           setPlayerData(resp.data[0].models.dojomon.PlayerStats);
+  //         }
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error("Error querying entities:", error);
+  //   }
+  // };
 
   useEffect(() => {
     const fetchMatchupLobbies = async () => {
@@ -65,22 +73,23 @@ export function useLobbyMatchMakingData(address: string | undefined) {
           query: new QueryBuilder<SchemaType>()
             .namespace("dojomon", (n) =>
               n.entity("Lobby", (e) => {
-                e.eq("lobby_league", playerData?.league);
-                e.lt("lobby_level", Number(playerData?.level!) + 2);
+                e.eq("lobby_league", find_lobby_league);
                 e.eq("lobby_type", "Public");
                 e.eq("is_vacant", true);
+                e.neq("turn", addAddressPadding(address!));
               })
             )
             .build(),
           callback: (resp) => {
             if (resp.error) {
               console.error("resp.error.message:", resp.error.message);
-              return;
+              return setLobbyCode("No Lobbies Found");
             }
             if (resp.data) {
               state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
               // @ts-expect-error
               setLobbyCode(resp.data[0].models.dojomon.Lobby.lobby_code);
+
               //@ts-expect-error
               console.log(resp.data[0].models.dojomon.Lobby.lobby_code);
             }
@@ -91,14 +100,10 @@ export function useLobbyMatchMakingData(address: string | undefined) {
       }
     };
 
-    if (address) {
-      fetchPlayerData(address!);
-    }
-
-    if (playerData) {
+    if (address && clickedBattle) {
       fetchMatchupLobbies();
     }
-  }, [sdk, address, playerData]);
+  }, [address, clickedBattle]);
 
   return { entityId, lobby_code };
 }
