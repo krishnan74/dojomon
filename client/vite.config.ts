@@ -7,6 +7,7 @@ import mkcert from "vite-plugin-mkcert";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/",
   plugins: [react(), wasm(), topLevelAwait(), mkcert()],
   resolve: {
     alias: {
