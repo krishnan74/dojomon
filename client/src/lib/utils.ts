@@ -1,4 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
+import { BigNumberish } from "starknet";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -35,14 +36,12 @@ export const felt252ToString = (felt252: string | undefined) => {
 };
 
 export const withGrid = (grid: number) => {
-
   return grid * 60;
-}
+};
 
-export const asGridCoord = (x:number, y:number)=>{
-  return `${x*60},${y*60}`
-}
-
+export const asGridCoord = (x: number, y: number) => {
+  return `${x * 60},${y * 60}`;
+};
 
 export const nextPosition = (
   initialX: number,
@@ -53,14 +52,13 @@ export const nextPosition = (
   let y = initialY;
 
   const size = 60;
-  if (direction === "left") { 
+  if (direction === "left") {
     x -= size;
   } else if (direction === "right") {
     x += size;
   } else if (direction === "up") {
     y -= size;
   } else if (direction === "down") {
-
     y += size;
   }
   return { x, y };
@@ -99,3 +97,10 @@ export const dojomonData = [
     image_id: "001",
   },
 ];
+
+export const formatWithLeadingZeros = (
+  number: BigNumberish,
+  length: number = 3
+) => {
+  return number.toString().padStart(length, "0");
+};
