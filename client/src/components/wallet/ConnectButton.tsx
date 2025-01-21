@@ -59,53 +59,18 @@ export const ConnectButton = ({ variant = "pixelated", ...props }) => {
           <Button
             variant={"solid"}
             h="48px"
-            fontSize="14px"
+            fontSize="50px"
             w="full"
             alignItems="center"
             justifyContent="center"
+            onClick={() => disconnect()}
           >
-            <HStack
-              onClick={() => {
-                if (isController) {
-                  (
-                    connector as unknown as ControllerConnector
-                  ).controller.openProfile("trophies"); // "trophies"
-                } else {
-                  //uiStore.openAccountDetails();
-                }
-              }}
-            >
-              {connector && isBurnerOrPredeplyed && <KatanaIcon />}
-              {connector && !isBurnerOrPredeplyed && !isController && (
-                /// @ts-ignore
-                <Image
-                  src={
-                    typeof connector.icon === "string"
-                      ? connector.icon
-                      : connector.icon.light
-                  }
-                  width="50px"
-                  height="50px"
-                  alt={connector.name}
-                />
-              )}
+            <div className="mt-1">
               {connector && isController && <Cartridge size={"2xl"} />}
-              <Text>
-                {isController
-                  ? username
-                  : shortenAddress(account.address || "")}
-              </Text>
-            </HStack>
-            {isController && (
-              <WalletModal
-                mb={1}
-                _hover={{ backgroundColor: "neon.500" }}
-                borderRadius={3}
-                onClick={() => {
-                  //uiStore.openAccountDetails();
-                }}
-              />
-            )}
+            </div>
+            <p className="text-white text-sm">
+              {isController ? username : shortenAddress(account.address || "")}
+            </p>
           </Button>
         )}
       </Box>

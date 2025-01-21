@@ -25,19 +25,19 @@ predeployedAccounts({
 }).then((p) => (pa = p));
 
 const ACTIONS_ADDRESS =
-  "0x057a6377949ade2eaf15acc9a57b1bf623b5791e70654df864b1428dfc041ace";
+  "0x0592c4ad898753d3641b868701cfad478d92b07241f40f9698d5c655bb546c2c";
 
 const BATTLE_ADDRESS =
-  "0x0650266f43afb264986a8738a0964c1968597c6bde505212e26b6063da2bd692";
+  "0x02520185667f93e25c80c6d57c5144a55bd7db2df437f0a269e54a4b767b62dc";
 
 const FRIEND_ADDRESS =
   "0x074adf429f0484603a007de9f56ff493465241d6e13214e8ef02d65a75c5956c";
 
 const LOBBY_ADDRESS =
-  "0x0500fae744da1afe24828b485a99aa8e3b2f1595179184182a270a843b6cb3d6";
+  "0x05b0bc305640ed535a46860bfafc3e1a83320edbdc66a2cc05d3ef469c9f94a7";
 
 const SHOP_ADDRESS =
-  "0x0531dc5251669303907e7137b0e3818aa5bf2292bbd1248220e88cde7598f61a";
+  "0x06c8ff113357e29c53ce5381424e3a8fc649bd0b16cf07571af3d2b34337a0fb";
 
 const policies: SessionPolicies = {
   contracts: {
@@ -133,7 +133,7 @@ export default function StarknetProvider({ children }: PropsWithChildren) {
     <StarknetConfig
       chains={[mainnet]}
       provider={provider}
-      connectors={pa}
+      connectors={[connector]}
       explorer={voyager}
       autoConnect
     >

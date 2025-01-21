@@ -42,7 +42,7 @@ pub struct PlayerJoined {
 #[dojo::event]
 pub struct LobbyCreated {
     #[key]
-    player: u32,
+    player: ContractAddress,
     lobby_code: u32,
 }
 

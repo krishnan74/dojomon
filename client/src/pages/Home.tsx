@@ -40,8 +40,8 @@ const Home = () => {
   const state = useDojoStore((state) => state);
 
   const { playerQueryData } = usePlayerData(address);
-  const { lobby_code } = useLobbyMatchMakingData(address);
   const { leaderboardData } = useLeaderBoardData(address);
+
 
   return (
     <div className="min-h-screen flex flex-col relative bg-[#080C1D]">
@@ -120,102 +120,98 @@ const Home = () => {
             <TabsContent value="leaderboard" className="">
               <Table className="shadow-sm rounded-lg overflow-hidden bg-transparent ">
                 <TableBody className="text-xs">
-                  <ScrollArea className="h-[200px]">
-                    {leaderboardData?.map((leader_model, index) => (
-                      <TableRow
-                        key={index}
-                        className="cursor-pointer transition-colors border-none"
-                      >
-                        <TableCell className="py-3 px-4 font-medium w-4">
-                          <div className="flex">
-                            {index + 1 || "N/A"} <span>.</span>
-                          </div>
-                        </TableCell>
+                  {leaderboardData?.map((leader_model, index) => (
+                    <TableRow
+                      key={index}
+                      className="cursor-pointer transition-colors border-none"
+                    >
+                      <TableCell className="py-3 px-4 font-medium w-4">
+                        <div className="flex">
+                          {index + 1 || "N/A"} <span>.</span>
+                        </div>
+                      </TableCell>
 
-                        <TableCell className="py-3 px-4 font-medium">
-                          <div className="flex items-center gap-x-3">
-                            <img
-                              src="../assets/website-design/charizard.png"
-                              width={20}
-                              height={20}
-                              alt=""
-                            />
-                            {felt252ToString(
-                              // @ts-expect-error
-                              leader_model.models.dojomon.PlayerStats.name
-                            ) || "N/A"}
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-3 px-4 text-right">
-                          {
+                      <TableCell className="py-3 px-4 font-medium">
+                        <div className="flex items-center gap-x-3">
+                          <img
+                            src="../assets/website-design/charizard.png"
+                            width={20}
+                            height={20}
+                            alt=""
+                          />
+                          {felt252ToString(
                             // @ts-expect-error
-                            leader_model.models.dojomon.PlayerStats.league ||
-                              "N/A"
-                          }
-                        </TableCell>
+                            leader_model.models.dojomon.PlayerStats.name
+                          ) || "N/A"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 px-4 text-right">
+                        {
+                          // @ts-expect-error
+                          leader_model.models.dojomon.PlayerStats.league ||
+                            "N/A"
+                        }
+                      </TableCell>
 
-                        <TableCell className="py-3 px-4 text-right">
-                          {
-                            // @ts-expect-error
+                      <TableCell className="py-3 px-4 text-right">
+                        {
+                          // @ts-expect-error
 
-                            leader_model.models.dojomon.PlayerStats.trophies ||
-                              "N/A"
-                          }
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </ScrollArea>
+                          leader_model.models.dojomon.PlayerStats.trophies ||
+                            "N/A"
+                        }
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TabsContent>
             <TabsContent value="hallOfFame">
               <Table className="shadow-sm rounded-lg overflow-hidden bg-transparent ">
                 <TableBody className="text-xs">
-                  <ScrollArea className="h-[200px]">
-                    {leaderboardData?.map((leader_model, index) => (
-                      <TableRow
-                        key={index}
-                        className="cursor-pointer transition-colors border-none"
-                      >
-                        <TableCell className="py-3 px-4 font-medium w-4">
-                          <div className="flex">
-                            {index + 1 || "N/A"} <span>.</span>
-                          </div>
-                        </TableCell>
+                  {leaderboardData?.map((leader_model, index) => (
+                    <TableRow
+                      key={index}
+                      className="cursor-pointer transition-colors border-none"
+                    >
+                      <TableCell className="py-3 px-4 font-medium w-4">
+                        <div className="flex">
+                          {index + 1 || "N/A"} <span>.</span>
+                        </div>
+                      </TableCell>
 
-                        <TableCell className="py-3 px-4 font-medium">
-                          <div className="flex items-center gap-x-3">
-                            <img
-                              src="../assets/website-design/charizard.png"
-                              width={20}
-                              height={20}
-                              alt=""
-                            />
-                            {felt252ToString(
-                              // @ts-expect-error
-                              leader_model.models.dojomon.PlayerStats.name
-                            ) || "N/A"}
-                          </div>
-                        </TableCell>
-                        <TableCell className="py-3 px-4 text-right">
-                          {
+                      <TableCell className="py-3 px-4 font-medium">
+                        <div className="flex items-center gap-x-3">
+                          <img
+                            src="../assets/website-design/charizard.png"
+                            width={20}
+                            height={20}
+                            alt=""
+                          />
+                          {felt252ToString(
                             // @ts-expect-error
-                            leader_model.models.dojomon.PlayerStats.league ||
-                              "N/A"
-                          }
-                        </TableCell>
+                            leader_model.models.dojomon.PlayerStats.name
+                          ) || "N/A"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-3 px-4 text-right">
+                        {
+                          // @ts-expect-error
+                          leader_model.models.dojomon.PlayerStats.league ||
+                            "N/A"
+                        }
+                      </TableCell>
 
-                        <TableCell className="py-3 px-4 text-right">
-                          {
-                            // @ts-expect-error
+                      <TableCell className="py-3 px-4 text-right">
+                        {
+                          // @ts-expect-error
 
-                            leader_model.models.dojomon.PlayerStats.trophies ||
-                              "N/A"
-                          }
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </ScrollArea>
+                          leader_model.models.dojomon.PlayerStats.trophies ||
+                            "N/A"
+                        }
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TabsContent>

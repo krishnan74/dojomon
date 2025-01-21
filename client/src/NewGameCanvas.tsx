@@ -35,7 +35,7 @@ const NewGameCanvas = () => {
 
   const { lobby_code } = useLobbyMatchMakingData(address!);
 
-  const [playerDetails, setPlayerDetails] = useState<PlayerStats | null>();
+  const [isPokemonNearBy, setIsPokemonNearBy] = useState<boolean>(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -104,11 +104,32 @@ const NewGameCanvas = () => {
     const renderedSprites = [hero, npc1];
     const renderedCrops: GameObject[] = [];
 
+    const isPlayerNear = (
+      playerX: number,
+      playerY: number,
+      pokemonX: number,
+      pokemonY: number,
+      range = withGrid(1)
+    ) => {
+      const withinX =
+        playerX >= pokemonX - range && playerX <= pokemonX + range;
+      const withinY =
+        playerY >= pokemonY - range && playerY <= pokemonY + range;
+      return withinX && withinY;
+    };
+
     const update = () => {
       hero.update({ arrow: directionInput.direction, map: overworldMap });
       hero.updateSprite({
         arrow: directionInput.direction,
       });
+      if (isPokemonNearBy) {
+        setIsPokemonNearBy(false);
+      }
+      if (isPlayerNear(hero.x, hero.y, withGrid(20), withGrid(23))) {
+        console.log("Pokemon interacted");
+        setIsPokemonNearBy(true);
+      }
 
       if (farmState.isFarming) {
         console.log("Farming...");
@@ -214,6 +235,12 @@ const NewGameCanvas = () => {
       farmState.isHarvestReady = false;
     }, 200);
   };
+
+  useEffect(() => {
+    if (farmState.isHarvestReady) {
+      setIsPopupVisible(true);
+    }
+  }, [farmState.isHarvestReady]);
 
   return (
     <div className="w-full h-screen flex justify-center items-center">
@@ -347,6 +374,20 @@ const NewGameCanvas = () => {
           </div>
         )}
       </div>
+
+      {isPokemonNearBy && (
+        <div className="absolute bottom-0 left-0 p-3 m-3 bg-white border-2 border-black flex items-center">
+          <div className="p-2">
+            <button
+              className="bg-green-500 text-white p-2 m-2 rounded"
+              onClick={() => (window.location.href = "/battle/")}
+            >
+              Click here to Capture
+            </button>
+          </div>
+        </div>
+      )}
+
       <canvas ref={canvasRef} />
     </div>
   );

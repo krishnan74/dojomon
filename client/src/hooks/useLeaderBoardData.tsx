@@ -45,6 +45,7 @@ export function useLeaderBoardData(address: string | undefined) {
             if (resp.data) {
               state.setEntities(resp.data as ParsedEntity<SchemaType>[]);
 
+              console.log("resp.data:", resp.data);
               // @ts-expect-error
               setLeaderboardData(resp.data);
             }

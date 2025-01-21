@@ -109,7 +109,7 @@ function App() {
     for (let i = 0; i < movesData.length; i++) {
       await client.actions.addMove(
         account!,
-        0,
+        2,
         movesData[i].name,
         movesData[i].description,
         movesData[i].power,

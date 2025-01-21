@@ -12,6 +12,7 @@ import { usePlayerAttackedData } from "@/hooks/events/usePlayerAttackedData";
 import { Howl } from "howler";
 import { useSpring, animated } from "react-spring";
 import { useBattleEndedData } from "@/hooks/events/useBattleEndedData";
+import { Move } from "@/typescript/models.gen";
 
 // Custom hook to parse query params
 function useQuery() {
@@ -64,6 +65,9 @@ const Battle = () => {
     useOpponentDojomonData(address, opponent_dojomon_id);
 
   const { movesQueryData } = useMovesData(selected_dojomon_id || "");
+
+  const [moves, setMoves] = useState<Move[]>([]);
+
   const { battleEndedSubscribeData } = useBattleEndedData(address, lobbyCode);
 
   const battleZoneImage = "../assets/game-assets/battleBackground.png";
@@ -83,6 +87,7 @@ const Battle = () => {
   useEffect(() => {
     if (myDojomonQueryData && opponentDojomonQueryData && movesQueryData) {
       setIsDataLoaded(true);
+      setMoves(movesQueryData);
     }
   }, [myDojomonQueryData, opponentDojomonQueryData, movesQueryData]);
 
@@ -91,7 +96,9 @@ const Battle = () => {
     if (battleEndedSubscribeData?.won_dojomon_id === selected_dojomon_id) {
       setGameOver("You Won!");
       defeatSound.play();
-    } else {
+    } else if (
+      battleEndedSubscribeData?.lost_dojomon_id === selected_dojomon_id
+    ) {
       setGameOver("You Lost!");
     }
   }, [battleEndedSubscribeData]);
@@ -129,7 +136,7 @@ const Battle = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 transition-all duration-500">
       {/* Player Stats */}
-      <div className="absolute bg-white h-[120px] w-[20%] border-4 border-black top-12 left-12 p-3">
+      <div className="absolute bg-white h-[120px] w-[20%] border-4 border-black top-12 left-12 p-3 z-10">
         <h1 className="font-bold">
           {felt252ToString(myDojomonQueryData?.name)}
         </h1>
@@ -143,7 +150,7 @@ const Battle = () => {
       </div>
 
       {/* Opponent Stats */}
-      <div className="absolute bg-white h-[120px] w-[20%] border-4 border-black top-12 right-12 p-3">
+      <div className="absolute bg-white h-[120px] w-[20%] border-4 border-black bottom-[170px] right-12 p-3 z-10">
         <h1 className="font-bold">
           {felt252ToString(opponentDojomonQueryData?.name)}
         </h1>
@@ -158,10 +165,9 @@ const Battle = () => {
       </div>
 
       {/* Moves */}
-      <div className="absolute w-full h-[150px] bottom-0 bg-white flex border-t-4 border-black">
-        {movesQueryData?.map((move_model, index) => (
+      <div className="absolute w-full h-[150px] bottom-0 bg-white flex border-t-4 border-black z-10">
+        {moves?.map((move_model, index) => (
           <MoveCard
-            key={index}
             // @ts-expect-error
             move={move_model.models.dojomon.Move}
             client={client}
@@ -183,7 +189,7 @@ const Battle = () => {
         style={{
           width: "1200px",
           height: "650px",
-          zIndex: 5,
+          zIndex: 0,
           backgroundImage: `url(${battleZoneImage})`,
         }}
       />

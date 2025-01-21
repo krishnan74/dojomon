@@ -91,7 +91,7 @@ const WaitLobby = () => {
               await client.actions.spawnPlayer(
                 account!,
                 userName,
-                DojomonType.Fire
+                DojomonType.Water
               );
             }}
           >
