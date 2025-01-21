@@ -60,15 +60,15 @@ async function main() {
           <BrowserRouter>
             <Routes>
               <Route index element={<Home />} />
-              <Route path="createPlayer" element={<CreatePlayer />} />
-              <Route path="game" element={<NewGameCanvas />} />
-              <Route path="battle/:lobbyCode" element={<Battle />} />
-              <Route path="lobby/:lobbyCode" element={<WaitLobby />} />
+              <Route path="/createPlayer" element={<CreatePlayer />} />
+              <Route path="/game" element={<NewGameCanvas />} />
+              <Route path="/battle/:lobbyCode" element={<Battle />} />
+              <Route path="/lobby/:lobbyCode" element={<WaitLobby />} />
               <Route
-                path="selectYourDojomon/:lobbyCode"
+                path="/selectYourDojomon/:lobbyCode"
                 element={<SelectDojomon />}
               />
-              <Route path="test" element={<App />} />
+              <Route path="/test" element={<App />} />
               <Route path="*" element={<NoPage />} />
             </Routes>
           </BrowserRouter>
