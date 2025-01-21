@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 //import App from "./App.tsx";
@@ -25,12 +24,7 @@ import SpawnPlayer from "./pages/CreatePlayer.tsx";
 import CreatePlayer from "./pages/CreatePlayer.tsx";
 import App from "./App.tsx";
 
-/**
- * Initializes and bootstraps the Dojo application.
- * Sets up the SDK, burner manager, and renders the root component.
- *
- * @throws {Error} If initialization fails
- */
+
 async function main() {
   const sdk = await init<SchemaType>(
     {
@@ -51,7 +45,6 @@ async function main() {
   );
 
   createRoot(document.getElementById("root")!).render(
-    <StrictMode>
       <DojoSdkProvider
         sdk={sdk}
         burnerManager={await setupBurnerManager(dojoConfig)}
@@ -75,7 +68,6 @@ async function main() {
           {/* <GameCanvas pokeballPosition={{ x: 0, y: 0 }} /> */}
         </StarknetProvider>
       </DojoSdkProvider>
-    </StrictMode>
   );
 }
 
