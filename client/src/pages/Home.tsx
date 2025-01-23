@@ -1,22 +1,9 @@
 import Navbar from "@/components/Navbar";
 import React, { useContext, useEffect, useState } from "react";
-import CharizardImage from "../../assets/website-design/charizard.png";
-import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
-import { PlayerStats, SchemaType } from "@/typescript/models.gen";
-import { addAddressPadding } from "starknet";
+import CharizardImage from "/assets/website-design/charizard.png";
 import { useDojoStore } from "@/hooks/useDojoStore";
 import { DojoContext } from "../dojo-sdk-provider";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import {
@@ -31,7 +18,6 @@ import {
 import { felt252ToString } from "@/lib/utils";
 import { usePlayerData } from "@/hooks";
 import { useAccount } from "@starknet-react/core";
-import { useLobbyMatchMakingData } from "@/hooks/useLobbyMatchMakingData";
 import { useLeaderBoardData } from "@/hooks/useLeaderBoardData";
 
 const Home = () => {
@@ -144,7 +130,7 @@ const Home = () => {
                       <TableCell className="py-3 px-4 font-medium">
                         <div className="flex items-center gap-x-3">
                           <img
-                            src="../assets/website-design/charizard.png"
+                            src={CharizardImage}
                             width={20}
                             height={20}
                             alt=""
@@ -194,7 +180,7 @@ const Home = () => {
                       <TableCell className="py-3 px-4 font-medium">
                         <div className="flex items-center gap-x-3">
                           <img
-                            src="../assets/website-design/charizard.png"
+                            src={CharizardImage}
                             width={20}
                             height={20}
                             alt=""

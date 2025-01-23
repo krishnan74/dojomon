@@ -1,14 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { useAccount } from "@starknet-react/core";
-import { WalletAccount } from "@/wallet-account";
 import { DojoContext } from "@/dojo-sdk-provider";
-import { useDojoStore, usePlayerData } from "@/hooks";
-import { QueryBuilder, ParsedEntity } from "@dojoengine/sdk";
-import { DojomonType, LobbyType, PlayerStats } from "@/typescript/models.gen";
+
 import { felt252ToString } from "@/lib/utils";
 import { useLobbyData } from "@/hooks/useLobbyData";
-import { Howler } from "howler";
+import { Howl } from "howler";
+import matchFoundSoundaudio from "/assets/audio/Vs flash.ogg";
 import { addAddressPadding, BigNumberish } from "starknet";
 
 function useQuery() {
@@ -42,7 +40,7 @@ const WaitLobby = () => {
   );
 
   const matchfoundSound = new Howl({
-    src: ["../assets/audio/Vs flash.ogg"],
+    src: [matchFoundSoundaudio],
     volume: 0.7,
   });
 

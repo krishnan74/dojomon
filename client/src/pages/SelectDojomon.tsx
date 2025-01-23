@@ -8,6 +8,7 @@ import { useLobbyData } from "@/hooks/useLobbyData";
 import { Button } from "@/components/ui/button";
 import { Howl } from "howler";
 import { addAddressPadding } from "starknet";
+import selectSoundAudio from "/assets/audio/GUI sel decision.ogg";
 
 const SelectDojomon = () => {
   const { client } = useContext(DojoContext); // Access the Dojo SDK client
@@ -25,7 +26,7 @@ const SelectDojomon = () => {
   const [opponentReady, setOpponentReady] = useState(false);
 
   const selectSound = new Howl({
-    src: ["../assets/audio/GUI sel decision.ogg"],
+    src: [selectSoundAudio],
     volume: 0.7,
   });
 

@@ -13,6 +13,9 @@ import { Howl } from "howler";
 import { useSpring, animated } from "react-spring";
 import { useBattleEndedData } from "@/hooks/events/useBattleEndedData";
 import { Move } from "@/typescript/models.gen";
+import moveSoundAudio from "/assets/audio/Battle ability.ogg";
+import victorySoundAudio from "/assets/audio/Battle victory.ogg";
+import battleBackgroundImage from "/assets/game-assets/battleBackground1.png";
 
 // Custom hook to parse query params
 function useQuery() {
@@ -79,19 +82,19 @@ const Battle = () => {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const myDojomonImage = "../assets/dojomons/back/"
-  const opponentDojomonImage = "../assets/dojomons/front/"
+  const myDojomonImage = "/assets/dojomons/back/";
+  const opponentDojomonImage = "/assets/dojomons/front/";
 
   // Sound effects
   const moveSound = new Howl({
-    src: ["../assets/audio/Battle ability.ogg"],
+    src: [moveSoundAudio],
     volume: 0.7,
   });
   const victorySound = new Howl({
-    src: ["../assets/audio/Battle victory.ogg"],
+    src: [victorySoundAudio],
     volume: 0.7,
   });
-  const defeatSound = new Howl({ src: ["/sounds/defeat.mp3"], volume: 0.7 });
+  // const defeatSound = new Howl({ src: ["/sounds/defeat.mp3"], volume: 0.7 });
 
   // Track loading status
   useEffect(() => {
@@ -109,144 +112,146 @@ const Battle = () => {
     }
   }, [attackEventSubscribeData]);
 
-
   useEffect(() => {
-      const canvas = canvasRef.current;
-      const ctx = canvas?.getContext("2d");
-      if (!canvas || !ctx) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
 
-      const viewportSize = {
-        width: 1200,
-        height: 600,
-      };
-  
-      canvas.width = viewportSize.width;
-      canvas.height = viewportSize.height;
-  
-      const battleZoneImage = new Image();
-      battleZoneImage.src = "../assets/game-assets/battleBackground1.png";
-  
-      const myPetImage = new Image();
-      myPetImage.src = `${myDojomonImage}${formatWithLeadingZeros(myDojomonQueryData?.image_id)}.png`;
-  
-      const enemyImage = new Image();
-      enemyImage.src = `${opponentDojomonImage}${formatWithLeadingZeros(opponentDojomonQueryData?.image_id)}.png`;
+    const viewportSize = {
+      width: 1200,
+      height: 600,
+    };
 
-      // console.log("myPetImage", enemyImage);
-  
-      const myDojomon = new Monster({
-        position: {
-          x: canvas.width / 3.6,
-          y: canvas.height / 2 -10,
-        },
-        image: myPetImage,
-        frames: { max: 1 },
-        sprites: {
-          up: myPetImage,
-          left: myPetImage,
-          right: myPetImage,
-          down: myPetImage
-        },
-        animate: true
-      });
-  
-      const enemyDojomon = new Monster({
-        position: {
-          x: canvas.width / 1.3,
+    canvas.width = viewportSize.width;
+    canvas.height = viewportSize.height;
+
+    const battleZoneImage = new Image();
+    battleZoneImage.src = battleBackgroundImage;
+
+    const myPetImage = new Image();
+    myPetImage.src = `${myDojomonImage}${formatWithLeadingZeros(
+      myDojomonQueryData?.image_id
+    )}.png`;
+
+    const enemyImage = new Image();
+    enemyImage.src = `${opponentDojomonImage}${formatWithLeadingZeros(
+      opponentDojomonQueryData?.image_id
+    )}.png`;
+
+    // console.log("myPetImage", enemyImage);
+
+    const myDojomon = new Monster({
+      position: {
+        x: canvas.width / 3.6,
+        y: canvas.height / 2 - 10,
+      },
+      image: myPetImage,
+      frames: { max: 1 },
+      sprites: {
+        up: myPetImage,
+        left: myPetImage,
+        right: myPetImage,
+        down: myPetImage,
+      },
+      animate: true,
+    });
+
+    const enemyDojomon = new Monster({
+      position: {
+        x: canvas.width / 1.3,
         y: canvas.height / 10,
-        },
-        image: enemyImage,
-        frames: { max: 1 },
-        sprites: {
-          up: enemyImage,
-          left: enemyImage,
-          right: enemyImage,
-          down: enemyImage
-        },
-        animate: true,
-        isEnemy: true
-      });
-  
-      const renderedSpritesBattle = [myDojomon, enemyDojomon];
+      },
+      image: enemyImage,
+      frames: { max: 1 },
+      sprites: {
+        up: enemyImage,
+        left: enemyImage,
+        right: enemyImage,
+        down: enemyImage,
+      },
+      animate: true,
+      isEnemy: true,
+    });
 
+    const renderedSpritesBattle = [myDojomon, enemyDojomon];
 
-  
-      const updateBattle = () => {
-        if(formatWithLeadingZeros(myDojomonQueryData?.health)<=0){        
-          myDojomon.faint();
-          return;
-        }
-        if(formatWithLeadingZeros(opponentDojomonQueryData?.health)<=0){
-          enemyDojomon.faint();
-          return;
-        }
+    const updateBattle = () => {
+      if (myDojomonQueryData && Number(myDojomonQueryData.health) <= 0) {
+        myDojomon.faint();
+        return;
+      }
+      if (
+        opponentDojomonQueryData &&
+        Number(opponentDojomonQueryData.health) <= 0
+      ) {
+        enemyDojomon.faint();
+        return;
+      }
 
-        if (attackEventSubscribeData) {
-          setAttacked(true);
+      if (attackEventSubscribeData) {
+        setAttacked(true);
 
-          
-          // setBattleMessage(felt252ToString(attackEventSubscribeData.move.name));
-          // setTimeout(() => setBattleMessage(null), 1500);
+        // setBattleMessage(felt252ToString(attackEventSubscribeData.move.name));
+        // setTimeout(() => setBattleMessage(null), 1500);
 
-          // IF enemy move
-          enemyDojomon.attack({
-            // attack:attackEventSubscribeData.move,
-            attack:{
-              name: "Fireball",
-              damage: 40,
-              type: "normal"
-            },
-            recipient: myDojomon,
-            // @ts-expect-error
-            renderedSpritesBattle: renderedSpritesBattle
-          });
-
-          // IF player move
-           myDojomon.attack({
-            // attack:attackEventSubscribeData.move,
-            attack:{
-              name: "Fireball",
-              damage: 40,
-              type: "normal"
-            },
-            recipient: enemyDojomon,
-            // @ts-expect-error
-            renderedSpritesBattle: renderedSpritesBattle
-           });
-        }
-  
-      };
-  
-      const renderBattle = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(
-          battleZoneImage,
-        0,0
-        );
-        renderedSpritesBattle.forEach((sprite) => {
-          sprite.draw(ctx);
+        // IF enemy move
+        enemyDojomon.attack({
+          // attack:attackEventSubscribeData.move,
+          attack: {
+            name: "Fireball",
+            damage: 40,
+            type: "normal",
+          },
+          recipient: myDojomon,
+          // @ts-expect-error
+          renderedSpritesBattle: renderedSpritesBattle,
         });
-      };
-  
-      const gameBattleLoop = () => {
-        updateBattle();
-        renderBattle();
-        requestAnimationFrame(gameBattleLoop);
-      };
 
-  
-        battleZoneImage.onload = () => {
-            gameBattleLoop();
-      };
-  
-  
-    }, [myDojomonQueryData, opponentDojomonQueryData,movesQueryData,isDataLoaded,attackEventSubscribeData]);
+        // IF player move
+        myDojomon.attack({
+          // attack:attackEventSubscribeData.move,
+          attack: {
+            name: "Fireball",
+            damage: 40,
+            type: "normal",
+          },
+          recipient: enemyDojomon,
+          // @ts-expect-error
+          renderedSpritesBattle: renderedSpritesBattle,
+        });
+      }
+    };
+
+    const renderBattle = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(battleZoneImage, 0, 0);
+      renderedSpritesBattle.forEach((sprite) => {
+        sprite.draw(ctx);
+      });
+    };
+
+    const gameBattleLoop = () => {
+      updateBattle();
+      renderBattle();
+      requestAnimationFrame(gameBattleLoop);
+    };
+
+    battleZoneImage.onload = () => {
+      gameBattleLoop();
+    };
+  }, [
+    myDojomonQueryData,
+    opponentDojomonQueryData,
+    movesQueryData,
+    isDataLoaded,
+    attackEventSubscribeData,
+  ]);
 
   // Handle game over logic
   useEffect(() => {
     if (battleEndedSubscribeData?.won_dojomon_id === selected_dojomon_id) {
       setGameOver("You Won!");
-      defeatSound.play();
+      victorySound.play();
     } else if (
       battleEndedSubscribeData?.lost_dojomon_id === selected_dojomon_id
     ) {
@@ -280,7 +285,7 @@ const Battle = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 transition-all duration-500">
-      <canvas ref={canvasRef} className="z-10"/>
+      <canvas ref={canvasRef} className="z-10" />
       {/* Player Stats */}
       <div className="absolute bg-white h-[120px] w-[20%] border-4 border-black top-12 left-12 p-3 z-10">
         <h1 className="font-bold">
@@ -321,7 +326,6 @@ const Battle = () => {
         )}.png`}
         alt=""
       /> */}
-      
 
       {/* Moves */}
       <div className="absolute w-full h-[150px] bottom-0 bg-white flex border-t-4 border-black z-10">
@@ -349,7 +353,6 @@ const Battle = () => {
           {battleMessage}
         </div>
       )}
-
     </div>
   );
 };

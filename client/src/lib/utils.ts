@@ -99,8 +99,8 @@ export const dojomonData = [
 ];
 
 export const formatWithLeadingZeros = (
-  number: BigNumberish,
+  number: BigNumberish | undefined,
   length: number = 3
 ) => {
-  return number.toString().padStart(length, "0");
+  return number?.toString().padStart(length, "0");
 };

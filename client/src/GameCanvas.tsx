@@ -1,8 +1,8 @@
 import { useRef, useEffect, useState } from "react";
 import { Boundary, Crop, Monster, Player, Position, Sprite } from "./interfaces";
-import { Collision } from "../assets/collisionData";
-import { BattleZoneData } from "../assets/battleZoneData";
-import { FarmZoneData } from "../assets/farmData";
+import { Collision } from "../public/assets/collisionData";
+import { BattleZoneData } from "../public/assets/battleZoneData";
+import { FarmZoneData } from "../public/assets/farmData";
 import Profile from "../assets/pfp.jpg"
 import Trophy from "../assets/trophy.png";
 import Gold from "../assets/gold.png";
