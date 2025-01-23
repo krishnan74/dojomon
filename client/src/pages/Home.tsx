@@ -42,9 +42,23 @@ const Home = () => {
   const { playerQueryData } = usePlayerData(address);
   const { leaderboardData } = useLeaderBoardData(address);
 
+  // State to track if the video is loaded
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+
+  // Handler for when the video has finished loading
+  const handleVideoLoaded = () => {
+    setIsVideoLoaded(true);
+  };
 
   return (
     <div className="min-h-screen flex flex-col relative bg-[#080C1D]">
+      {/* Loader */}
+      {!isVideoLoaded && (
+        <div className="absolute inset-0 flex justify-center items-center bg-black opacity-70 z-50">
+          <div className="w-16 h-16 border-4 border-t-4 border-white rounded-full animate-spin"></div>
+        </div>
+      )}
+
       <div
         className="absolute inset-0 bg-cover bg-center opacity-30"
         style={{
@@ -86,10 +100,6 @@ const Home = () => {
           <h2 className="text-4xl font-extrabold leading-snug tracking-tight">
             Catch 'em! Collect Your Strongest and Rarest DojoMon
           </h2>
-          {/* <p className="text-gray-500 text-sm">
-            Catch all officially licensed DojoMons as NFTs and grow your
-            unbeatable collection!
-          </p> */}
           <button
             onClick={() => {
               playerQueryData != null
@@ -140,14 +150,15 @@ const Home = () => {
                             alt=""
                           />
                           {felt252ToString(
-                            // @ts-expect-error
+                            //@ts-expect-error
                             leader_model.models.dojomon.PlayerStats.name
                           ) || "N/A"}
                         </div>
                       </TableCell>
                       <TableCell className="py-3 px-4 text-right">
                         {
-                          // @ts-expect-error
+                          //@ts-expect-error
+
                           leader_model.models.dojomon.PlayerStats.league ||
                             "N/A"
                         }
@@ -155,7 +166,7 @@ const Home = () => {
 
                       <TableCell className="py-3 px-4 text-right">
                         {
-                          // @ts-expect-error
+                          //@ts-expect-error
 
                           leader_model.models.dojomon.PlayerStats.trophies ||
                             "N/A"
@@ -189,14 +200,15 @@ const Home = () => {
                             alt=""
                           />
                           {felt252ToString(
-                            // @ts-expect-error
+                            //@ts-expect-error
                             leader_model.models.dojomon.PlayerStats.name
                           ) || "N/A"}
                         </div>
                       </TableCell>
                       <TableCell className="py-3 px-4 text-right">
                         {
-                          // @ts-expect-error
+                          //@ts-expect-error
+
                           leader_model.models.dojomon.PlayerStats.league ||
                             "N/A"
                         }
@@ -204,7 +216,7 @@ const Home = () => {
 
                       <TableCell className="py-3 px-4 text-right">
                         {
-                          // @ts-expect-error
+                          //@ts-expect-error
 
                           leader_model.models.dojomon.PlayerStats.trophies ||
                             "N/A"
@@ -220,7 +232,7 @@ const Home = () => {
 
         {/* Right Content */}
         <div className="  lg:w-[40%] flex justify-end   ">
-          <div className="relative  h-[500px] w-[400px] rounded-xl p-6 shadow-lg transform hover:scale-105 transition-all duration-300">
+          <div className="relative  h-[400px] w-[300px] rounded-xl p-6 shadow-lg transform hover:scale-105 transition-all duration-300">
             <div
               className="absolute inset-0 bg-cover bg-center opacity-80  rounded-xl"
               style={{
@@ -242,6 +254,22 @@ const Home = () => {
           </div>
         </div>
       </main>
+
+      <div className="w-full flex justify-center mt-12 items-center px-4 py-10">
+        <div className="w-full max-w-[900px] text-center">
+          <p className="text-xl md:text-2xl font-semibold text-white mb-4">
+            How to Play DojoMon: A Beginner's Guide
+          </p>
+          <div className="relative">
+            <video
+              src="../assets/Dojomon Demo Video.mp4"
+              className="w-full rounded-lg shadow-lg transition-all duration-300 hover:scale-105"
+              controls
+              onLoadedData={handleVideoLoaded} // Event handler to track loading
+            ></video>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
