@@ -20,6 +20,8 @@ import { useLobbyMatchMakingData } from "./hooks/useLobbyMatchMakingData";
 import { useLobbyCreatedData } from "./hooks/events/useLobbyCreatedData";
 import { useNavigate } from "react-router-dom";
 import { usePlayerJoinedData } from "./hooks/events/usePlayerJoinedData";
+import ShopPopup from "./components/ShopPopUp";
+import { useInventoryData } from "./hooks/useInventoryData";
 
 const NewGameCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -36,6 +38,9 @@ const NewGameCanvas = () => {
 
   const { playerQueryData, playerSubscribeData } = usePlayerData(address!);
 
+  const { playerInventoryQueryData, playerInventorySubscribeData } =
+    useInventoryData(address!);
+
   const [isLoading, setIsLoading] = useState(false); // Add a loading state
   const [clickedBattle, setClickedBattle] = useState(false);
 
@@ -48,6 +53,9 @@ const NewGameCanvas = () => {
 
   const { lobbyCreatedEventData } = useLobbyCreatedData(address!);
   const { playerJoinedEventData } = usePlayerJoinedData(address!);
+
+  const [isShopOpen, setIsShopOpen] = useState(false); // Shop visibility state
+
   const navigate = useNavigate(); // Using React Router's navigate for redirection
 
   const [isPokemonNearBy, setIsPokemonNearBy] = useState<boolean>(false);
@@ -138,12 +146,12 @@ const NewGameCanvas = () => {
       hero.updateSprite({
         arrow: directionInput.direction,
       });
-      if (isPokemonNearBy) {
-        setIsPokemonNearBy(false);
-      }
+
       if (isPlayerNear(hero.x, hero.y, withGrid(20), withGrid(23))) {
         console.log("Pokemon interacted");
         setIsPokemonNearBy(true);
+      } else {
+        setIsPokemonNearBy(false);
       }
 
       if (farmState.isFarming) {
@@ -236,6 +244,19 @@ const NewGameCanvas = () => {
 
     setIsLoading(false); // Reset loading flag after operation
   };
+
+  // const handlePurchase = (type: string) => {
+  //   const pokeball = pokeballs[type];
+  //   if (playerQueryData?.gold >= pokeball.price) {
+  //     setPokeballs((prevState) => ({
+  //       ...prevState,
+  //       [type]: { ...pokeball, quantity: pokeball.quantity + 1 },
+  //     }));
+  //     alert(`You purchased a ${type} Pokéball!`);
+  //   } else {
+  //     alert("You don't have enough gold!");
+  //   }
+  // };
 
   const handleStartFarming = () => {
     setIsPopupVisible(false);
@@ -362,20 +383,61 @@ const NewGameCanvas = () => {
         </div>
 
         {/* Top Right */}
-        <div className="absolute top-0 right-0 p-3 m-3 h-[70px] flex items-center">
-          <div>
-            <div
-              className=""
-              //   onClick={() => setIsPokemonTabOpened(!isPokemonTabOpened)}
-            >
-              <img
-                src={PokemonPfp}
-                width={70}
-                className="rounded-full border-2 border-black"
-                alt=""
-              />
-            </div>
-            <div></div>
+        <div className="absolute top-0 right-0 p-3 m-3 h-[70px] flex items-center space-x-6 bg-black bg-opacity-50 rounded-xl shadow-lg p-2">
+          {/* DojoBall */}
+          <div className="flex items-center space-x-2">
+            <img
+              src="../assets/game-ui/POKEBALL.png"
+              alt="DojoBall"
+              className="w-10 h-10" // Increased size for better visibility
+            />
+            <span className="text-white text-lg font-bold">
+              {playerInventorySubscribeData
+                ? playerInventorySubscribeData?.dojoballs.toString()
+                : playerInventoryQueryData?.dojoballs.toString()}
+            </span>
+          </div>
+
+          {/* GreatBall */}
+          <div className="flex items-center space-x-2">
+            <img
+              src="../assets/game-ui/GREATBALL.png"
+              alt="GreatBall"
+              className="w-10 h-10" // Increased size for better visibility
+            />
+            <span className="text-white text-lg font-bold">
+              {playerInventorySubscribeData
+                ? playerInventorySubscribeData?.greatballs.toString()
+                : playerInventoryQueryData?.greatballs.toString()}
+            </span>
+          </div>
+
+          {/* UltraBall */}
+          <div className="flex items-center space-x-2">
+            <img
+              src="../assets/game-ui/ULTRABALL.png"
+              alt="UltraBall"
+              className="w-10 h-10" // Increased size for better visibility
+            />
+            <span className="text-white text-lg font-bold">
+              {playerInventorySubscribeData
+                ? playerInventorySubscribeData?.ultraballs.toString()
+                : playerInventoryQueryData?.ultraballs.toString()}
+            </span>
+          </div>
+
+          {/* MasterBall */}
+          <div className="flex items-center space-x-2">
+            <img
+              src="../assets/game-ui/MASTERBALL.png"
+              alt="MasterBall"
+              className="w-10 h-10" // Increased size for better visibility
+            />
+            <span className="text-white text-lg font-bold">
+              {playerInventorySubscribeData
+                ? playerInventorySubscribeData?.masterballs.toString()
+                : playerInventoryQueryData?.masterballs.toString()}
+            </span>
           </div>
         </div>
 
@@ -384,11 +446,10 @@ const NewGameCanvas = () => {
             className="bg-white text-black"
             onClick={() => {
               if (!isLoading) {
-                // Prevent clicking while loading
                 setClickedBattle(true);
               }
             }}
-            disabled={isLoading} // Disable the button while loading
+            disabled={isLoading}
           >
             <img
               src={BattleLogo}
@@ -398,9 +459,20 @@ const NewGameCanvas = () => {
             />
           </button>
           <div className="bg-white p-2 ml-2">
-            <button>SHOP</button>
+            <button onClick={() => setIsShopOpen(true)}>SHOP</button>
           </div>
         </div>
+
+        {isShopOpen && (
+          <ShopPopup
+            setIsShopOpen={setIsShopOpen}
+            playerGold={
+              playerSubscribeData?.gold
+                ? playerSubscribeData.gold
+                : playerQueryData?.gold
+            }
+          />
+        )}
 
         {/* Bottom right popup */}
         {isPopupVisible && (

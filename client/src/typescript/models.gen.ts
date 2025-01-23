@@ -86,6 +86,14 @@ export interface DojomonStruct {
   dojomon_type: string;
 }
 
+export interface Inventory {
+  player: string;
+  dojoballs: BigNumberish;
+  greatballs: BigNumberish;
+  ultraballs: BigNumberish;
+  masterballs: BigNumberish;
+}
+
 // Type definition for `dojomon::models::DojoBall` struct
 export interface DojoBall {
   dojoball_id: BigNumberish;

@@ -25,7 +25,6 @@ import CreatePlayer from "./pages/CreatePlayer.tsx";
 import App from "./App.tsx";
 import TempBattleCanvas from "./TempBattleCanvas.tsx";
 
-
 async function main() {
   const sdk = await init<SchemaType>(
     {
@@ -46,30 +45,30 @@ async function main() {
   );
 
   createRoot(document.getElementById("root")!).render(
-      <DojoSdkProvider
-        sdk={sdk}
-        burnerManager={await setupBurnerManager(dojoConfig)}
-      >
-        <StarknetProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route index element={<Home />} />
-              <Route path="/createPlayer" element={<CreatePlayer />} />
-              <Route path="/game" element={<NewGameCanvas />} />
-              <Route path="/battle/:lobbyCode" element={<Battle />} />
-              <Route path="/lobby/:lobbyCode" element={<WaitLobby />} />
-              <Route
-                path="/selectYourDojomon/:lobbyCode"
-                element={<SelectDojomon />}
-              />
-              <Route path="/test" element={<App />} />
-              <Route path="/test-battle" element={<TempBattleCanvas />} />
-              <Route path="*" element={<NoPage />} />
-            </Routes>
-          </BrowserRouter>
-          {/* <GameCanvas pokeballPosition={{ x: 0, y: 0 }} /> */}
-        </StarknetProvider>
-      </DojoSdkProvider>
+    <DojoSdkProvider
+      sdk={sdk}
+      burnerManager={await setupBurnerManager(dojoConfig)}
+    >
+      <StarknetProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route index element={<Home />} />
+            <Route path="/createPlayer" element={<CreatePlayer />} />
+            <Route path="/game" element={<NewGameCanvas />} />
+            <Route path="/battle/:lobbyCode" element={<Battle />} />
+            <Route path="/lobby/:lobbyCode" element={<WaitLobby />} />
+            <Route
+              path="/selectYourDojomon/:lobbyCode"
+              element={<SelectDojomon />}
+            />
+            <Route path="/test" element={<App />} />
+            <Route path="/battle" element={<TempBattleCanvas />} />
+            <Route path="*" element={<NoPage />} />
+          </Routes>
+        </BrowserRouter>
+        {/* <GameCanvas pokeballPosition={{ x: 0, y: 0 }} /> */}
+      </StarknetProvider>
+    </DojoSdkProvider>
   );
 }
 

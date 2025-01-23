@@ -49,6 +49,10 @@ const policies: SessionPolicies = {
         },
         { name: "actions", entrypoint: "createDojomon" },
         { name: "actions", entrypoint: "feedDojomon" },
+        { name: "actions", entrypoint: "catchDojomon" },
+        { name: "actions", entrypoint: "addGold" },
+        { name: "actions", entrypoint: "addMove" },
+        { name: "actions", entrypoint: "harvestFood" },
       ],
     },
     [BATTLE_ADDRESS]: {
@@ -60,6 +64,10 @@ const policies: SessionPolicies = {
         {
           name: "battle",
           entrypoint: "endBattle",
+        },
+        {
+          name: "battle",
+          entrypoint: "changeTurn",
         },
       ],
     },

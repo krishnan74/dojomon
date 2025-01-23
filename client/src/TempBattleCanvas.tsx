@@ -1,46 +1,39 @@
-import React, { useEffect, useRef } from 'react'
-import { Monster } from './classes';
+import React, { useEffect, useRef, useState } from "react";
+import { Monster } from "./classes";
 
 const TempBattleCanvas = () => {
-
-
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [move, setMove] = React.useState<string | null>(null);
-  // const [isAnimating, setIsAnimating] = React.useState<boolean>(false);
+  const [isCatching, setIsCatching] = useState<boolean>(false);
 
-  const myDojomonImage = "../assets/dojomons/back/"
-  const opponentDojomonImage = "../assets/dojomons/front/"
+  const myDojomonImage = "../assets/dojomons/back/";
+  const opponentDojomonImage = "../assets/dojomons/front/";
 
   let isAnimating = false;
 
-
   const attacks = {
     Tackle: {
-      name: 'Tackle',
+      name: "Tackle",
       damage: 10,
-      type: 'Normal',
-
+      type: "Normal",
     },
     Fireball: {
-      name: 'Fireball',
+      name: "Fireball",
       damage: 25,
-      type: 'Fire',
-
+      type: "Fire",
     },
     Waterball: {
-      name: 'Waterball',
+      name: "Waterball",
       damage: 25,
-      type: 'Fire',
-
-    }
-  }
+      type: "Water",
+    },
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
 
-    console.log("canvas", canvas);
     const viewportSize = {
       width: 1200,
       height: 600,
@@ -58,8 +51,6 @@ const TempBattleCanvas = () => {
     const enemyImage = new Image();
     enemyImage.src = `${opponentDojomonImage}004.png`;
 
-    console.log("myPetImage", enemyImage);
-
     const myDojomon = new Monster({
       position: {
         x: canvas.width / 3.6,
@@ -71,9 +62,9 @@ const TempBattleCanvas = () => {
         up: myPetImage,
         left: myPetImage,
         right: myPetImage,
-        down: myPetImage
+        down: myPetImage,
       },
-      animate: true
+      animate: true,
     });
 
     const enemyDojomon = new Monster({
@@ -87,45 +78,73 @@ const TempBattleCanvas = () => {
         up: enemyImage,
         left: enemyImage,
         right: enemyImage,
-        down: enemyImage
+        down: enemyImage,
       },
       animate: true,
-      isEnemy: true
+      isEnemy: true,
     });
 
     const renderedSpritesBattle = [myDojomon, enemyDojomon];
 
+    // Animation for catching Dojomon
+    const catchAnimation = () => {
+      let ballSize = 20;
+      let ballX = canvas.width / 2 - ballSize / 2;
+      let ballY = canvas.height - 80;
+      let targetX = enemyDojomon.position.x + 20; // Slight offset from enemy
+      let targetY = enemyDojomon.position.y + 20;
 
+      const animateCatch = () => {
+        if (!isCatching) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(battleZoneImage, 0, 0);
+
+        // Draw Pokéball (animated catching ball)
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
+        ctx.fillStyle = "#ff0000"; // Pokéball color (red)
+        ctx.fill();
+        ctx.stroke();
+
+        // Move the ball towards the enemy
+        if (ballX < targetX) ballX += 5;
+        if (ballY < targetY) ballY += 5;
+        if (ballSize < 40) ballSize += 1;
+
+        // If ball reaches enemy, simulate capture and stop animation
+        if (ballX >= targetX && ballY >= targetY) {
+          setIsCatching(false);
+          setMove(null); // Reset move state
+          // Simulate catch completion
+          alert("Dojomon Caught!");
+        }
+
+        requestAnimationFrame(animateCatch);
+      };
+      animateCatch();
+    };
 
     const updateBattle = () => {
-
-
-
       if (move !== null) {
         if (isAnimating) return;
-        isAnimating = true
+        isAnimating = true;
         const attack = attacks[move as keyof typeof attacks];
-        console.log("attack", attack);
         myDojomon.attack({
           attack: attack,
           recipient: enemyDojomon,
-          renderedSpritesBattle: renderedSpritesBattle
+          renderedSpritesBattle: renderedSpritesBattle,
         });
         setTimeout(() => {
-          // Reset animation state after a delay
-          isAnimating = false
-          setMove(null); // Reset move
-        }, 1000); // Adjust delay duration as per your animation timing
+          isAnimating = false;
+          setMove(null);
+        }, 1000);
       }
-
     };
 
     const renderBattle = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(
-        battleZoneImage,
-        0, 0
-      );
+      ctx.drawImage(battleZoneImage, 0, 0);
       renderedSpritesBattle.forEach((sprite) => {
         sprite.draw(ctx);
       });
@@ -137,44 +156,47 @@ const TempBattleCanvas = () => {
       requestAnimationFrame(gameBattleLoop);
     };
 
-
     battleZoneImage.onload = () => {
       gameBattleLoop();
     };
-
-
-  }, [move,isAnimating]);
+  }, [move, isCatching]);
 
   const handleTackle = () => {
-    if (move === null) { // Allow only when no ongoing attack
+    if (move === null) {
       setMove("Tackle");
-      console.log("Tackle move initiated");
     }
   };
 
   const handleAttack = () => {
-    if (move === null) { // Allow only when no ongoing attack
+    if (move === null) {
       setMove("Fireball");
-      console.log("Attack move initiated");
     }
-  }
+  };
 
   const handleAttackWater = () => {
-    if (move === null) { // Allow only when no ongoing attack
+    if (move === null) {
       setMove("Waterball");
-      console.log("AttackWater move initiated");
     }
-  }
+  };
+
+  const handleCatch = () => {
+    if (move === null && !isCatching) {
+      setIsCatching(true); // Start the catch animation
+      catchAnimation(); // Trigger the catch animation
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-800 to-gray-900 transition-all duration-500">
-
       <>
         <div className="absolute bg-white h-[80px] w-[200px] border-4 border-black top-12 left-12 p-3">
           <h1 className="font-bold font-pixel">Draggle</h1>
           <div className="relative mt-2">
             <div className="h-2 bg-slate-400"></div>
-            <div id="enemy-health-bar" className="h-2 bg-green-500 absolute top-0 right-0 left-0"></div>
+            <div
+              id="enemy-health-bar"
+              className="h-2 bg-green-500 absolute top-0 right-0 left-0"
+            ></div>
           </div>
         </div>
 
@@ -182,26 +204,39 @@ const TempBattleCanvas = () => {
           <h1 className="font-bold font-pixel">Emby</h1>
           <div className="relative mt-2">
             <div className="h-2 bg-slate-400"></div>
-            <div id="player-health-bar" className="h-2 bg-green-500 absolute top-0 right-0 left-0"></div>
+            <div
+              id="player-health-bar"
+              className="h-2 bg-green-500 absolute top-0 right-0 left-0"
+            ></div>
           </div>
         </div>
+
         <div className="bg-white border-2 border-black absolute w-full h-[150px] bottom-0 left-0 flex">
           <div className="w-4/5 flex">
-            <button className="w-1/2 h-full bg-green-500 text-white font-bold hover:bg-blue-700 font-pixel"
-              onClick={handleTackle}>
+            <button
+              className="w-1/2 h-full bg-green-500 text-white font-bold hover:bg-blue-700 font-pixel"
+              onClick={handleTackle}
+            >
               Tackle
             </button>
-            <button className="w-1/2 h-full bg-red-500 text-white font-bold hover:bg-red-700 font-pixel"
-              onClick={handleAttack}>
+            <button
+              className="w-1/2 h-full bg-red-500 text-white font-bold hover:bg-red-700 font-pixel"
+              onClick={handleAttack}
+            >
               Attack
             </button>
-            <button className="w-1/2 h-full bg-blue-500 text-white font-bold hover:bg-red-700 font-pixel"
-              onClick={handleAttackWater}>
+            <button
+              className="w-1/2 h-full bg-blue-500 text-white font-bold hover:bg-red-700 font-pixel"
+              onClick={handleAttackWater}
+            >
               Attack Water
             </button>
-          </div>
-          <div className="w-1/5 flex items-center justify-center bg-gray-200 border-l-2 border-black">
-            <h1 className="text-center font-bold text-lg font-pixel">Attack Type</h1>
+            <button
+              className="w-1/2 h-full bg-yellow-500 text-white font-bold hover:bg-red-700 font-pixel"
+              onClick={handleCatch}
+            >
+              Catch Dojomon
+            </button>
           </div>
         </div>
       </>
@@ -210,6 +245,4 @@ const TempBattleCanvas = () => {
   );
 };
 
-
-
-export default TempBattleCanvas
+export default TempBattleCanvas;

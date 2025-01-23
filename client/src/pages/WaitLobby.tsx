@@ -85,7 +85,7 @@ const WaitLobby = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen  bg-gradient-to-br from-gray-800 to-gray-900 ">
-      <WalletAccount />
+      {/* <WalletAccount />
 
       <div className="p-5 border-black border ">
         <button
@@ -125,7 +125,7 @@ const WaitLobby = () => {
             onChange={(e) => setUserName(e.target.value)}
           />
         </div>
-      </div>
+      </div> */}
 
       <div className="relative w-full max-w-4xl flex items-center justify-between p-8">
         {/* Left Section: Player 1 */}
