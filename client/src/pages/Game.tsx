@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+import  { useContext, useEffect, useRef, useState } from "react";
 import { asGridCoord, felt252ToString, withGrid } from "../lib/utils";
 import { DirectionInput } from "../classes/DirectionInput";
 import { Person } from "../classes/Person";
