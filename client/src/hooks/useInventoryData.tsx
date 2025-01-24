@@ -1,10 +1,5 @@
 import { DojoContext } from "../dojo-sdk-provider";
-import {
-  Inventory,
-  League,
-  PlayerStats,
-  SchemaType,
-} from "../typescript/models.gen";
+import { Inventory, SchemaType } from "../typescript bindings/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";

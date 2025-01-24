@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from "react";
-import { asGridCoord, felt252ToString, withGrid } from "./lib/utils";
-import { DirectionInput } from "./classes/DirectionInput";
-import { Person } from "./classes/Person";
-import { GameObject } from "./classes/GameObject";
+import { asGridCoord, felt252ToString, withGrid } from "../lib/utils";
+import { DirectionInput } from "../classes/DirectionInput";
+import { Person } from "../classes/Person";
+import { GameObject } from "../classes/GameObject";
 import { OverworldMap } from "@/classes/OverworldMap";
 
 import Profile from "/assets/game-ui/pfp.jpg";
@@ -10,17 +10,17 @@ import Trophy from "/assets/game-ui/trophy.png";
 import Gold from "/assets/game-ui/gold.png";
 import Carrot from "/assets/game-ui/carrot.png";
 import BattleLogo from "/assets/game-ui/battle.png";
-import { FarmManager } from "./classes/FarmManager";
-import { usePlayerData } from "./hooks";
+import { FarmManager } from "../classes/FarmManager";
+import { usePlayerData } from "../hooks";
 import { useAccount } from "@starknet-react/core";
-import { LobbyType, PlayerStats } from "./typescript/models.gen";
-import { DojoContext } from "./dojo-sdk-provider";
-import { useLobbyMatchMakingData } from "./hooks/useLobbyMatchMakingData";
-import { useLobbyCreatedData } from "./hooks/events/useLobbyCreatedData";
+import { LobbyType, PlayerStats } from "../typescript bindings/models.gen";
+import { DojoContext } from "../dojo-sdk-provider";
+import { useLobbyMatchMakingData } from "../hooks/useLobbyMatchMakingData";
+import { useLobbyCreatedData } from "../hooks/events/useLobbyCreatedData";
 import { useNavigate } from "react-router-dom";
-import { usePlayerJoinedData } from "./hooks/events/usePlayerJoinedData";
-import ShopPopup from "./components/ShopPopUp";
-import { useInventoryData } from "./hooks/useInventoryData";
+import { usePlayerJoinedData } from "../hooks/events/usePlayerJoinedData";
+import ShopPopup from "../components/ShopPopUp";
+import { useInventoryData } from "../hooks/useInventoryData";
 import DojoBallImage from "/assets/game-ui/POKEBALL.png";
 import GreatBallImage from "/assets/game-ui/GREATBALL.png";
 import UltraBallImage from "/assets/game-ui/ULTRABALL.png";
@@ -80,8 +80,7 @@ const NewGameCanvas = () => {
     backgroundImage.src = "/assets/game-assets/dojomon-base-map2.png";
 
     const foregroundImage = new Image();
-    foregroundImage.src =
-      "/assets/game-assets/dojomon-base-map-foreground.png";
+    foregroundImage.src = "/assets/game-assets/dojomon-base-map-foreground.png";
 
     const cropImg = new Image();
     cropImg.src = "/assets/crop4.png";

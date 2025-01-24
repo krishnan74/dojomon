@@ -1,17 +1,9 @@
 import { DojoContext } from "../../dojo-sdk-provider";
-import {
-  BattleEnded,
-  Dojomon,
-  DojomonType,
-  LobbyCreated,
-  PlayerAttacked,
-  PlayerSelectedDojomon,
-  SchemaType,
-} from "../../typescript/models.gen";
-import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
+import { LobbyCreated, SchemaType } from "../../typescript bindings/models.gen";
+import { ParsedEntity } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { addAddressPadding, CairoOption, CairoOptionVariant } from "starknet";
+import { addAddressPadding } from "starknet";
 import { useDojoStore } from "../useDojoStore";
 
 export function useLobbyCreatedData(address: string | undefined) {

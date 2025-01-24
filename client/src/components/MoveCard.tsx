@@ -7,9 +7,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { felt252ToString } from "@/lib/utils";
-import { Move } from "@/typescript/models.gen";
-import React, { SetStateAction, useContext } from "react";
-import { Button } from "./ui/button";
+import { Move } from "@/typescript bindings/models.gen";
+import React, { SetStateAction } from "react";
 import { BigNumberish } from "starknet";
 
 interface MoveCardProps {

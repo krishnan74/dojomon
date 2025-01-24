@@ -1,7 +1,6 @@
 import {
   Icon as ChakraIcon,
   IconProps as ChakraIconProps,
-  ThemeProps,
 } from "@chakra-ui/react";
 import React from "react";
 

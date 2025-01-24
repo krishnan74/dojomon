@@ -1,6 +1,6 @@
 import { BigNumberish } from "starknet";
 import { useDojoStore } from "./useDojoStore.tsx";
-import { SchemaType } from "../typescript/models.gen.ts";
+import { SchemaType } from "../typescript bindings/models.gen.ts";
 
 /**
  * Custom hook to retrieve a specific model for a given entityId within a specified namespace.

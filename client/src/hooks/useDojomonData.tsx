@@ -4,7 +4,7 @@ import {
   DojomonType,
   PlayerSelectedDojomon,
   SchemaType,
-} from "../typescript/models.gen";
+} from "../typescript bindings/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -29,6 +29,7 @@ export function useDojomonData(
     player: "",
     name: "",
     health: 0,
+    max_health: 0,
     attack: 0,
     defense: 0,
     speed: 0,
@@ -39,6 +40,7 @@ export function useDojomonData(
     position: { x: 0, y: 0 },
     is_free: true,
     is_being_caught: false,
+    image_id: 0,
   });
 
   const [dojomonQueryData, setDojomonQueryData] = useState<Dojomon[]>([]);
@@ -49,6 +51,7 @@ export function useDojomonData(
       player: "",
       name: "",
       health: 0,
+      max_health: 0,
       attack: 0,
       defense: 0,
       speed: 0,
@@ -59,6 +62,7 @@ export function useDojomonData(
       position: { x: 0, y: 0 },
       is_free: true,
       is_being_caught: false,
+      image_id: 0,
     });
 
   useEffect(() => {

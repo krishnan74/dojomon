@@ -1,21 +1,8 @@
 import { DojoContext } from "../dojo-sdk-provider";
-import {
-  DojomonType,
-  League,
-  Move,
-  MoveEffect,
-  PlayerStats,
-  SchemaType,
-} from "../typescript/models.gen";
+import { Move, SchemaType } from "../typescript bindings/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
-import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
-import {
-  addAddressPadding,
-  CairoCustomEnum,
-  CairoOption,
-  CairoOptionVariant,
-} from "starknet";
+
 import { useDojoStore } from "./useDojoStore";
 
 export function useMovesData(dojomon_id: string | undefined) {

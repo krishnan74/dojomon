@@ -1,14 +1,8 @@
 import { DojoContext } from "../dojo-sdk-provider";
-import {
-  Dojomon,
-  DojomonType,
-  PlayerSelectedDojomon,
-  SchemaType,
-} from "../typescript/models.gen";
+import { Dojomon, SchemaType } from "../typescript bindings/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { addAddressPadding, CairoOption, CairoOptionVariant } from "starknet";
 import { useDojoStore } from "./useDojoStore";
 
 export function useMyDojomonData(
@@ -34,7 +28,7 @@ export function useMyDojomonData(
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
-    const subscribe = async (address: string) => {
+    const subscribe = async () => {
       const subscription = await sdk.subscribeEntityQuery({
         query: new QueryBuilder<SchemaType>()
           .namespace("dojomon", (n) =>
@@ -62,7 +56,7 @@ export function useMyDojomonData(
     };
 
     if (address) {
-      subscribe(address);
+      subscribe();
     }
 
     return () => {
@@ -73,7 +67,7 @@ export function useMyDojomonData(
   }, [sdk, address]);
 
   useEffect(() => {
-    const fetchEntities = async (address: string) => {
+    const fetchEntities = async () => {
       try {
         await sdk.getEntities({
           query: new QueryBuilder<SchemaType>()
@@ -101,7 +95,7 @@ export function useMyDojomonData(
     };
 
     if (address) {
-      fetchEntities(address);
+      fetchEntities();
     }
   }, [sdk, address, dojomon_id]);
 

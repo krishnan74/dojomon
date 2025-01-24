@@ -32,7 +32,7 @@ export class Boundary {
   }
 }
 
-export class Crop  {
+export class Crop {
   static width = 60;
   static height = 60;
 
@@ -49,7 +49,7 @@ export class Crop  {
   grow({ renderedSpritesGame }: { renderedSpritesGame: Sprite[] }) {
     const cropImage = new Image();
     cropImage.src = "../assets/cherry.png"; // Ensure the path is correct
-  
+
     const cropSprite = new Sprite({
       position: { x: this.position.x, y: this.position.y },
       image: cropImage,
@@ -69,31 +69,43 @@ export class Crop  {
   }
 }
 
-
 interface PlayerOptions {
   position: { x: number; y: number };
   image: HTMLImageElement;
-  frames?: { max: number, val?: number, elapsed?: number, hold?: number };
+  frames?: { max: number; val?: number; elapsed?: number; hold?: number };
   width?: number;
   height?: number;
   animate?: boolean;
   isEnemy?: boolean;
-  sprites: { up: HTMLImageElement; left: HTMLImageElement; right: HTMLImageElement; down: HTMLImageElement };
+  sprites: {
+    up: HTMLImageElement;
+    left: HTMLImageElement;
+    right: HTMLImageElement;
+    down: HTMLImageElement;
+  };
 }
-
-
 
 export class Sprite {
   position: { x: number; y: number };
   // velocity: { x: number; y: number };
   image: HTMLImageElement;
-  frames: { max: number, val: number, elapsed: number, hold: number };
+  frames: { max: number; val: number; elapsed: number; hold: number };
   width: number;
   height: number;
   moving: boolean = false;
-  sprites: { up: HTMLImageElement; left: HTMLImageElement; right: HTMLImageElement; down: HTMLImageElement };
+  sprites: {
+    up: HTMLImageElement;
+    left: HTMLImageElement;
+    right: HTMLImageElement;
+    down: HTMLImageElement;
+  };
 
-  constructor({ position, image, frames = { max: 1 }, sprites }: PlayerOptions) {
+  constructor({
+    position,
+    image,
+    frames = { max: 1 },
+    sprites,
+  }: PlayerOptions) {
     this.position = position;
     // this.velocity = velocity;
     this.image = image;
@@ -132,13 +144,23 @@ export class Player {
   position: { x: number; y: number };
   // velocity: { x: number; y: number };
   image: HTMLImageElement;
-  frames: { max: number, val: number, elapsed: number, hold: number };
+  frames: { max: number; val: number; elapsed: number; hold: number };
   width: number;
   height: number;
   moving: boolean = false;
-  sprites: { up: HTMLImageElement; left: HTMLImageElement; right: HTMLImageElement; down: HTMLImageElement };
+  sprites: {
+    up: HTMLImageElement;
+    left: HTMLImageElement;
+    right: HTMLImageElement;
+    down: HTMLImageElement;
+  };
 
-  constructor({ position, image, frames = { max: 1 }, sprites }: PlayerOptions) {
+  constructor({
+    position,
+    image,
+    frames = { max: 1 },
+    sprites,
+  }: PlayerOptions) {
     this.position = position;
     // this.velocity = velocity;
     this.image = image;
@@ -181,7 +203,12 @@ export class Monster {
   animate: boolean = false;
   opacity: number;
   health: number;
-  sprites: { up: HTMLImageElement; left: HTMLImageElement; right: HTMLImageElement; down: HTMLImageElement };
+  sprites: {
+    up: HTMLImageElement;
+    left: HTMLImageElement;
+    right: HTMLImageElement;
+    down: HTMLImageElement;
+  };
   isEnemy: boolean = true;
 
   constructor({
@@ -231,37 +258,39 @@ export class Monster {
     }
   }
 
-  attack({ attack, recipient, renderedSpritesBattle }:
-    {
-      attack: { name: string, damage: number, type: string },
-      recipient: Monster,
-      renderedSpritesBattle: []
-    }) {
+  attack({
+    attack,
+    recipient,
+    renderedSpritesBattle,
+  }: {
+    attack: { name: string; damage: number; type: string };
+    recipient: Monster;
+    renderedSpritesBattle: [];
+  }) {
+    let healthBar = "#enemy-health-bar";
+    if (this.isEnemy) healthBar = "#player-health-bar";
 
-      let healthBar = "#enemy-health-bar";
-      if (this.isEnemy) healthBar = "#player-health-bar";
-
-    recipient.health -= attack.damage
+    recipient.health -= attack.damage;
     console.log("attack", attack);
 
     switch (attack.name) {
-      case 'Fireball': {
+      case "Fireball": {
         const fireballImage = new Image();
-        fireballImage.src = '../assets/fireball.png';
+        fireballImage.src = "../assets/fireball.png";
         const fireball = new Player({
           position: { x: this.position.x, y: this.position.y },
           image: fireballImage,
           frames: {
             max: 4,
-            hold: 10
+            hold: 10,
           },
           sprites: {
             up: fireballImage,
             left: fireballImage,
             right: fireballImage,
-            down: fireballImage
+            down: fireballImage,
           },
-          animate: true
+          animate: true,
         });
 
         renderedSpritesBattle.splice(1, 0, fireball);
@@ -271,31 +300,31 @@ export class Monster {
           y: recipient.position.y,
           onComplete: () => {
             gsap.to(healthBar, {
-              width: `${recipient.health}%`
+              width: `${recipient.health}%`,
             });
 
             gsap.to(recipient.position, {
               x: recipient.position.x + 10,
               yoyo: true,
               repeat: 5,
-              duration: 0.08
+              duration: 0.08,
             });
 
             gsap.to(recipient, {
               opacity: 0,
               repeat: 5,
               yoyo: true,
-              duration: 0.08
+              duration: 0.08,
             });
 
             renderedSpritesBattle.splice(1, 1);
-          }
+          },
         });
 
         break;
       }
 
-      case 'Tackle': {
+      case "Tackle": {
         const tl = gsap.timeline();
 
         console.log(" health after attack", recipient.health);
@@ -306,12 +335,12 @@ export class Monster {
         const healthElement = document.querySelector(healthBar) as HTMLElement;
         if (healthElement) {
           gsap.to(healthElement, {
-            width: `${recipient.health}%`
+            width: `${recipient.health}%`,
           });
         }
 
         tl.to(this.position, {
-          x: this.position.x - movementDistance
+          x: this.position.x - movementDistance,
         })
           .to(this.position, {
             x: this.position.x + movementDistance * 2,
@@ -321,37 +350,32 @@ export class Monster {
                 x: recipient.position.x + 10,
                 yoyo: true,
                 repeat: 5,
-                duration: 0.08
+                duration: 0.08,
               });
 
               gsap.to(recipient, {
                 opacity: 0,
                 repeat: 5,
                 yoyo: true,
-                duration: 0.08
+                duration: 0.08,
               });
-            }
+            },
           })
           .to(this.position, {
-            x: this.position.x
+            x: this.position.x,
           });
         break;
       }
     }
-
   }
 
   faint() {
-
     gsap.to(this.position, {
       y: this.position.y + 20,
-      duration: 1
-    })
+      duration: 1,
+    });
     gsap.to(this, {
-      opacity: 0
-    })
-
+      opacity: 0,
+    });
   }
-
-
 }

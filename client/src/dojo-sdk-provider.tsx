@@ -7,9 +7,9 @@ import {
 import { Account } from "starknet";
 import { dojoConfig } from "../dojoConfig";
 import { DojoProvider } from "@dojoengine/core";
-import { setupWorld } from "./typescript/contracts.gen";
+import { setupWorld } from "./typescript bindings/contracts.gen";
 import { SDK } from "@dojoengine/sdk";
-import { SchemaType } from "./typescript/models.gen";
+import { SchemaType } from "./typescript bindings/models.gen";
 
 /**
  * Interface defining the shape of the Dojo context.

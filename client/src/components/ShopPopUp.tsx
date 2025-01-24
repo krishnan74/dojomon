@@ -1,5 +1,5 @@
 import { DojoContext } from "@/dojo-sdk-provider";
-import { DojoBallType, DojomonType } from "@/typescript/models.gen";
+import { DojoBallType } from "@/typescript bindings/models.gen";
 import { useAccount } from "@starknet-react/core";
 import React, { useContext, useState } from "react";
 import { BigNumberish } from "starknet";
@@ -12,7 +12,7 @@ interface ShopPopupProps {
 const ShopPopup: React.FC<ShopPopupProps> = ({ setIsShopOpen, playerGold }) => {
   const { client } = useContext(DojoContext);
 
-  const { account, address } = useAccount();
+  const { account } = useAccount();
 
   const [pokeballs, setPokeballs] = useState<{
     [key: string]: { quantity: number; price: number; image: string };

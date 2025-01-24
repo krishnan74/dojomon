@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import { useControllerUsername, usePlayerData } from "@/hooks";
-import { DojomonType } from "@/typescript/models.gen";
+import { DojomonType } from "@/typescript bindings/models.gen";
 import { useAccount } from "@starknet-react/core";
 import React, { useContext, useEffect } from "react";
 import { dojomonData } from "@/lib/utils";

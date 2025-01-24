@@ -1,4 +1,4 @@
-import { useAccount, useConnect } from "@starknet-react/core";
+import { useConnect } from "@starknet-react/core";
 import { useEffect, useState } from "react";
 import { ControllerConnector } from "@cartridge/connector";
 

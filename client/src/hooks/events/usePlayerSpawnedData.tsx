@@ -1,16 +1,11 @@
 import { DojoContext } from "../../dojo-sdk-provider";
 import {
-  Dojomon,
-  DojomonType,
-  PlayerAttacked,
-  PlayerSelectedDojomon,
   PlayerSpawned,
   SchemaType,
-} from "../../typescript/models.gen";
-import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
-import { getEntityIdFromKeys } from "@dojoengine/utils";
-import { useContext, useEffect, useMemo, useState } from "react";
-import { addAddressPadding, CairoOption, CairoOptionVariant } from "starknet";
+} from "../../typescript bindings/models.gen";
+import { ParsedEntity } from "@dojoengine/sdk";
+import { useContext, useEffect, useState } from "react";
+import { addAddressPadding } from "starknet";
 import { useDojoStore } from "../useDojoStore";
 
 export function usePlayerSpawnedData(address: string | undefined) {

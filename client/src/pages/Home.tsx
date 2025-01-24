@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import CharizardImage from "/assets/website-design/charizard.png";
 import { useDojoStore } from "@/hooks/useDojoStore";
 import { DojoContext } from "../dojo-sdk-provider";

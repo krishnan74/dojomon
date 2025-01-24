@@ -4,13 +4,11 @@ import { createRoot } from "react-dom/client";
 
 import "./index.css";
 import { init } from "@dojoengine/sdk";
-import { SchemaType, schema } from "./typescript/models.gen.ts";
+import { SchemaType, schema } from "./typescript bindings/models.gen.ts";
 import { dojoConfig } from "../dojoConfig.ts";
 import { DojoSdkProvider } from "./dojo-sdk-provider.tsx";
 import { setupBurnerManager } from "@dojoengine/create-burner";
 import StarknetProvider from "./starknet-provider.tsx";
-import Navbar from "./components/Navbar.tsx";
-import GameCanvas from "./GameCanvas.tsx";
 
 import Home from "./pages/Home.tsx";
 import Battle from "./pages/Battle.tsx";
@@ -18,12 +16,11 @@ import WaitLobby from "./pages/WaitLobby.tsx";
 import NoPage from "./pages/NoPage.tsx";
 import SelectDojomon from "./pages/SelectDojomon.tsx";
 
-import NewGameCanvas from "./NewGameCanvas.tsx";
+import NewGameCanvas from "./pages/Game.tsx";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import SpawnPlayer from "./pages/CreatePlayer.tsx";
 import CreatePlayer from "./pages/CreatePlayer.tsx";
-import App from "./App.tsx";
-import TempBattleCanvas from "./TempBattleCanvas.tsx";
+import App from "./testing/App.tsx";
+import TempBattleCanvas from "./testing/TempBattleCanvas.tsx";
 
 async function main() {
   const sdk = await init<SchemaType>(

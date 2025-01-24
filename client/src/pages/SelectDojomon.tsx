@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
 import { useDojomonData } from "@/hooks/useDojomonData";
 import { useAccount } from "@starknet-react/core";
 import DojomonCard from "@/components/DojomonCard";

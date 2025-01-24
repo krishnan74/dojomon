@@ -2,7 +2,7 @@ import { useDojoStore } from "./useDojoStore";
 import { DojoContext } from "../dojo-sdk-provider";
 import { v4 as uuidv4 } from "uuid";
 import { useAccount } from "@starknet-react/core";
-import { DojomonType, League } from "../typescript/models.gen";
+import { DojomonType, League } from "../typescript bindings/models.gen";
 import { CairoOption, CairoOptionVariant, BigNumberish } from "starknet";
 import { useCallback, useContext } from "react";
 

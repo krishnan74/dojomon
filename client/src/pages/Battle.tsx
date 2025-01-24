@@ -12,7 +12,7 @@ import { usePlayerAttackedData } from "@/hooks/events/usePlayerAttackedData";
 import { Howl } from "howler";
 import { useSpring, animated } from "react-spring";
 import { useBattleEndedData } from "@/hooks/events/useBattleEndedData";
-import { Move } from "@/typescript/models.gen";
+import { Move } from "@/typescript bindings/models.gen";
 import moveSoundAudio from "/assets/audio/Battle ability.ogg";
 import victorySoundAudio from "/assets/audio/Battle victory.ogg";
 import battleBackgroundImage from "/assets/game-assets/battleBackground1.png";

@@ -1,7 +1,4 @@
 import { GameObject } from "./GameObject";
-import { Person } from "./Person";
-import { withGrid } from "../lib/utils";
-import { al } from "node_modules/@starknet-react/core/dist/index-BGDcP25e";
 
 export class Sprite {
   image: HTMLImageElement;

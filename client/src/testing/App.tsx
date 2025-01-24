@@ -9,12 +9,12 @@ import {
   LobbyType,
   Move,
   MoveEffect,
-} from "./typescript/models.gen.ts";
+} from "../typescript bindings/models.gen.ts";
 
 import { useAccount } from "@starknet-react/core";
-import { WalletAccount } from "./wallet-account.tsx";
-import { DojoContext } from "./dojo-sdk-provider.tsx";
-import { usePlayerData } from "./hooks/usePlayerData.tsx";
+import { WalletAccount } from "../components/wallet/wallet-account.tsx";
+import { DojoContext } from "../dojo-sdk-provider.tsx";
+import { usePlayerData } from "../hooks/usePlayerData.tsx";
 
 import {
   Select,
@@ -34,10 +34,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { felt252ToString, shortenAddress } from "./lib/utils.ts";
-import { useLobbyData } from "./hooks/useLobbyData.tsx";
-import { useDojomonData } from "./hooks/useDojomonData.tsx";
-import { Button } from "./components/ui/button.tsx";
+import { felt252ToString, shortenAddress } from "../lib/utils.ts";
+import { useLobbyData } from "../hooks/useLobbyData.tsx";
+import { useDojomonData } from "../hooks/useDojomonData.tsx";
+import { Button } from "../components/ui/button.tsx";
 import { CairoOption, CairoOptionVariant } from "starknet";
 
 // import useModel from "./hooks/useModel.tsx";

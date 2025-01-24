@@ -1,12 +1,6 @@
 import { DojoProvider } from "@dojoengine/core";
-import {
-  Account,
-  AccountInterface,
-  BigNumberish,
-  CairoCustomEnum,
-  addAddressPadding,
-} from "starknet";
-import * as models from "./models.gen";
+import { Account, AccountInterface, BigNumberish } from "starknet";
+import * as models from "./models.gen.ts";
 import {
   build_actions_spawn_calldata,
   build_shop_buyDojoBall_calldata,

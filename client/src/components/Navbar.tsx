@@ -1,22 +1,6 @@
-import { useState } from "react";
-import { Button } from "./ui/button";
-import {
-  Select,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-} from "./ui/select";
-import { useAccount } from "@starknet-react/core";
-import { copyToClipboard, shortenAddress } from "../lib/utils";
-import { MetaMaskAvatar } from "react-metamask-avatar";
 import { ConnectButton } from "./wallet/ConnectButton";
-import { Outlet } from "react-router-dom";
-import { useControllerUsername } from "@/hooks";
 
 const Navbar = () => {
-  const [showDetails, setShowDetails] = useState(false);
-
   return (
     <div className="flex items-center px-10 py-8 justify-between z-20 w-full">
       <a className="" href={"/"}>

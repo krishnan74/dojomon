@@ -1,14 +1,14 @@
 import { DojoContext } from "../dojo-sdk-provider";
-import { League, Lobby, LobbyType, SchemaType } from "../typescript/models.gen";
+import {
+  League,
+  Lobby,
+  LobbyType,
+  SchemaType,
+} from "../typescript bindings/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
-import {
-  addAddressPadding,
-  CairoCustomEnum,
-  CairoOption,
-  CairoOptionVariant,
-} from "starknet";
+import { CairoOption, CairoOptionVariant } from "starknet";
 import { useDojoStore } from "./useDojoStore";
 
 export function useLobbyData(
@@ -163,7 +163,7 @@ export function useLobbyData(
   useEffect(() => {
     let unsubscribe: (() => void) | undefined;
 
-    const subscribe = async (address: string) => {
+    const subscribe = async () => {
       const subscription = await sdk.subscribeEntityQuery({
         query: new QueryBuilder<SchemaType>()
           .namespace("dojomon", (n) =>
@@ -188,7 +188,7 @@ export function useLobbyData(
     };
 
     if (address) {
-      subscribe(address);
+      subscribe();
     }
 
     return () => {
@@ -199,7 +199,7 @@ export function useLobbyData(
   }, [sdk, address]);
 
   useEffect(() => {
-    const fetchEntities = async (address: string) => {
+    const fetchEntities = async () => {
       try {
         await sdk.getEntities({
           query: new QueryBuilder<SchemaType>()
@@ -227,7 +227,7 @@ export function useLobbyData(
     };
 
     if (address) {
-      fetchEntities(address);
+      fetchEntities();
     }
   }, [sdk, address]);
 

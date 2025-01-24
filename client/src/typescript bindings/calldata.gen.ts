@@ -1,6 +1,5 @@
 import { BigNumberish, CairoCustomEnum } from "starknet";
 import * as models from "./models.gen";
-import { effect } from "@chakra-ui/react";
 
 const dojomonTypeToString = {
   0: "Fire",

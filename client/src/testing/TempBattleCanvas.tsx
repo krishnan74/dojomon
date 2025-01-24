@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Monster } from "./classes";
+import { Monster } from "../classes";
 
 const TempBattleCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);

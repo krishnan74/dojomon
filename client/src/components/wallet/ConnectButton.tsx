@@ -14,9 +14,6 @@ import {
   Trophy,
   WalletModal,
 } from "../icons";
-import { useContext, useEffect, useState } from "react";
-import { ControllerConnector } from "@cartridge/connector";
-import { DojoContext } from "@/dojo-sdk-provider";
 
 export const ConnectButton = ({ variant = "pixelated", ...props }) => {
   const { account, address, status } = useAccount();

@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { felt252ToString } from "@/lib/utils";
-import { Dojomon } from "@/typescript/models.gen";
+import { Dojomon } from "@/typescript bindings/models.gen";
 import { Button } from "./ui/button";
 
 interface DojomonCardProps {

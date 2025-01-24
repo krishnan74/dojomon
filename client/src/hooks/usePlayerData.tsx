@@ -1,14 +1,9 @@
 import { DojoContext } from "../dojo-sdk-provider";
-import { League, PlayerStats, SchemaType } from "../typescript/models.gen";
+import { PlayerStats, SchemaType } from "../typescript bindings/models.gen";
 import { ParsedEntity, QueryBuilder } from "@dojoengine/sdk";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useContext, useEffect, useMemo, useState } from "react";
-import {
-  addAddressPadding,
-  CairoCustomEnum,
-  CairoOption,
-  CairoOptionVariant,
-} from "starknet";
+import { addAddressPadding } from "starknet";
 import { useDojoStore } from "./useDojoStore";
 
 export function usePlayerData(address: string | undefined) {
